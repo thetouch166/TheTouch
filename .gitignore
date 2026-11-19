@@ -1,0 +1,9 @@
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+node_modules/
+.env
+# Backups exported from Admin → Settings contain customer data — keep them out of git
+the-touch-backup-*.json
+the-touch-sales-*.csv

@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Touch — Luxury Chocolates · Abu Dhabi</title>
+<meta name="description" content="The Touch — premium handcrafted chocolates, pralines and luxury gift arrangements from Abu Dhabi, delivered across all seven Emirates.">
+<meta name="theme-color" content="#40050e">
+<link rel="icon" href="img/monogram-flat.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bur:#40050e;--bur2:#5a0a17;--gold:#cd9754;--car:#9c6036;--cocoa:#39261f;--ink:#221f2d;--slate:#3b3d50;--mute:#7a6f7b;--cream:#f8f3ec;--cream2:#f1e8dc;--line:#e9e0d4;--w:#fff;
+--serif:'Cormorant Garamond','Didot','Bodoni 72',Georgia,serif;--sans:'Montserrat','Helvetica Neue',Arial,sans-serif;--ease:cubic-bezier(.2,.7,.2,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);color:var(--ink);background:var(--w);font-size:14px;line-height:1.6;font-weight:400;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:1320px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--car);font-weight:500}
+.h1,.h2,.h3{font-family:var(--serif);font-weight:500;letter-spacing:.01em;line-height:1.1}
+.h1{font-size:clamp(40px,6vw,76px)}.h2{font-size:clamp(30px,3.6vw,46px)}.h3{font-size:24px}
+.it{font-style:italic}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:50px;padding:0 34px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:500;border:1px solid currentColor;transition:all .35s var(--ease)}
+.btn-dark{background:var(--bur);color:#fff;border-color:var(--bur)}.btn-dark:hover{background:var(--cocoa);border-color:var(--cocoa)}
+.btn-gold{background:var(--gold);color:#fff;border-color:var(--gold)}.btn-gold:hover{background:#b98443}
+.btn-line{color:var(--bur)}.btn-line:hover{background:var(--bur);color:#fff;border-color:var(--bur)}
+.btn-ghost{color:#fff;border-color:rgba(255,255,255,.6)}.btn-ghost:hover{background:#fff;color:var(--bur)}
+.btn-block{width:100%}
+.link{font-size:11px;letter-spacing:.24em;text-transform:uppercase;border-bottom:1px solid currentColor;padding-bottom:4px;font-weight:500}
+
+/* announcement + header */
+.ann{background:var(--bur);color:#ead7bd;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;text-align:center;padding:10px 16px}
+@media(max-width:700px){.ann{font-size:9px;letter-spacing:.08em;padding:8px 12px;line-height:1.5}.wa{width:50px;height:50px;right:14px;bottom:14px}}
+header.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line);transition:box-shadow .3s}
+header.top.sc{box-shadow:0 6px 30px rgba(64,5,14,.06)}
+.hbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:84px}
+.hbar .logo img{height:46px;width:auto;transition:height .3s}
+header.top.sc .hbar .logo img{height:38px}
+.nav{display:flex;gap:30px}
+.nav a{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:500;position:relative;padding:6px 0}
+.nav a:after{content:'';position:absolute;left:0;bottom:0;height:1px;width:0;background:var(--gold);transition:width .35s var(--ease)}
+.nav a:hover:after,.nav a.on:after{width:100%}
+.hicons{display:flex;justify-content:flex-end;gap:6px}
+.ib{width:42px;height:42px;display:grid;place-items:center;position:relative;border-radius:50%;transition:background .2s}
+.ib:hover{background:var(--cream)}
+.ib svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.4}
+.badge{position:absolute;top:4px;right:2px;background:var(--gold);color:#fff;font-size:9.5px;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;font-weight:600;padding:0 4px}
+.burger{display:none}
+@media(max-width:900px){.nav{display:none}.burger{display:grid}.hbar{height:68px}.hbar .logo img{height:36px}header.top.sc .hbar .logo img{height:32px}}
+
+/* mobile menu */
+.drawer{position:fixed;inset:0;z-index:90;pointer-events:none}
+.drawer .scrim{position:absolute;inset:0;background:rgba(34,31,45,.45);opacity:0;transition:opacity .35s}
+.drawer .panel{position:absolute;top:0;bottom:0;background:#fff;width:min(420px,92vw);transition:transform .45s var(--ease);display:flex;flex-direction:column}
+.drawer.left .panel{left:0;transform:translateX(-100%)}.drawer.right .panel{right:0;transform:translateX(100%)}
+.drawer.open{pointer-events:auto}.drawer.open .scrim{opacity:1}.drawer.open .panel{transform:none}
+.dhead{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--line)}
+.dhead .t{font-family:var(--serif);font-size:24px}
+.mlinks a{display:flex;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+.mlinks a span{font-family:var(--serif);letter-spacing:0;text-transform:none;color:var(--mute);font-size:16px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1fr 1.15fr;min-height:min(80vh,760px);background:var(--bur)}
+.hero .txt{color:#f3e6d4;display:flex;flex-direction:column;justify-content:center;padding:70px clamp(28px,6vw,96px);position:relative;overflow:hidden}
+.hero .txt .mono{width:84px;margin-bottom:34px;opacity:.95}
+.hero .txt .eyebrow{color:var(--gold);margin-bottom:22px}
+.hero .txt .h1{color:#fff;margin-bottom:22px}
+.hero .txt .h1 em{color:var(--gold);font-style:italic}
+.hero .txt p{max-width:420px;color:#d9c5b0;font-size:14.5px;margin-bottom:38px;font-weight:300}
+.hero .txt .row{display:flex;gap:14px;flex-wrap:wrap}
+.hero .img{background:#f3e5d3 url(img/hero-slim.jpg) center/cover no-repeat;position:relative}
+.hero .img:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(64,5,14,.18),transparent 30%)}
+.hero .txt:before{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;border:1px solid rgba(205,151,84,.18);border-radius:50%}
+.hero .txt:after{content:'';position:absolute;right:-80px;bottom:-80px;width:300px;height:300px;border:1px solid rgba(205,151,84,.12);border-radius:50%}
+@media(max-width:900px){.hero{grid-template-columns:1fr;min-height:0}.hero .img{height:58vw;min-height:280px;order:-1}.hero .txt{padding:46px 24px 54px}.hero .txt .mono{display:none}}
+.fade{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease),transform 1s var(--ease)}.fade.in{opacity:1;transform:none}
+
+/* values marquee */
+.marq{background:var(--cream);border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;padding:16px 0}
+.marq div{display:inline-block;animation:mq 40s linear infinite}
+.marq span{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--car);margin:0 26px}
+.marq b{color:var(--gold);font-weight:400}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* sections */
+section.s{padding:96px 0}
+.shead{text-align:center;margin-bottom:54px}
+.shead .eyebrow{display:block;margin-bottom:14px}
+.shead p{color:var(--mute);max-width:560px;margin:16px auto 0}
+.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.cat{position:relative;text-align:center}
+.cat .ph{aspect-ratio:3/4;background:var(--cream);overflow:hidden;display:grid;place-items:center;margin-bottom:18px}
+.cat .ph img{width:88%;mix-blend-mode:multiply;transition:transform 1.2s var(--ease)}
+.cat:hover .ph img{transform:scale(1.07)}
+.cat .n{font-family:var(--serif);font-size:21px}
+.cat .a{font-size:12px;color:var(--mute)}
+@media(max-width:900px){.cats{grid-template-columns:repeat(5,64%);overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -24px;padding:0 24px;scrollbar-width:none}.cats::-webkit-scrollbar{display:none}.cat{scroll-snap-align:start}section.s{padding:64px 0}}
+
+/* product cards */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:34px 22px}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr);gap:28px 12px}}
+.card{display:flex;flex-direction:column;position:relative}
+.card .ph{position:relative;aspect-ratio:1;background:var(--cream);overflow:hidden;margin-bottom:16px}
+.card .ph img{width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;transition:transform 1.1s var(--ease)}
+.card:hover .ph img{transform:scale(1.06)}
+.card .tag{position:absolute;top:12px;left:12px;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;background:#fff;padding:5px 9px;color:var(--bur)}
+.card .quick{position:absolute;left:12px;right:12px;bottom:12px;height:44px;background:var(--bur);color:#fff;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;opacity:0;transform:translateY(10px);transition:all .4s var(--ease)}
+.card:hover .quick{opacity:1;transform:none}
+@media(hover:none){.card .quick{display:none}}
+.card .n{font-family:var(--serif);font-size:19px;line-height:1.25;margin-bottom:2px}
+.card .a{font-size:12px;color:var(--mute);margin-bottom:6px;direction:rtl;text-align:left}
+.card .pr{font-size:13px;font-weight:500;letter-spacing:.04em;color:var(--cocoa)}
+.card .pr small{color:var(--mute);font-weight:400}
+.card.out .ph{opacity:.55}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 66px)/4);gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:6px}
+.rail::-webkit-scrollbar{display:none}.rail .card{scroll-snap-align:start}
+@media(max-width:1000px){.rail{grid-auto-columns:42%}}@media(max-width:600px){.rail{grid-auto-columns:66%;margin:0 -24px;padding:0 24px;gap:14px}}
+.railnav{display:flex;justify-content:space-between;align-items:end;margin-bottom:38px;gap:20px}
+.railnav .arr{display:flex;gap:8px}.railnav .arr button{width:46px;height:46px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;transition:all .2s}
+.railnav .arr button:hover{border-color:var(--bur);background:var(--bur);color:#fff}
+@media(max-width:600px){.railnav .arr{display:none}}
+
+/* split banners */
+.split{display:grid;grid-template-columns:1fr 1fr;min-height:620px}
+.split .im{background:#e9dccb center/cover no-repeat}
+.split .tx{display:flex;flex-direction:column;justify-content:center;padding:70px clamp(28px,7vw,110px);background:var(--cream)}
+.split .tx .eyebrow{margin-bottom:18px}.split .tx .h2{margin-bottom:20px}.split .tx p{color:var(--mute);margin-bottom:34px;max-width:440px}
+.split.rev .im{order:2}
+@media(max-width:900px){.split{grid-template-columns:1fr;min-height:0}.split .im{height:92vw;max-height:560px}.split.rev .im{order:0}.split .tx{padding:50px 24px}}
+
+/* events band */
+.events{background:var(--bur);color:#f3e6d4;padding:100px 0;position:relative;overflow:hidden}
+.events .h2{color:#fff}.events .eyebrow{color:var(--gold)}
+.evgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(205,151,84,.22);margin-top:56px;border:1px solid rgba(205,151,84,.22)}
+.ev{background:var(--bur);padding:38px 30px}
+.ev .k{font-family:var(--serif);font-size:42px;color:var(--gold);font-style:italic;line-height:1;margin-bottom:18px}
+.ev h4{font-family:var(--serif);font-size:23px;font-weight:500;color:#fff;margin-bottom:10px}
+.ev p{color:#cdb8a3;font-size:13px;font-weight:300}
+@media(max-width:900px){.evgrid{grid-template-columns:1fr 1fr}.ev{padding:28px 20px}}
+@media(max-width:520px){.evgrid{grid-template-columns:1fr}}
+
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center}
+.pillar svg{width:38px;height:38px;stroke:var(--gold);fill:none;stroke-width:1.1;margin:0 auto 18px}
+.pillar h4{font-family:var(--serif);font-size:21px;font-weight:500;margin-bottom:8px}
+.pillar p{color:var(--mute);font-size:13px}
+@media(max-width:900px){.pillars{grid-template-columns:1fr 1fr;gap:34px 18px}}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats div{padding:46px 10px}.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font-family:var(--serif);font-size:54px;font-weight:500;color:var(--bur);line-height:1}
+.stats span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+@media(max-width:600px){.stats b{font-size:38px}.stats span{font-size:9px;letter-spacing:.12em}}
+
+/* footer */
+footer{background:#1e0207;color:#bfa992;padding:80px 0 30px;font-size:13px}
+.fgrid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:40px}
+footer .flogo{height:54px;width:auto;margin-bottom:22px}
+footer h5{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#fff;font-weight:500;margin-bottom:18px}
+footer li{list-style:none;margin-bottom:10px}footer a:hover{color:var(--gold)}
+.news{display:flex;border-bottom:1px solid #5b3a2c;margin-top:8px}.news input{flex:1;background:none;border:0;padding:12px 0;color:#fff;outline:0}.news button{color:var(--gold);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.fbot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid #3a1a14;margin-top:60px;padding-top:26px;font-size:11px;letter-spacing:.06em}
+@media(max-width:900px){.fgrid{grid-template-columns:1fr 1fr}.fgrid>div:first-child{grid-column:1/-1}}
+
+/* page head + shop */
+.phead{background:var(--cream);text-align:center;padding:64px 24px 54px}
+.phead .eyebrow{display:block;margin-bottom:12px}.phead p{color:var(--mute);max-width:560px;margin:14px auto 0}
+.crumbs{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);padding:20px 0}
+.crumbs a:hover{color:var(--bur)}
+.tabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:34px 0 46px}
+.tab{height:40px;padding:0 20px;border:1px solid var(--line);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;transition:all .25s}
+.tab.on,.tab:hover{background:var(--bur);border-color:var(--bur);color:#fff}
+@media(max-width:700px){.tabs{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;margin:24px -24px 30px;padding:0 24px;scrollbar-width:none}.tab{flex:none}}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;font-size:12px;color:var(--mute)}
+.toolbar select{border:1px solid var(--line);padding:9px 12px;background:#fff;font-size:12px}
+
+/* product page */
+.pdp{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:70px;padding:10px 0 90px}
+.pdp .gal{background:var(--cream);aspect-ratio:1;display:grid;place-items:center;position:sticky;top:110px}
+.pdp .gal img{width:100%;mix-blend-mode:multiply}
+.pdp .info .eyebrow{margin-bottom:14px;display:block}
+.pdp .info .h2{margin-bottom:6px}
+.pdp .ar{font-size:18px;color:var(--mute);margin-bottom:22px;direction:rtl;text-align:left;font-family:var(--serif)}
+.pdp .price{font-size:22px;font-weight:500;color:var(--cocoa);margin-bottom:6px;letter-spacing:.02em}
+.pdp .vat{font-size:11px;color:var(--mute);margin-bottom:28px}
+.pdp .desc{color:#4f4650;margin-bottom:30px;font-size:14.5px;font-weight:300;line-height:1.8}
+.opt-l{font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;font-weight:500}
+.opts{display:flex;gap:10px;margin-bottom:26px;flex-wrap:wrap}
+.opt{min-width:84px;height:48px;padding:0 16px;border:1px solid var(--line);font-size:13px;transition:all .2s}
+.opt.on{border-color:var(--bur);background:var(--bur);color:#fff}
+.buy{display:flex;gap:12px;margin-bottom:28px}
+.qty{display:flex;align-items:center;border:1px solid var(--line);height:50px}
+.qty button{width:44px;height:100%;font-size:18px}.qty span{min-width:30px;text-align:center}
+.buy .btn{flex:1;padding:0 16px;white-space:nowrap;letter-spacing:.18em}
+.acc{border-top:1px solid var(--line)}
+.acc details{border-bottom:1px solid var(--line)}
+.acc summary{list-style:none;padding:18px 0;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:500;cursor:pointer;display:flex;justify-content:space-between}
+.acc summary::-webkit-details-marker{display:none}.acc summary:after{content:'+';font-size:18px;font-weight:300}.acc details[open] summary:after{content:'–'}
+.acc p{padding:0 0 20px;color:var(--mute);font-size:13.5px}
+.perks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}
+.perks div{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--mute)}
+.perks svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.2;flex:none}
+@media(max-width:900px){.pdp{grid-template-columns:minmax(0,1fr);gap:30px}.pdp .gal{position:static;margin:0 -24px}}
+
+/* cart drawer */
+.cart-items{flex:1;overflow:auto;padding:8px 24px}
+.ci{display:grid;grid-template-columns:78px 1fr auto;gap:14px;padding:18px 0;border-bottom:1px solid var(--line)}
+.ci img{width:78px;height:78px;object-fit:cover;background:var(--cream);mix-blend-mode:multiply}
+.ci .n{font-family:var(--serif);font-size:17px;line-height:1.2}
+.ci .m{font-size:11.5px;color:var(--mute);margin:3px 0 8px}
+.ci .q{display:inline-flex;align-items:center;border:1px solid var(--line);height:30px}
+.ci .q button{width:28px;height:100%}.ci .q span{min-width:22px;text-align:center;font-size:12px}
+.ci .p{font-size:13px;font-weight:500;text-align:right}
+.ci .rm{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-top:12px;text-decoration:underline}
+.cart-foot{padding:22px 24px calc(22px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--cream)}
+.cart-foot .r{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px}
+.cart-foot .r.t{font-size:16px;font-weight:600;margin:10px 0 16px}
+.empty{text-align:center;padding:70px 20px;color:var(--mute)}
+.empty .h3{color:var(--ink);margin-bottom:10px}
+.prog{font-size:12px;color:var(--cocoa);background:var(--cream);padding:12px 24px}
+.prog i{display:block;height:3px;background:var(--line);margin-top:8px}.prog i b{display:block;height:100%;background:var(--gold);transition:width .4s}
+
+/* checkout */
+.co{display:grid;grid-template-columns:1.35fr 1fr;gap:56px;padding:20px 0 90px;align-items:start}
+.co h3{font-family:var(--serif);font-size:26px;font-weight:500;margin:34px 0 18px;display:flex;align-items:center;gap:12px}
+.co h3:first-child{margin-top:0}.co h3 i{font-style:normal;font-family:var(--sans);font-size:11px;width:26px;height:26px;border-radius:50%;background:var(--bur);color:#fff;display:grid;place-items:center}
+.f{display:grid;grid-template-columns:1fr 1fr;gap:14px}.f .full{grid-column:1/-1}
+.fld label{display:block;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-bottom:7px}
+.fld input,.fld select,.fld textarea{width:100%;height:50px;border:1px solid var(--line);padding:0 14px;background:#fff;outline:0;font-size:14px;transition:border-color .2s;border-radius:0;-webkit-appearance:none;appearance:none}
+.fld select{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6f7b' fill='none'/%3E%3C/svg%3E") right 14px center no-repeat}
+.fld textarea{height:96px;padding:12px 14px;resize:vertical}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--gold)}
+.fld.err input,.fld.err select{border-color:#b3261e}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line)}
+.seg button{height:54px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;transition:all .2s}
+.seg button.on{background:var(--bur);color:#fff}
+.radio{display:flex;flex-direction:column;gap:10px}
+.radio label{display:flex;gap:14px;align-items:center;border:1px solid var(--line);padding:16px;cursor:pointer;transition:border-color .2s}
+.radio label.on{border-color:var(--bur);background:#fdfaf6}
+.radio input{accent-color:var(--bur);width:18px;height:18px}
+.radio small{display:block;color:var(--mute);font-size:12px}
+.sum{background:var(--cream);padding:30px;position:sticky;top:110px}
+.sum h4{font-family:var(--serif);font-size:24px;font-weight:500;margin-bottom:18px}
+.sum .li{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.sum .li img{width:54px;height:54px;object-fit:cover;mix-blend-mode:multiply;background:#efe5d8}
+.sum .li small{display:block;color:var(--mute);font-size:11px}
+.sum .r{display:flex;justify-content:space-between;font-size:13px;margin-top:10px}
+.sum .r.t{font-size:18px;font-weight:600;border-top:1px solid #dccfbe;padding-top:16px;margin-top:16px}
+.slots{display:flex;gap:8px;flex-wrap:wrap}
+.slots button{height:42px;padding:0 14px;border:1px solid var(--line);font-size:12px}.slots button.on{border-color:var(--bur);background:var(--bur);color:#fff}
+@media(max-width:900px){.co{grid-template-columns:1fr;gap:30px}.sum{position:static;order:-1;padding:22px}.f{grid-template-columns:1fr}}
+
+.ok{text-align:center;max-width:620px;margin:0 auto;padding:80px 24px 100px}
+.ok .mono{width:70px;margin:0 auto 26px}
+.ok .no{display:inline-block;border:1px solid var(--gold);color:var(--car);padding:10px 20px;letter-spacing:.2em;font-size:12px;margin:18px 0 26px}
+.ok p{color:var(--mute);margin-bottom:12px}
+
+/* misc */
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,30px);background:var(--ink);color:#fff;padding:14px 22px;font-size:12.5px;letter-spacing:.04em;opacity:0;transition:all .4s var(--ease);z-index:200;pointer-events:none;display:flex;gap:10px;align-items:center;max-width:90vw}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.wa{position:fixed;right:20px;bottom:20px;width:56px;height:56px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:60;transition:transform .2s}
+.wa:hover{transform:scale(1.06)}.wa svg{width:28px;height:28px;fill:#fff}
+.search{position:fixed;inset:0;background:#fff;z-index:120;display:none;flex-direction:column}
+.search.on{display:flex}
+.search .bar{display:flex;align-items:center;gap:14px;padding:22px 24px;border-bottom:1px solid var(--line);max-width:1100px;width:100%;margin:0 auto}
+.search input{flex:1;border:0;outline:0;font-family:var(--serif);font-size:30px;background:none}
+.search .res{overflow:auto;padding:30px 24px;max-width:1100px;width:100%;margin:0 auto}
+.story-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:20px}
+.story-grid div{border-top:1px solid var(--gold);padding-top:22px}
+.story-grid h4{font-family:var(--serif);font-size:26px;font-weight:500;margin-bottom:10px;font-style:italic;color:var(--bur)}
+.story-grid p{color:var(--mute)}
+@media(max-width:800px){.story-grid{grid-template-columns:1fr}}
+.prose{max-width:760px;margin:0 auto;text-align:center;font-family:var(--serif);font-size:clamp(22px,2.6vw,30px);line-height:1.5;color:var(--cocoa)}
+.prose em{color:var(--car)}
+.hidden{display:none!important}
+
+/* ---- refinements ---- */
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.btn:focus-visible,.tab:focus-visible,.opt:focus-visible{outline-offset:3px}
+.btn[disabled]{cursor:not-allowed}
+.ann{text-wrap:balance}
+.ib{width:44px;height:44px}
+.tab{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;height:44px}
+.mlinks a{align-items:center;min-height:56px}
+#menuContact a{display:inline-block;padding:4px 0}
+.fld input,.fld select,.fld textarea{scroll-margin-top:130px}
+.fld .hint{display:none;font-size:11px;color:#b3261e;margin-top:6px;letter-spacing:.02em}
+.fld.err .hint{display:block}
+.fld.err textarea{border-color:#b3261e}
+.slots{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.slots button{height:46px;padding:0 8px;transition:all .2s}
+.slots button:hover:not([disabled]):not(.on){border-color:var(--bur)}
+.slots button[disabled]{opacity:.35;cursor:not-allowed;text-decoration:line-through}
+.pickup-note{margin-top:14px;padding:16px 18px;background:var(--cream);font-size:13px;color:var(--cocoa);display:flex;gap:12px;align-items:flex-start}
+.pickup-note svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.2;flex:none;margin-top:1px}
+.ci .q{height:36px}.ci .q button{width:34px;font-size:15px}
+.ci .rm{padding:6px 0 6px 10px;margin-top:6px}
+.cart-foot .cont{display:block;width:100%;text-align:center;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin-top:6px;padding:10px 0}
+.cart-foot .cont:hover{color:var(--bur)}
+.grid>.empty,.grid>.nores{grid-column:1/-1}
+.nores{text-align:center;padding:40px 0;color:var(--mute)}
+.nores .h3{color:var(--ink);margin-bottom:8px}
+.toolbar label{display:flex;align-items:center;gap:10px}
+.toolbar select{height:44px;padding:0 34px 0 14px;-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6f7b' fill='none'/%3E%3C/svg%3E") right 12px center no-repeat;border-radius:0;color:var(--ink)}
+.search input{min-width:0;width:100%}.search input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+body.lock .sbar{visibility:hidden}
+.opt:hover:not(.on){border-color:var(--bur)}
+.qty button:hover{color:var(--gold)}
+.pdp .gal img{aspect-ratio:1;object-fit:contain}
+.ok .meta{display:block;max-width:420px;text-align:left;background:var(--cream);padding:20px 26px;margin:0 auto 6px;font-size:13.5px;color:var(--cocoa)}
+.ok .meta div{display:flex;justify-content:space-between;gap:30px;padding:4px 0}.ok .meta span{color:var(--mute)}
+/* sticky mobile buy bar */
+.sbar{position:fixed;left:0;right:0;bottom:0;z-index:70;background:rgba(255,255,255,.98);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:none;align-items:center;gap:14px;transform:translateY(110%);transition:transform .4s var(--ease);box-shadow:0 -8px 30px rgba(64,5,14,.06)}
+.sbar.on{transform:none}
+.sbar .n{font-family:var(--serif);font-size:17px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbar .pr{font-size:12.5px;color:var(--cocoa);font-weight:500}
+.sbar>div{flex:1;min-width:0}
+.sbar .btn{height:48px;padding:0 22px;flex:none}
+body.sbar-on .wa{transform:translateY(-74px)}
+body.sbar-on .toast{bottom:96px}
+@media(max-width:900px){.sbar{display:flex}}
+@media(max-width:700px){
+  .fld input,.fld select,.fld textarea,.toolbar select,.news input{font-size:16px}
+  .search .bar{padding:14px 16px;gap:10px}.search input{font-size:24px}.search .res{padding:22px 16px}
+  .cats,.rail{scroll-padding-inline:24px}
+  .hero .txt .row .btn{flex:1 1 100%}
+  .fgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 20px}
+  .toolbar{gap:12px}
+  .ci .q{height:40px}.ci .q button{width:40px}
+  .toast{bottom:20px;text-align:center;justify-content:center;width:max-content}
+  .co.evco .sum{order:0}
+  .phead{padding:44px 24px 38px}.crumbs{padding:14px 0}
+  .slots button{font-size:13px}
+}
+@media(max-width:900px){.cats,.rail{scroll-padding-inline:24px}}
+@media(min-width:701px) and (max-width:900px){.cats{grid-template-columns:repeat(5,38%)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.fade{opacity:1;transform:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="ann" id="ann"></div>
+<header class="top" id="top">
+  <div class="wrap hbar">
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="ib burger" aria-label="Menu" onclick="openDrawer('menu')"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></button>
+      <nav class="nav" id="nav">
+        <a href="#/shop/pralines" data-n="pralines">Pralines</a>
+        <a href="#/shop/oriental" data-n="oriental">Oriental</a>
+        <a href="#/shop/gifts" data-n="gifts">Gifting</a>
+        <a href="#/events" data-n="events">Events</a>
+        <a href="#/story" data-n="story">Our Story</a>
+      </nav>
+    </div>
+    <a href="#/" class="logo" aria-label="The Touch home"><img src="img/logo-burgundy.png" alt="The Touch"></a>
+    <div class="hicons">
+      <button class="ib" aria-label="Search" onclick="openSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+      <a class="ib" aria-label="WhatsApp" id="hdrWa" target="_blank" rel="noopener" style="display:none"></a>
+      <button class="ib" aria-label="Shopping bag" onclick="openDrawer('cart')"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg><span class="badge hidden" id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <img class="flogo" src="img/logo-white.png" alt="The Touch">
+        <p style="max-width:330px;margin-bottom:18px">Premium handcrafted chocolates, bespoke arrangements and luxury gifting from Abu Dhabi — delivered with care across all seven Emirates.</p>
+        <div class="eyebrow" style="color:var(--gold)">Where Luxury Finds Its Flavor</div>
+      </div>
+      <div><h5>Shop</h5><ul>
+        <li><a href="#/shop/pralines">Pralines &amp; Bonbons</a></li><li><a href="#/shop/oriental">Oriental Collection</a></li>
+        <li><a href="#/shop/bars">Bars &amp; Slims</a></li><li><a href="#/shop/dipped">Dipped Fruits &amp; Nuts</a></li><li><a href="#/shop/gifts">Gifts &amp; Arrangements</a></li></ul></div>
+      <div><h5>The House</h5><ul>
+        <li><a href="#/story">Our Story</a></li><li><a href="#/events">Weddings &amp; Events</a></li><li><a href="#/events">Corporate Gifting</a></li><li><a href="#/delivery">Delivery &amp; Care</a></li></ul></div>
+      <div><h5>Boutique</h5><ul id="fContact"></ul>
+        <h5 style="margin-top:26px">Newsletter</h5>
+        <form class="news" onsubmit="event.preventDefault();this.reset();toast('Thank you — welcome to The Touch.')"><input type="email" required placeholder="Your email"><button>Join</button></form>
+      </div>
+    </div>
+    <div class="fbot"><span>© <span id="yr"></span> The Touch Chocolates · Abu Dhabi, UAE</span><span>Prices in AED, inclusive of 5% VAT · <a href="admin.html" style="opacity:.6">Staff</a></span></div>
+  </div>
+</footer>
+
+<!-- Mobile menu -->
+<div class="drawer left" id="menu"><div class="scrim" onclick="closeDrawers()"></div><div class="panel">
+  <div class="dhead"><img src="img/logo-burgundy.png" alt="" style="height:30px"><button class="ib" aria-label="Close" onclick="closeDrawers()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="mlinks" onclick="closeDrawers()">
+    <a href="#/shop/all">Shop All <span>›</span></a>
+    <a href="#/shop/pralines">Pralines <span>برالين</span></a>
+    <a href="#/shop/oriental">Oriental <span>شرقي</span></a>
+    <a href="#/shop/bars">Bars &amp; Slims <span>ألواح</span></a>
+    <a href="#/shop/dipped">Fruits &amp; Nuts <span>مكسرات</span></a>
+    <a href="#/shop/gifts">Gifting <span>هدايا</span></a>
+    <a href="#/events">Weddings &amp; Events <span>›</span></a>
+    <a href="#/story">Our Story <span>›</span></a>
+    <a href="#/delivery">Delivery &amp; Care <span>›</span></a>
+  </div>
+  <div style="margin-top:auto;padding:24px;font-size:12px;color:var(--mute)" id="menuContact"></div>
+</div></div>
+
+<!-- Cart -->
+<div class="drawer right" id="cart"><div class="scrim" onclick="closeDrawers()"></div><div class="panel">
+  <div class="dhead"><div class="t">Your Bag</div><button class="ib" aria-label="Close" onclick="closeDrawers()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div id="cartBody" style="flex:1;display:flex;flex-direction:column;min-height:0"></div>
+</div></div>
+
+<!-- Search -->
+<div class="search" id="search">
+  <div class="bar"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#7a6f7b" fill="none"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="q" type="search" aria-label="Search" enterkeyhint="search" placeholder="Search chocolates, gifts…" autocomplete="off"><button class="ib" aria-label="Close search" onclick="closeSearch()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="res"><div class="grid" id="qres"></div></div>
+</div>
+
+<a class="wa" id="waFloat" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><svg viewBox="0 0 32 32"><path d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.2c1.9 1 4 1.6 6.1 1.6 7 0 12.7-5.6 12.7-12.6S23 3 16 3zm0 23c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.3 1.3-4-.3-.4c-1.1-1.7-1.7-3.6-1.7-5.6C5.4 9.8 10.2 5.1 16 5.1s10.6 4.7 10.6 10.5S21.8 26 16 26zm5.8-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.6-1.6-1-.8-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2.1-.4 0-.6-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.7s1.2 3.1 1.4 3.3c.2.2 2.4 3.6 5.7 5 .8.3 1.4.5 1.9.7.8.3 1.5.2 2.1.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z"/></svg></a>
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script>
+'use strict';
+const {DB,U}=TT; const $=s=>document.querySelector(s); const app=$('#app');
+let S, PRODUCTS=[];
+const VALUES=['Serenity','Caramel','Depth','Bliss','Purity','Intensity','Mystery','Passion'];
+
+/* ---------- Cart (kept on this device) ---------- */
+const Cart={
+  items:JSON.parse(localStorage.getItem('tt_cart')||'[]'),
+  save(){localStorage.setItem('tt_cart',JSON.stringify(this.items));renderCartBadge();renderCart()},
+  key(pid,grams){return pid+'|'+(grams||0)},
+  add(p,qty,grams){qty=qty||1;const k=this.key(p.id,grams);const f=this.items.find(i=>i.k===k);
+    if(f)f.qty+=qty;else this.items.push({k,pid:p.id,name:p.name,img:p.img,unit:p.unit,price:p.price,grams:p.unit==='kg'?grams:0,qty});this.save()},
+  set(k,q){const f=this.items.find(i=>i.k===k);if(!f)return;f.qty=q;if(q<=0)this.items=this.items.filter(i=>i.k!==k);this.save()},
+  clear(){this.items=[];this.save()},
+  count(){return this.items.reduce((a,i)=>a+i.qty,0)},
+  subtotal(){return U.r2(this.items.reduce((a,i)=>a+U.lineTotal(i),0))}
+};
+
+/* ---------- helpers ---------- */
+const money=n=>U.money(n,S.currency);
+function priceLabel(p){return p.unit==='kg'?`${money(p.price)} <small>/ kg</small>`:money(p.price)}
+function toast(m){const t=$('#toast');t.innerHTML=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600)}
+function waLink(text){return 'https://wa.me/'+S.whatsapp+(text?'?text='+encodeURIComponent(text):'')}
+function openDrawer(id){closeDrawers();$('#'+id).classList.add('open');document.body.style.overflow='hidden';document.body.classList.add('lock');if(id==='cart')renderCart()}
+function closeDrawers(){document.querySelectorAll('.drawer').forEach(d=>d.classList.remove('open'));document.body.style.overflow='';document.body.classList.remove('lock')}
+function openSearch(){$('#search').classList.add('on');document.body.style.overflow='hidden';document.body.classList.add('lock');setTimeout(()=>$('#q').focus(),50);doSearch()}
+function closeSearch(){$('#search').classList.remove('on');document.body.style.overflow='';document.body.classList.remove('lock')}
+function visible(){return PRODUCTS.filter(p=>p.active!==false)}
+function byId(id){return PRODUCTS.find(p=>p.id===id)}
+function observe(){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll('.fade').forEach(el=>io.observe(el))}
+const icon={
+  leaf:'<svg viewBox="0 0 40 40"><path d="M8 32C8 16 18 8 33 7c0 15-8 25-24 25z"/><path d="M8 32L24 16"/></svg>',
+  hand:'<svg viewBox="0 0 40 40"><path d="M12 22V10a2 2 0 014 0v9M16 18V7a2 2 0 014 0v11M20 18V9a2 2 0 014 0v10M24 19v-6a2 2 0 014 0v11c0 6-4 10-10 10s-9-3-11-7l-3-6a2 2 0 013-2l3 4"/></svg>',
+  clock:'<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14"/><path d="M20 11v10l6 4"/></svg>',
+  truck:'<svg viewBox="0 0 40 40"><path d="M4 11h20v16H4zM24 17h7l5 5v5H24"/><circle cx="11" cy="29" r="3"/><circle cx="30" cy="29" r="3"/></svg>',
+  gift:'<svg viewBox="0 0 40 40"><rect x="6" y="15" width="28" height="8"/><path d="M8 23v12h24V23M20 15v20M20 15c-3-6-10-6-9-1 1 3 9 1 9 1zm0 0c3-6 10-6 9-1-1 3-9 1-9 1z"/></svg>'
+};
+
+function card(p){
+  const out=(p.stock!=null&&p.stock<=0);
+  return `<div class="card ${out?'out':''}">
+    <a href="#/p/${p.id}" class="ph"><img loading="lazy" src="${U.esc(p.img)}" alt="${U.esc(p.name)}">${p.featured?'<span class="tag">Signature</span>':''}${out?'<span class="tag">Sold out</span>':''}</a>
+    ${out?'':`<button class="quick" onclick="quickAdd('${p.id}')">Add to bag</button>`}
+    <a href="#/p/${p.id}"><div class="n">${U.esc(p.name)}</div><div class="a">${U.esc(p.ar||'')}</div><div class="pr">${priceLabel(p)}</div></a>
+  </div>`}
+function quickAdd(id){const p=byId(id);Cart.add(p,1,p.unit==='kg'?250:0);toast(`<b>${U.esc(p.name)}</b>&nbsp;added to your bag`);bump()}
+function bump(){const b=$('#cartCount');b.animate([{transform:'scale(1)'},{transform:'scale(1.5)'},{transform:'scale(1)'}],{duration:400})}
+
+/* ---------- Pages ---------- */
+function pageHome(){
+  const feat=visible().filter(p=>p.featured);const orient=visible().filter(p=>p.cat==='oriental');
+  const catImg={pralines:'img/salted-caramel.jpg',oriental:'img/kunafah.jpg',bars:'img/slim-almond.jpg',dipped:'img/orange-slices.jpg',gifts:'img/gift-bag.jpg'};
+  const vals=VALUES.map(v=>`<span>${v}</span><b>✦</b>`).join('');
+  app.innerHTML=`
+  <section class="hero">
+    <div class="txt">
+      <img class="mono fade" src="img/monogram-gold.png" alt="">
+      <div class="eyebrow fade">Abu Dhabi · Handcrafted Chocolates</div>
+      <h1 class="h1 fade">Where Luxury<br>Finds Its <em>Flavor</em></h1>
+      <p class="fade">Premium pralines, oriental creations and bespoke arrangements — crafted to say what words sometimes can't.</p>
+      <div class="row fade"><a class="btn btn-gold" href="#/shop/all">Discover the collection</a><a class="btn btn-ghost" href="#/shop/gifts">Gifting</a></div>
+    </div>
+    <div class="img" role="img" aria-label="The Touch slim chopped almond chocolate"></div>
+  </section>
+  <div class="marq"><div>${vals}${vals}${vals}${vals}</div></div>
+
+  <section class="s"><div class="wrap">
+    <div class="shead fade"><span class="eyebrow">The Collections</span><h2 class="h2">Crafted for every <span class="it">meaningful</span> moment</h2></div>
+    <div class="cats">${TT.CATS.map(c=>`<a class="cat fade" href="#/shop/${c.id}"><div class="ph"><img loading="lazy" src="${catImg[c.id]}" alt=""></div><div class="n">${c.name}</div><div class="a">${c.ar}</div></a>`).join('')}</div>
+  </div></section>
+
+  <section class="s" style="padding-top:0"><div class="wrap">
+    <div class="railnav fade"><div><span class="eyebrow">Signature Selection</span><h2 class="h2" style="margin-top:12px">Our most loved</h2></div>
+      <div class="arr"><button onclick="rail('r1',-1)" aria-label="Previous">‹</button><button onclick="rail('r1',1)" aria-label="Next">›</button></div></div>
+    <div class="rail" id="r1">${feat.map(card).join('')}</div>
+    <div style="text-align:center;margin-top:46px"><a class="btn btn-line" href="#/shop/all">View all chocolates</a></div>
+  </div></section>
+
+  <section class="split">
+    <div class="im" style="background-image:url(img/gift-bag.jpg)"></div>
+    <div class="tx fade"><span class="eyebrow">The Art of Gifting</span><h2 class="h2">A gesture,<br>a feeling, <span class="it">a touch</span> of care</h2>
+      <p>Signature gift bags, crystal trays and reusable keepsake boxes — each arranged by hand and finished with our signature ribbon. Personalise colours and messages for every occasion.</p>
+      <div><a class="btn btn-dark" href="#/shop/gifts">Shop gifting</a></div></div>
+  </section>
+
+  <section class="s"><div class="wrap">
+    <div class="railnav fade"><div><span class="eyebrow">Oriental Collection</span><h2 class="h2" style="margin-top:12px">Heritage, <span class="it">reimagined</span></h2></div>
+      <div class="arr"><button onclick="rail('r2',-1)" aria-label="Previous">‹</button><button onclick="rail('r2',1)" aria-label="Next">›</button></div></div>
+    <div class="rail" id="r2">${orient.map(card).join('')}</div>
+  </div></section>
+
+  <section class="events"><div class="wrap">
+    <div class="shead fade" style="margin-bottom:0"><span class="eyebrow">Events &amp; Bespoke Arrangements</span><h2 class="h2">Unforgettable chocolate<br><span class="it">experiences</span></h2>
+    <p style="color:#cdb8a3">From grand weddings to corporate galas, our team designs displays, favours and gifts tailored to your celebration.</p></div>
+    <div class="evgrid fade">
+      <div class="ev"><div class="k">i.</div><h4>VIP Weddings</h4><p>Elegant multi-tiered chocolate displays and tailored favour boxes for grand celebrations.</p></div>
+      <div class="ev"><div class="k">ii.</div><h4>Corporate Galas</h4><p>Custom-branded corporate gifts and luxury chocolate dessert stations.</p></div>
+      <div class="ev"><div class="k">iii.</div><h4>Family Celebrations</h4><p>Arrangements for baby receptions, Eid, anniversaries and private gatherings.</p></div>
+      <div class="ev"><div class="k">iv.</div><h4>Personalised</h4><p>Custom colour themes, luxury acrylic and crystal trays, signature ribbons.</p></div>
+    </div>
+    <div style="text-align:center;margin-top:50px"><a class="btn btn-gold" href="#/events">Plan your event</a></div>
+  </div></section>
+
+  <section class="s"><div class="wrap">
+    <div class="pillars">
+      <div class="pillar fade">${icon.leaf}<h4>Ethical Cocoa</h4><p>Single-origin beans selected for rich, authentic flavour.</p></div>
+      <div class="pillar fade">${icon.hand}<h4>Handcrafted Mastery</h4><p>Small batches by master chocolatiers with precise tempering.</p></div>
+      <div class="pillar fade">${icon.clock}<h4>Fresh Every Day</h4><p>Daily boutique replenishment for perfect aroma and texture.</p></div>
+      <div class="pillar fade">${icon.truck}<h4>Cold-Chain Delivery</h4><p>Temperature-controlled delivery to all seven Emirates.</p></div>
+    </div>
+  </div></section>
+
+  <section class="split rev">
+    <div class="im" style="background-image:url(img/banner-nuts.jpg)"></div>
+    <div class="tx fade"><span class="eyebrow">Visit the Boutique</span><h2 class="h2">An opulent<br><span class="it">sensory</span> journey</h2>
+      <p>Deep cocoa tones, warm brass and soft light. Sample fresh pralines, consult our packaging designers and assemble your arrangement live in-store in Abu Dhabi.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn btn-dark" href="${waLink('Hello The Touch, I would like to visit the boutique.')}" target="_blank" rel="noopener">Book a visit</a><a class="btn btn-line" href="#/story">Our story</a></div></div>
+  </section>
+
+  <section class="s"><div class="wrap"><div class="stats fade">
+    <div><b>7</b><span>Emirates delivered</span></div><div><b>100%</b><span>Premium natural cocoa</span></div><div><b>365</b><span>Days of VIP gifting</span></div>
+  </div></div></section>`;
+  observe();
+}
+function rail(id,d){const r=document.getElementById(id);r.scrollBy({left:d*r.clientWidth*.8,behavior:'smooth'})}
+
+function pageShop(cat){
+  cat=cat||'all';const c=TT.CATS.find(x=>x.id===cat);
+  const sort=sessionStorage.getItem('tt_sort')||'feat';
+  let list=visible().filter(p=>cat==='all'||p.cat===cat);
+  if(sort==='low')list.sort((a,b)=>a.price-b.price);else if(sort==='high')list.sort((a,b)=>b.price-a.price);else if(sort==='az')list.sort((a,b)=>a.name.localeCompare(b.name));else list.sort((a,b)=>(b.featured?1:0)-(a.featured?1:0));
+  app.innerHTML=`
+  <div class="phead"><span class="eyebrow">${c?c.ar:'The Touch'}</span><h1 class="h2">${c?c.name:'All Chocolates'}</h1><p>${c&&c.id==='gifts'?'Arranged by hand, finished with our signature ribbon — for every meaningful moment.':'Handcrafted in Abu Dhabi with the finest ingredients. Pralines are sold by weight and packed in our signature box.'}</p></div>
+  <div class="wrap">
+    <div class="tabs"><a class="tab ${cat==='all'?'on':''}" href="#/shop/all">All</a>${TT.CATS.map(x=>`<a class="tab ${cat===x.id?'on':''}" href="#/shop/${x.id}">${x.name}</a>`).join('')}</div>
+    <div class="toolbar"><span>${list.length} ${list.length===1?'creation':'creations'}</span>
+      <label><span class="hidden">Sort by</span><select aria-label="Sort by" onchange="sessionStorage.setItem('tt_sort',this.value);route()"><option value="feat">Featured</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="az">Name A–Z</option></select></label></div>
+    <div class="grid" style="margin-bottom:90px">${list.map(card).join('')||'<div class="nores"><div class="h3">Coming soon</div><p style="margin-bottom:22px">New creations are being prepared for this collection.</p><a class="btn btn-line" href="#/shop/all">View all chocolates</a></div>'}</div>
+  </div>`;
+  app.querySelector('select').value=sort;
+  const on=app.querySelector('.tab.on'),tb=app.querySelector('.tabs');if(on&&tb.scrollWidth>tb.clientWidth)tb.scrollLeft=on.offsetLeft-tb.offsetLeft-24;
+}
+
+function pageProduct(id){
+  const p0=byId(id);const p=p0&&p0.active!==false?p0:null;if(!p){app.innerHTML='<div class="empty" style="padding:120px 20px"><div class="h3">Not found</div><a class="link" href="#/shop/all">Back to shop</a></div>';return}
+  const kg=p.unit==='kg';let grams=kg?500:0,qty=1;const out=p.stock!=null&&p.stock<=0;
+  const rel=visible().filter(x=>x.cat===p.cat&&x.id!==p.id).slice(0,4);
+  app.innerHTML=`<div class="wrap">
+    <div class="crumbs"><a href="#/">Home</a> / <a href="#/shop/${p.cat}">${TT.catName(p.cat)}</a> / ${U.esc(p.name)}</div>
+    <div class="pdp">
+      <div class="gal"><img src="${U.esc(p.img)}" alt="${U.esc(p.name)}"></div>
+      <div class="info">
+        <span class="eyebrow">${TT.catName(p.cat)}</span>
+        <h1 class="h2">${U.esc(p.name)}</h1><div class="ar">${U.esc(p.ar||'')}</div>
+        <div class="price" id="pp"></div><div class="vat">${kg?money(p.price)+' per kg · ':''}Inclusive of VAT</div>
+        <p class="desc">${U.esc(p.desc||'')}</p>
+        ${kg?`<div class="opt-l">Choose weight</div><div class="opts" id="wopts">${[250,500,1000].map(g=>`<button class="opt ${g===grams?'on':''}" data-g="${g}">${g>=1000?'1 kg':g+' g'}</button>`).join('')}</div>`:''}
+        <div class="buy">
+          <div class="qty"><button id="qm">−</button><span id="qv">1</span><button id="qp">+</button></div>
+          <button class="btn btn-dark" id="add" ${out?'disabled style="opacity:.5"':''}>${out?'Sold out':'Add to bag'}</button>
+        </div>
+        <a class="btn btn-line btn-block" target="_blank" rel="noopener" href="${waLink('Hello The Touch, I am interested in: '+p.name)}">Order via WhatsApp</a>
+        <div class="perks"><div>${icon.truck}Delivery to all 7 Emirates</div><div>${icon.gift}Complimentary gift message</div><div>${icon.clock}Same-day before ${S.sameDayCutoff>12?S.sameDayCutoff-12+' PM':S.sameDayCutoff+' AM'}</div><div>${icon.hand}Handcrafted in Abu Dhabi</div></div>
+        <div class="acc" style="margin-top:30px">
+          <details open><summary>Details</summary><p>${kg?'Sold by weight and presented in The Touch signature box. Approximately 40–50 pieces per kilogram.':'Presented in The Touch signature packaging.'} Contains milk, nuts and may contain traces of gluten and soy.</p></details>
+          <details><summary>Storage &amp; care</summary><p>Keep in a cool, dry place between 16–18 °C, away from sunlight and strong odours. Best enjoyed within 3 weeks.</p></details>
+          <details><summary>Delivery</summary><p>Cold-chain delivery across the UAE. Orders before ${S.sameDayCutoff}:00 within Abu Dhabi are delivered the same day. Free delivery in Abu Dhabi above ${money(S.freeDeliveryOver)}.</p></details>
+        </div>
+      </div>
+    </div>
+    ${rel.length?`<div class="shead"><span class="eyebrow">You may also love</span></div><div class="grid" style="margin-bottom:90px">${rel.map(card).join('')}</div>`:''}
+  </div>
+  ${out?'':`<div class="sbar" id="sbar" aria-hidden="true"><div><div class="n">${U.esc(p.name)}</div><div class="pr"><span id="sbp"></span>${kg?' · <span id="sbg"></span>':''}</div></div><button class="btn btn-dark" id="sbadd" tabindex="-1">Add to bag</button></div>`}`;
+  const upd=()=>{const t=money(U.r2((kg?p.price*grams/1000:p.price)*qty));$('#pp').textContent=t;$('#qv').textContent=qty;
+    if($('#sbp')){$('#sbp').textContent=t+(qty>1?' ('+qty+')':'');if(kg)$('#sbg').textContent=U.qtyLabel({unit:'kg',grams})}};upd();
+  if(kg)$('#wopts').onclick=e=>{const b=e.target.closest('.opt');if(!b)return;grams=+b.dataset.g;document.querySelectorAll('#wopts .opt').forEach(x=>x.classList.toggle('on',x===b));upd()};
+  $('#qm').onclick=()=>{qty=Math.max(1,qty-1);upd()};$('#qp').onclick=()=>{const per=kg?grams/1000:1;const inBag=Cart.items.filter(x=>x.pid===p.id).reduce((a,x)=>a+(x.unit==='kg'?x.grams/1000:1)*x.qty,0);if(p.stock!=null&&(qty+1)*per+inBag>p.stock+1e-9){toast('Only '+(kg?U.r2(p.stock)+' kg':p.stock+' pieces')+' available right now');return}qty++;upd()};
+  $('#qm').setAttribute('aria-label','Decrease quantity');$('#qp').setAttribute('aria-label','Increase quantity');
+  const doAdd=()=>{if(out)return;Cart.add(p,qty,grams);bump();openDrawer('cart')};
+  $('#add').onclick=doAdd;
+  const sb=$('#sbar');document.body.classList.remove('sbar-on');
+  if(sb&&'IntersectionObserver' in window){$('#sbadd').onclick=doAdd;
+    const io=new IntersectionObserver(([e])=>{const on=!e.isIntersecting&&e.boundingClientRect.top<0;sb.classList.toggle('on',on);sb.setAttribute('aria-hidden',!on);document.body.classList.toggle('sbar-on',on&&getComputedStyle(sb).display!=='none')});
+    io.observe($('.buy'))}
+}
+
+function renderCartBadge(){const n=Cart.count();const b=$('#cartCount');b.textContent=n;b.classList.toggle('hidden',!n)}
+function renderCart(){if(typeof PRODUCTS!=='undefined'&&PRODUCTS.length)syncCart();
+  const body=$('#cartBody');if(!body)return;
+  if(!Cart.items.length){body.innerHTML=`<div class="empty"><div class="h3">Your bag is empty</div><p style="margin-bottom:26px">Discover our handcrafted collections.</p><a class="btn btn-dark" href="#/shop/all" onclick="closeDrawers()">Shop now</a></div>`;return}
+  const sub=Cart.subtotal();const left=S.freeDeliveryOver-sub;
+  body.innerHTML=`
+   <div class="prog">${left>0?`Add <b>${money(left)}</b> for complimentary Abu Dhabi delivery`:'You qualify for complimentary Abu Dhabi delivery ✦'}<i><b style="width:${Math.min(100,sub/S.freeDeliveryOver*100)}%"></b></i></div>
+   <div class="cart-items">${Cart.items.map(i=>`<div class="ci"><img src="${U.esc(i.img)}" alt=""><div><div class="n">${U.esc(i.name)}</div><div class="m">${i.unit==='kg'?U.qtyLabel(i)+' · ':''}${money(i.unit==='kg'?i.price*i.grams/1000:i.price)}</div>
+     <div class="q"><button aria-label="${i.qty>1?'Decrease quantity':'Remove item'}" onclick="Cart.set('${i.k}',${i.qty-1})">−</button><span>${i.qty}</span><button aria-label="Increase quantity" onclick="Cart.set('${i.k}',${i.qty+1})">+</button></div></div>
+     <div><div class="p">${money(U.lineTotal(i))}</div><button class="rm" onclick="Cart.set('${i.k}',0)">Remove</button></div></div>`).join('')}</div>
+   <div class="cart-foot"><div class="r t"><span>Subtotal <small style="font-weight:400;color:var(--mute);font-size:12px">(${Cart.count()} ${Cart.count()===1?'item':'items'})</small></span><span>${money(sub)}</span></div>
+     <a class="btn btn-dark btn-block" href="#/checkout" onclick="closeDrawers()">Secure checkout</a><button class="cont" onclick="closeDrawers()">Continue shopping</button>
+     <p style="font-size:11px;color:var(--mute);text-align:center;margin-top:10px">Delivery &amp; gift message at checkout · Prices incl. VAT</p></div>`;
+}
+
+const PAYDESC={delivery:{cod:'Pay in cash when your order arrives.',card_on_delivery:'Our driver brings a card machine.',link:'We send you a secure card payment link on WhatsApp to confirm.'},
+  pickup:{cod:'Pay in cash when you collect at the boutique.',card_on_delivery:'Pay by card when you collect at the boutique.',link:'We send you a secure card payment link on WhatsApp to confirm.'}};
+const dxbNow=()=>{try{return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Dubai'}))}catch(e){return new Date()}};
+function syncCart(){let changed=false,removed=[];Cart.items=Cart.items.filter(it=>{const p=byId(it.pid);if(!p||p.active===false){removed.push(it.name);return false}if(it.price!==p.price||it.name!==p.name||it.img!==p.img){it.price=p.price;it.name=p.name;it.img=p.img;changed=true}return true});if(removed.length||changed){localStorage.setItem('tt_cart',JSON.stringify(Cart.items));renderCartBadge()}if(removed.length)toast(U.esc(removed.join(', '))+' is no longer available and was removed from your bag');return changed||removed.length}
+function pageCheckout(){syncCart();
+  if(!Cart.items.length){location.hash='#/shop/all';return}
+  const em=Object.keys(S.delivery||{});const st=JSON.parse(localStorage.getItem('tt_cust')||'{}');
+  const today=dxbNow();const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const now=dxbNow();const minDay=now.getHours()>=S.sameDayCutoff?new Date(+today+864e5):today;
+  let mode='delivery',pay=(S.onlinePayments||['cod'])[0],slot='';
+  const slots=['10:00 – 13:00','13:00 – 16:00','16:00 – 19:00','19:00 – 22:00'];
+  app.innerHTML=`<div class="wrap"><div class="crumbs"><a href="#/">Home</a> / Checkout</div>
+  <div class="co">
+    <form id="cof" novalidate>
+      <h3><i>1</i>Your details</h3>
+      <div class="f">
+        <div class="fld"><label>Full name *</label><input name="name" required value="${U.esc(st.name||'')}" autocomplete="name"><div class="hint">Please enter your name</div></div>
+        <div class="fld"><label>Mobile (WhatsApp) *</label><input name="phone" required type="tel" inputmode="tel" placeholder="05X XXX XXXX" value="${U.esc(st.phone||'')}" autocomplete="tel"><div class="hint">Please enter a valid UAE mobile number</div></div>
+        <div class="fld full"><label>Email</label><input name="email" type="email" value="${U.esc(st.email||'')}" autocomplete="email"></div>
+      </div>
+      <h3><i>2</i>Delivery</h3>
+      <div class="seg" id="mode"><button type="button" class="on" data-m="delivery">Home delivery</button><button type="button" data-m="pickup">Boutique pick-up</button></div>
+      <div class="f" id="addr" style="margin-top:14px">
+        <div class="fld"><label>Emirate *</label><select name="emirate">${em.map(e=>`<option ${e===(st.emirate||'Abu Dhabi')?'selected':''}>${e}</option>`).join('')}</select></div>
+        <div class="fld"><label>Area *</label><input name="area" value="${U.esc(st.area||'')}" placeholder="e.g. Al Reem Island"><div class="hint">Please enter your area</div></div>
+        <div class="fld full"><label>Building / villa, street, landmark *</label><input name="address" value="${U.esc(st.address||'')}" autocomplete="street-address"><div class="hint">Please enter your address</div></div>
+      </div>
+      <div class="pickup-note hidden" id="pnote">${icon.gift}<div><b style="font-weight:500">Collect from our boutique</b><br>${U.esc(S.address)} · We'll message you on WhatsApp when your order is ready.</div></div>
+      <div class="f" style="margin-top:14px">
+        <div class="fld"><label id="dl">Delivery date *</label><input type="date" name="date" min="${iso(minDay)}" value="${iso(minDay)}"><div class="hint">Please choose a date</div></div>
+        <div class="fld"><label>Preferred time</label><div class="slots" id="slots">${slots.map(s=>`<button type="button" data-s="${s}">${s}</button>`).join('')}</div></div>
+      </div>
+      <h3><i>3</i>Gift message <span style="font-family:var(--sans);font-size:11px;color:var(--mute);letter-spacing:.1em">(optional)</span></h3>
+      <div class="f"><div class="fld"><label>Recipient name</label><input name="giftTo"></div><div class="fld"><label>Recipient mobile</label><input name="giftPhone" type="tel"></div>
+      <div class="fld full"><label>Your message (printed on our card)</label><textarea name="giftMsg" maxlength="300"></textarea></div>
+      <div class="fld full"><label>Order notes</label><input name="notes" placeholder="Ribbon colour, allergies, delivery instructions…"></div></div>
+      <h3><i>4</i>Payment</h3>
+      <div class="radio" id="pay">${(S.onlinePayments||[]).map((k,i)=>`<label class="${i?'':'on'}"><input type="radio" name="pay" value="${k}" ${i?'':'checked'}><div><b style="font-weight:500">${TT.payLabel(k)}</b><small data-k="${k}">${PAYDESC.delivery[k]||''}</small></div></label>`).join('')}</div>
+      <button class="btn btn-dark btn-block" style="margin-top:28px;height:58px" id="place">Place order</button>
+      <p style="font-size:11.5px;color:var(--mute);text-align:center;margin-top:12px">Our concierge will confirm your order on WhatsApp.</p>
+    </form>
+    <aside class="sum"><h4>Order summary</h4><div id="sumItems"></div><div id="sumTot"></div></aside>
+  </div></div>`;
+  const f=$('#cof');
+  const tot=()=>{const sub=Cart.subtotal();const del=mode==='pickup'?0:TT.deliveryFee(f.emirate.value,sub);const t=U.r2(sub+del);return{sub,del,t,vat:U.vatPart(t,S.vatRate)}};
+  const draw=()=>{const x=tot();
+    $('#sumItems').innerHTML=Cart.items.map(i=>`<div class="li"><img src="${U.esc(i.img)}" alt=""><div>${U.esc(i.name)}<small>${i.unit==='kg'?U.qtyLabel(i)+' × ':'× '}${i.qty}</small></div><div>${money(U.lineTotal(i))}</div></div>`).join('');
+    $('#sumTot').innerHTML=`<div class="r"><span>Subtotal</span><span>${money(x.sub)}</span></div><div class="r"><span>${mode==='pickup'?'Boutique pick-up':'Delivery'}</span><span>${x.del?money(x.del):'Complimentary'}</span></div><div class="r t"><span>Total</span><span>${money(x.t)}</span></div><div class="r" style="color:var(--mute);font-size:11.5px"><span>Includes VAT (${S.vatRate}%)</span><span>${money(x.vat)}</span></div>`};
+  draw();
+  f.emirate.onchange=draw;
+  $('#mode').onclick=e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;$('#mode').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#addr').classList.toggle('hidden',mode==='pickup');$('#pnote').classList.toggle('hidden',mode!=='pickup');$('#pay').querySelectorAll('small[data-k]').forEach(x=>x.textContent=PAYDESC[mode][x.dataset.k]||'');$('#dl').textContent=mode==='pickup'?'Pick-up date *':'Delivery date *';draw()};
+  const slotAvail=()=>{const dn=dxbNow();const today=f.date.value===iso(dn);const h=dn.getHours();
+    $('#slots').querySelectorAll('button').forEach(b=>{const end=parseInt(b.dataset.s.split('–')[1]);const off=today&&end-1<=h;b.disabled=off;if(off&&b.classList.contains('on')){b.classList.remove('on');slot=''}})};
+  slotAvail();f.date.addEventListener('change',slotAvail);
+  f.addEventListener('input',e=>{const fl=e.target.closest('.fld.err');if(fl&&e.target.value.trim())fl.classList.remove('err')});
+  $('#slots').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;slot=b.dataset.s;$('#slots').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
+  $('#pay').onchange=e=>{pay=e.target.value;$('#pay').querySelectorAll('label').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked))};
+  f.onsubmit=async e=>{e.preventDefault();
+    {const over=[];const m={};Cart.items.forEach(x=>{m[x.pid]=(m[x.pid]||0)+(x.unit==='kg'?x.grams/1000:1)*x.qty});Object.keys(m).forEach(id=>{const p=byId(id);if(p&&p.stock!=null&&m[id]>p.stock+1e-9)over.push(p.name+' (only '+(p.unit==='kg'?U.r2(p.stock)+' kg':p.stock+' pcs')+' available)')});if(over.length){toast('Please reduce: '+U.esc(over.join(', ')));return}}
+    const need=['name','phone'].concat(mode==='delivery'?['area','address']:[]).concat(['date']);let bad=false;
+    need.forEach(n=>{const el=f[n];const er=!el.value.trim()||(n==='phone'&&!/^\+?[\d\s()-]{9,16}$/.test(el.value.trim()))||(n==='date'&&el.value<el.min);el.closest('.fld').classList.toggle('err',er);if(er)bad=true});
+    if(bad){toast('Please complete the highlighted fields');f.querySelector('.err input,.err select').focus();return}
+    const btn=$('#place');btn.disabled=true;btn.textContent='Placing your order…';
+    const x=tot();
+    const order={id:U.uid('o_'),no:U.orderNo('W'),channel:'web',status:'new',created:Date.now(),
+      customer:{name:f.name.value.trim(),phone:f.phone.value.trim(),email:f.email.value.trim()},
+      fulfil:mode,emirate:mode==='delivery'?f.emirate.value:'',area:f.area.value.trim(),address:mode==='delivery'?f.address.value.trim():'',
+      date:f.date.value,slot,gift:{to:f.giftTo.value.trim(),phone:f.giftPhone.value.trim(),msg:f.giftMsg.value.trim()},notes:f.notes.value.trim(),
+      items:Cart.items.map(i=>({pid:i.pid,name:i.name,unit:i.unit,price:i.price,grams:i.grams,qty:i.qty,disc:0})),
+      subtotal:x.sub,discount:0,delivery:x.del,total:x.t,vat:x.vat,payment:{method:pay,paid:false},stockApplied:false};
+    localStorage.setItem('tt_cust',JSON.stringify({name:order.customer.name,phone:order.customer.phone,email:order.customer.email,emirate:f.emirate.value,area:order.area,address:f.address.value}));
+    let saved=true;try{await DB.put('orders',order)}catch(err){console.error(err);saved=false}
+    sessionStorage.setItem('tt_last',JSON.stringify(order));Cart.clear();
+    location.hash='#/order/'+order.no+(saved?'':'?wa=1');
+  };
+}
+function waOrderText(o){
+  return `✦ THE TOUCH — New order ${o.no}\n\n${o.items.map(i=>`• ${i.name}${i.unit==='kg'?' ('+U.qtyLabel(i)+')':''} × ${i.qty} — ${money(U.lineTotal(i))}`).join('\n')}\n\nSubtotal: ${money(o.subtotal)}\nDelivery: ${o.delivery?money(o.delivery):'Free'}\nTOTAL: ${money(o.total)}\nPayment: ${TT.payLabel(o.payment.method)}\n\nName: ${o.customer.name}\nMobile: ${o.customer.phone}\n${o.fulfil==='pickup'?'Boutique pick-up':'Delivery: '+[o.address,o.area,o.emirate].filter(Boolean).join(', ')}\nDate: ${o.date} ${o.slot||''}${o.gift.msg?'\nGift message: '+o.gift.msg+(o.gift.to?' (to '+o.gift.to+')':''):''}${o.notes?'\nNotes: '+o.notes:''}`}
+function fmtDay(d){if(!d)return'';const x=new Date(d+'T12:00:00');return isNaN(x)?d:x.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'})}
+function pageOrder(no){
+  const o=JSON.parse(sessionStorage.getItem('tt_last')||'null');
+  const wa=o&&o.no===no?waLink(waOrderText(o)):waLink('Hello, about my order '+no);
+  app.innerHTML=`<div class="ok"><img class="mono" src="img/monogram-gold.png" alt=""><span class="eyebrow">Thank you${o?', '+U.esc(o.customer.name.split(' ')[0]):''}</span>
+   <h1 class="h2" style="margin-top:14px">Your order has been received</h1><div class="no">ORDER ${U.esc(no)}</div>
+   ${o?`<div class="meta"><div><span>Total</span><b style="font-weight:600">${money(o.total)}</b></div><div><span>Payment</span>${TT.payLabel(o.payment.method)}</div><div><span>${o.fulfil==='pickup'?'Boutique pick-up':'Delivery'}</span>${o.fulfil==='pickup'?'':U.esc([o.area,o.emirate].filter(Boolean).join(', '))}</div><div><span>Date</span>${U.esc(fmtDay(o.date))}</div>${o.slot?`<div><span>Time</span>${U.esc(o.slot)}</div>`:''}</div>`:''}
+   <p style="margin:20px 0 30px">Our concierge will confirm your order shortly on WhatsApp. For a faster confirmation, send us your order now:</p>
+   <a class="btn btn-gold" href="${wa}" target="_blank" rel="noopener" id="waBtn">Send order on WhatsApp</a>
+   <div style="margin-top:22px"><a class="link" href="#/">Continue shopping</a></div></div>`;
+}
+
+function pageStory(){
+  app.innerHTML=`<div class="phead"><span class="eyebrow">About The Touch</span><h1 class="h2">Chocolate that says what<br><span class="it">words sometimes can't</span></h1></div>
+  <section class="s"><div class="wrap">
+    <p class="prose fade">The Touch was born from a simple idea: that chocolate has the power to express what words sometimes can't. Founded with passion for flavour, we blend <em>artistry with authenticity</em>, creating premium chocolates that bring people closer together.</p>
+    <div class="story-grid" style="margin-top:80px">
+      <div class="fade"><h4>Our Mission</h4><p>To craft exceptional chocolates using the finest ingredients, creating personal gestures of warmth and connection for every occasion.</p></div>
+      <div class="fade"><h4>Our Vision</h4><p>To become the UAE's premier destination for luxury gifting, elevated event arrangements and unforgettable chocolate experiences.</p></div>
+      <div class="fade"><h4>Our Values</h4><p>Serenity, passion, artisanal purity and perfection in presentation define every chocolate piece and every client interaction.</p></div>
+    </div></div></section>
+  <section class="split"><div class="im" style="background-image:url(img/gift-bag-sign.jpg)"></div><div class="tx fade"><span class="eyebrow">Artisanal Sourcing</span><h2 class="h2">From bean<br>to <span class="it">boutique</span></h2>
+    <p>Single-origin cocoa selected for depth and smoothness. Small batches prepared by master chocolatiers with precise temperature control. Daily replenishment in our Abu Dhabi boutique, and cold-chain delivery across all seven Emirates.</p><div><a class="btn btn-dark" href="#/shop/all">Explore the collection</a></div></div></section>`;
+  observe();
+}
+function pageEvents(){
+  app.innerHTML=`<div class="phead" style="background:var(--bur);color:#fff"><span class="eyebrow" style="color:var(--gold)">Weddings · Corporate · Celebrations</span><h1 class="h2">Bespoke chocolate<br><span class="it">arrangements</span></h1><p style="color:#cdb8a3">Tell us about your occasion — our team will design a proposal within 24 hours.</p></div>
+  <section class="s"><div class="wrap"><div class="co evco" style="padding:0">
+    <form id="evf" novalidate>
+      <h3><i>✦</i>Event enquiry</h3>
+      <div class="f">
+        <div class="fld"><label>Full name *</label><input name="name" required autocomplete="name"><div class="hint">Please enter your name</div></div>
+        <div class="fld"><label>Mobile *</label><input name="phone" type="tel" inputmode="tel" placeholder="05X XXX XXXX" required autocomplete="tel"><div class="hint">Please enter your mobile number</div></div>
+        <div class="fld"><label>Event type</label><select name="type"><option>Wedding</option><option>Corporate event / gifting</option><option>Baby reception</option><option>Eid / Ramadan</option><option>Birthday / anniversary</option><option>Other</option></select></div>
+        <div class="fld"><label>Event date</label><input type="date" name="date" min="${new Date().toISOString().slice(0,10)}"></div>
+        <div class="fld"><label>Guests / pieces</label><input name="guests" inputmode="numeric"></div>
+        <div class="fld"><label>Budget (AED)</label><input name="budget" inputmode="numeric"></div>
+        <div class="fld full"><label>Tell us about your vision</label><textarea name="msg" placeholder="Colour theme, trays, favour boxes, branding…"></textarea></div>
+      </div>
+      <button class="btn btn-dark btn-block" style="margin-top:22px;height:56px">Send enquiry</button>
+    </form>
+    <aside class="sum"><h4>What we create</h4>
+      <p style="margin-bottom:14px;color:var(--mute)"><b style="color:var(--ink);font-weight:500">VIP Weddings</b><br>Multi-tiered chocolate displays and tailored favour boxes.</p>
+      <p style="margin-bottom:14px;color:var(--mute)"><b style="color:var(--ink);font-weight:500">Corporate Galas &amp; Launches</b><br>Custom-branded gifts and dessert stations.</p>
+      <p style="margin-bottom:14px;color:var(--mute)"><b style="color:var(--ink);font-weight:500">Family Celebrations</b><br>Baby receptions, Eid, anniversaries, private gatherings.</p>
+      <p style="margin-bottom:22px;color:var(--mute)"><b style="color:var(--ink);font-weight:500">Personalisation</b><br>Custom colour themes, acrylic &amp; crystal trays.</p>
+      <a class="btn btn-line btn-block" target="_blank" rel="noopener" href="${waLink('Hello The Touch, I would like to discuss an event.')}">Chat on WhatsApp</a></aside>
+  </div></div></section>`;
+  $('#evf').addEventListener('input',e=>{const fl=e.target.closest('.fld.err');if(fl&&e.target.value.trim())fl.classList.remove('err')});
+  $('#evf').onsubmit=async e=>{e.preventDefault();const f=e.target;let bad=false;['name','phone'].forEach(n=>{const er=!f[n].value.trim()||(n==='phone'&&!/^\+?[\d\s()-]{9,16}$/.test(f[n].value.trim()));f[n].closest('.fld').classList.toggle('err',er);if(er)bad=true});
+    if(bad){toast('Please add your name and mobile');f.querySelector('.err input').focus();return}
+    const q={id:U.uid('e_'),created:Date.now(),status:'new',name:f.name.value.trim(),phone:f.phone.value.trim(),type:f.type.value,date:f.date.value,guests:f.guests.value,budget:f.budget.value,msg:f.msg.value.trim()};
+    try{await DB.put('enquiries',q)}catch(err){console.error(err)}
+    f.innerHTML=`<div class="ok" style="padding:40px 0;text-align:left"><span class="eyebrow">Thank you</span><h2 class="h2" style="margin:12px 0 16px">We'll be in touch within 24 hours</h2><a class="btn btn-gold" target="_blank" rel="noopener" href="${waLink(`Event enquiry — ${q.type}\nName: ${q.name}\nDate: ${q.date}\nGuests: ${q.guests}\nBudget: ${q.budget}\n${q.msg}`)}">Also send on WhatsApp</a></div>`;window.scrollTo(0,0)};
+}
+function pageDelivery(){
+  const d=S.delivery||{};
+  app.innerHTML=`<div class="phead"><span class="eyebrow">Delivery &amp; Care</span><h1 class="h2">Delivered with care</h1></div>
+  <section class="s"><div class="wrap" style="max-width:760px">
+   <table style="width:100%;border-collapse:collapse;font-size:14px">${Object.keys(d).map(k=>`<tr style="border-bottom:1px solid var(--line)"><td style="padding:14px 0">${k}</td><td style="text-align:right">${d[k]?money(d[k]):'Complimentary'}</td></tr>`).join('')}</table>
+   <p style="color:var(--mute);margin-top:24px">Complimentary delivery within Abu Dhabi on orders above ${money(S.freeDeliveryOver)}. Orders placed before ${S.sameDayCutoff}:00 in Abu Dhabi are delivered the same day. All deliveries use temperature-controlled vehicles.</p>
+   <p style="color:var(--mute);margin-top:14px">Store chocolates in a cool, dry place (16–18 °C), away from direct sunlight. Best enjoyed within three weeks.</p></div></section>`}
+
+/* ---------- Router ---------- */
+function route(){
+  const h=location.hash.replace(/^#\/?/,'');const [pg,arg]=h.split('?')[0].split('/');
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(pg==='shop'?arg:pg)));
+  closeSearch();closeDrawers();document.body.classList.remove('sbar-on');{const t=$('#toast');if(t&&!t._keep)t.classList.remove('on')}
+  if(pg==='shop')pageShop(arg);else if(pg==='p')pageProduct(arg);else if(pg==='checkout')pageCheckout();else if(pg==='order')pageOrder(arg);
+  else if(pg==='story')pageStory();else if(pg==='events')pageEvents();else if(pg==='delivery')pageDelivery();else pageHome();
+  window.scrollTo(0,0);
+}
+function doSearch(){const q=$('#q').value.trim().toLowerCase();const list=visible().filter(p=>!q||(p.name+' '+(p.ar||'')+' '+p.desc+' '+TT.catName(p.cat)).toLowerCase().includes(q));$('#qres').innerHTML=list.map(card).join('')||`<div class="nores"><div class="h3">No matches for “${U.esc(q)}”</div><p>Try “pistachio”, “hazelnut” or “gift”.</p></div>`}
+$('#q').addEventListener('input',doSearch);$('#qres').addEventListener('click',e=>{if(e.target.closest('a'))closeSearch()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawers();closeSearch()}});
+addEventListener('scroll',()=>$('#top').classList.toggle('sc',scrollY>20),{passive:true});
+addEventListener('hashchange',route);
+
+(async function(){
+  await TT.boot();S=TT.settings;PRODUCTS=TT.products;
+  $('#ann').textContent=S.announcement||'';
+  $('#yr').textContent=new Date().getFullYear();
+  $('#waFloat').href=waLink('Hello The Touch');
+  const c=`<li>${U.esc(S.address)}</li><li><a href="tel:${S.phone.replace(/\s/g,'')}">${U.esc(S.phone)}</a></li><li><a target="_blank" rel="noopener" href="https://instagram.com/${S.instagram}">@${U.esc(S.instagram)}</a></li>`;
+  $('#fContact').innerHTML=c;$('#menuContact').innerHTML=`${U.esc(S.address)}<br><a href="tel:${S.phone.replace(/\s/g,'')}">${U.esc(S.phone)}</a><br><a target="_blank" rel="noopener" href="https://instagram.com/${S.instagram}">@${U.esc(S.instagram)}</a>`;
+  renderCartBadge();route();
+  // live product/price updates from admin
+  let sig=JSON.stringify(PRODUCTS.map(p=>[p.id,p.price,p.stock,p.active,p.name,p.img&&p.img.length]));
+  DB.watch('products',ps=>{if(!ps||!ps.length)return;const ns=JSON.stringify(ps.map(p=>[p.id,p.price,p.stock,p.active,p.name,p.img&&p.img.length]));if(ns===sig)return;sig=ns;PRODUCTS=ps;
+    const pg=(location.hash.split('/')[1]||'');if(pg==='checkout'||pg==='order'||pg==='events')return;const y=scrollY;route();window.scrollTo(0,y)});
+})();
+</script>
+</body>
+</html>
