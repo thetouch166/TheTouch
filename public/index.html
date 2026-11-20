@@ -160,6 +160,19 @@ section.s{padding:96px 0}
 .split .tx{display:flex;flex-direction:column;justify-content:center;padding:70px clamp(28px,7vw,110px);background:var(--cream)}
 .split .tx .eyebrow{margin-bottom:18px}.split .tx .h2{margin-bottom:20px}.split .tx p{color:var(--mute);margin-bottom:34px;max-width:440px}
 .split.rev .im{order:2}
+/* gifting: the signature box seen from above, black lacquer lid behind — composed, so nothing is ever cropped */
+.split .gbx{--s:min(54%,400px);position:relative;display:grid;place-items:center;overflow:hidden;isolation:isolate;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px),radial-gradient(120% 90% at 45% 45%,#f1e6d3 0%,#e5d4b9 55%,#d5bf9c 100%)}
+.gbx .lid,.gbx .box{grid-area:1/1;width:var(--s);aspect-ratio:1;border-radius:3px}
+.gbx .lid{transform:translate(22%,-13%) rotate(7deg);background:linear-gradient(150deg,#2c2522 0%,#100d0c 52%,#211b18 100%);box-shadow:0 34px 60px -24px rgba(20,12,8,.55);display:grid;place-items:center;position:relative}
+.gbx .lid:before{content:'';position:absolute;inset:9px;border:1px solid rgba(201,160,99,.5)}
+.gbx .lid img{position:absolute;top:11%;right:10%;width:19%;opacity:.95}
+.gbx .box{position:relative;transform:translate(-8%,8%) rotate(-3deg);padding:4.6%;background:linear-gradient(145deg,#fcf8f1,#efe4d3);box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 34px 60px -22px rgba(70,45,20,.45),0 10px 22px -10px rgba(70,45,20,.3)}
+.gbx .box:before{content:'';position:absolute;inset:2.2%;border:1px solid rgba(168,120,58,.55);pointer-events:none}
+.gbx .cells{display:grid;grid-template-columns:repeat(3,1fr);gap:4%;height:100%}
+.gbx .cells i{display:grid;place-items:center;border-radius:9px;background:#f4ebdd;box-shadow:inset 0 3px 7px rgba(90,58,25,.2),inset 0 -1px 0 rgba(255,255,255,.7);overflow:hidden}
+.gbx .cells img{width:96%;aspect-ratio:1;object-fit:cover;mix-blend-mode:multiply;-webkit-mask-image:radial-gradient(closest-side,#000 66%,transparent 100%);mask-image:radial-gradient(closest-side,#000 66%,transparent 100%)}
+.gbx .cells i.fade{transform:translateY(10px) scale(.94)}.gbx .cells i.fade.in{transform:none}
 @media(max-width:900px){.split{grid-template-columns:1fr;min-height:0}.split .im{height:92vw;max-height:560px}.split.rev .im{order:0}.split .tx{padding:50px 24px}}
 
 /* events band = the boutique's black lacquer gift bag with brass lettering, framed like a gift box */
@@ -565,7 +578,8 @@ function pageHome(){
   </div></section>
 
   <section class="split">
-    <div class="im" style="background-image:url(img/gift-bag.jpg)"></div>
+    <div class="im gbx" aria-hidden="true"><div class="lid"><img src="img/monogram-gold.png" alt=""></div>
+      <div class="box"><div class="cells">${['salted-caramel','pistachio-orange','truffle-rocher','kunafah','coconut-pistachio','florentine-pistachio','macadamia','tiramisu','madlouka'].map((n,i)=>`<i class="fade" style="transition-delay:${(Math.floor(i/3)*.14+(i%3)*.07).toFixed(2)}s"><img src="img/${n}.jpg" alt="" loading="lazy"></i>`).join('')}</div></div></div>
     <div class="tx fade"><span class="eyebrow">The Art of Gifting</span><h2 class="h2">A gesture,<br>a feeling, <span class="it">a touch</span> of care</h2>
       <p>Signature gift bags, crystal trays and reusable keepsake boxes — each arranged by hand and finished with our signature ribbon. Personalise colours and messages for every occasion.</p>
       <div><a class="btn btn-dark" href="#/shop/gifts">Shop gifting</a></div></div>
