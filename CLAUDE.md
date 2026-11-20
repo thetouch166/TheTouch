@@ -7,25 +7,27 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
 
 ## Stack (keep it this way)
 - Plain static files: **vanilla HTML + CSS + JavaScript, no framework, no build step, no npm dependencies.**
-- Hosting: Cloudflare Pages (upload the `public/` folder only).
-- Database: Firebase Firestore + Firebase Auth (email/password for staff), loaded from the gstatic CDN
-  (compat SDK v10) only when `public/js/config.js` sets `window.TT_FIREBASE`.
-- Without a Firebase config the app runs in **offline mode** (localStorage on one device) — used for dev/tests.
+- Hosting: Cloudflare Pages, deployed with `npx wrangler pages deploy` (wrangler.toml → `public/` + `functions/`).
+- API: `functions/api/[[path]].js` (Pages Functions) → **Neon Postgres over HTTPS (no driver package)**, photos in
+  **R2** (binding `PHOTOS`, served by `functions/media/`), emails via **Resend**. Staff auth = `STAFF_LOGINS` secret
+  (email:password; …) → HMAC token in localStorage `tt_tok`. Public access rules live in the API (`publicCreateOk`).
+- `public/js/config.js` sets `window.TT_API='/api'` (live) except on port 5500 → **offline mode** (localStorage) for dev/tests.
 
 ## Layout
 ```
-public/                 ← deploy this folder (Cloudflare Pages "Upload assets")
+public/                 ← the static site (wrangler deploys it together with functions/)
   index.html            customer website (single-page app, hash routes)
   admin.html            admin panel + POS (single file)
-  js/config.js          Firebase web config (null = offline mode)
+  js/config.js          TT_API: '/api' live · null offline (port 5500)
   js/store.js           shared data layer + catalogue seed + utils  → window.TT
   img/                  product photos (square, near-white bg) + logos
-firestore.rules         security rules to paste into Firebase → Firestore → Rules
-docs/SETUP.md           go-live guide (Firebase, Cloudflare, email, printer, daily routine)
+functions/api/[[path]].js   API: Neon (table docs(col,id,data jsonb,updated,deleted)), auth, rules, R2 upload, Resend
+functions/media/[[path]].js R2 photos at /media/p/… (immutable cache)
+wrangler.toml           Cloudflare Pages project, R2 binding, MAIL_FROM / SHOP_EMAIL
+docs/SETUP.md           go-live guide (Cloudflare, Neon, R2, Resend, printer, daily routine)
 docs/LAUNCH-CHECKLIST.md  tomorrow's checklist (tick as you go)
 docs/BACKLOG.md         known issues + later upgrades
-tests/smoke_test.py     Playwright end-to-end smoke test (offline mode)
-tests/fake_firebase.js  in-memory Firebase stand-in to test live mode without an account
+tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live against wrangler pages dev)
 ```
 
 ## Run locally
@@ -37,7 +39,9 @@ tests/fake_firebase.js  in-memory Firebase stand-in to test live mode without an
 ## Data layer — `public/js/store.js` (window.TT)
 - `TT.DB` = backend with the SAME API in both modes: `init, all(col), get(col,id), put(col,obj), patch(col,id,part),
   inc(col,id,field,delta), del(col,id), watch(col,cb) → unsubscribe, signIn, signOut, isAdmin`, plus `DB.mode`
-  (`'local'` | `'live'`). Always go through `TT.DB`; never call localStorage/Firestore directly for business data.
+  (`'local'` | `'live'`), `upload(dataUrl)→url` (R2 in live, data URL offline). Always go through `TT.DB`.
+- Live `watch` = initial load + admin polls `/api/sync?since=` every 5 s (paused while the tab is hidden), website
+  re-reads products every 60 s (edge-cached 60 s, purged on staff writes). Writes apply locally at once (optimistic).
 - Collections: `products`, `orders`, `settings` (doc id `main`), `enquiries`, `shifts`, `stock` (stock movement log), `subscribers` (newsletter `{id,email,created,source}`; public create-only).
 - `TT.boot({admin})` loads settings + products (seeds the catalogue when empty). `TT.U` = utils
   (`money, r2, uid, orderNo, esc, vatPart, lineTotal, qtyLabel, dayKey, fmtTime, compressImage`).
@@ -45,7 +49,7 @@ tests/fake_firebase.js  in-memory Firebase stand-in to test live mode without an
   malicious web orders; flags `o.tampered` when totals don't match lines). Keep it in the admin's orders watcher.
 - Prices are **AED, VAT-inclusive (5%)**: `vat = total − total/1.05` (`U.vatPart`). Use `U.r2` for money math.
 
-### Shapes (do not rename fields — stored data and Firestore rules depend on them)
+### Shapes (do not rename fields — stored data and the API's checks depend on them)
 - **product**: `{id, sku, name, ar, cat, unit:'kg'|'pc', price, stock, min, img, desc, active, featured, updated}`
   — `min` = low-stock alert level (optional; default 2 kg / 5 pcs, see `lowLevel()`)
   — `unit:'kg'` → price per kg, stock in kg, sold by grams.
@@ -93,12 +97,14 @@ checkout. Dates/cut-offs use Dubai time via `dxbNow()`.
 ## Testing
 - `pip install playwright && playwright install chromium`, start the local server on port 5500, then
   `python tests/smoke_test.py` (website order → admin → POS sale → shift close; prints PASS/FAIL).
-- Live mode without an account: see `tests/smoke_test.py --live` (serves `fake_firebase.js` instead of the CDN).
+- Live mode: `.dev.vars` (test Neon DATABASE_URL + `STAFF_LOGINS="owner@thetouch.ae:secret123"`) →
+  `npx wrangler pages dev --port 8788` → `python tests/smoke_test.py --live`. Never use the shop's database for tests.
 - After any change: run the smoke test and check the browser console for errors on both pages.
 
 ## Go-live (see docs/LAUNCH-CHECKLIST.md)
 1. Domain → Cloudflare nameservers (do first; DNS can take hours)
-2. Firebase project, publish `firestore.rules`, enable Email/Password, add staff users, paste config in `public/js/config.js`
-3. Cloudflare Pages → upload `public/` → custom domains `thetouch.ae` + `www` → add both in Firebase Authorized domains
-4. Email Routing `hello@thetouch.ae` → Gmail; Gmail "Send mail as"
+2. Neon project (Frankfurt) → pooled connection string
+3. R2 bucket `the-touch-photos` → `wrangler pages deploy` → secrets DATABASE_URL, STAFF_LOGINS, RESEND_API_KEY → custom domains
+4. Resend domain verify + Email Routing `hello@thetouch.ae` → Gmail
 5. Real prices, TRN, stock in Admin; shop laptop install + printer; run the launch test
+6. Website online payments: Stripe — waiting for the client's account

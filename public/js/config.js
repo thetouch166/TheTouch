@@ -1,22 +1,12 @@
 /* ============================================================
    THE TOUCH — CONFIGURATION
    ------------------------------------------------------------
-   OFFLINE / DEMO MODE (default): leave TT_FIREBASE = null.
-   Everything is saved on this device only (great for testing
-   and for running the POS on one laptop).
+   LIVE MODE (default on the real site): the website and admin
+   talk to our own API at /api (Cloudflare Pages Functions →
+   Neon database, R2 photos, Resend emails). See docs/SETUP.md.
 
-   LIVE MODE: paste your Firebase web config below so website
-   orders appear instantly in the admin on any device.
-   See SETUP.md (10 minutes, free plan is enough).
+   OFFLINE / DEMO MODE: on the local dev server (port 5500 —
+   VS Code Live Server or `python -m http.server 5500`) the app
+   saves to this browser only (localStorage). PIN 1234.
    ============================================================ */
-window.TT_FIREBASE = null;
-/* Example:
-window.TT_FIREBASE = {
-  apiKey: "AIza...",
-  authDomain: "the-touch-xxxx.firebaseapp.com",
-  projectId: "the-touch-xxxx",
-  storageBucket: "the-touch-xxxx.appspot.com",
-  messagingSenderId: "000000000",
-  appId: "1:000000000:web:xxxxxxxx"
-};
-*/
+window.TT_API = (location.port === '5500' || location.protocol === 'file:') ? null : '/api';

@@ -1,6 +1,6 @@
 /* THE TOUCH — shared data layer (website + admin + POS)
    Local mode: localStorage (+ live sync between tabs on the same device)
-   Live mode : Firebase Firestore (+ Auth for admin) when js/config.js has TT_FIREBASE */
+   Live mode : our API at /api (Cloudflare Pages Functions -> Neon Postgres, photos in R2) when js/config.js sets TT_API */
 (function () {
   'use strict';
 
@@ -129,39 +129,97 @@
     async inc(col, id, field, delta) { const m = local._read(col); if (!m[id]) return; m[id][field] = U.r2((Number(m[id][field]) || 0) + delta); local._write(col, m); },
     async del(col, id) { const m = local._read(col); delete m[id]; local._write(col, m); },
     watch(col, cb) { (watchers[col] = watchers[col] || []).push(cb); local.all(col).then(cb); return () => { watchers[col] = watchers[col].filter(f => f !== cb); }; },
+    async upload(dataUrl) { return dataUrl; },   // offline: the photo stays inside the product
     async signIn(pin) { const s = await local.get('settings', 'main'); return pin === ((s && s.pin) || DEFAULT_SETTINGS.pin); },
     async signOut() { },
     isAdmin() { return sessionStorage.getItem('tt_admin') === '1'; }
   };
 
-  /* ---------------- Firebase backend ---------------- */
-  function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
-  const FBV = '10.12.2';
-  const fb = {
+  /* ---------------- Cloud backend: our API on Cloudflare (/api → Neon database, R2 photos) ----------------
+     Same API as local mode. watch() = first full load, then the admin asks every few seconds "what changed
+     since…" (paused while the screen is off, to keep the database asleep). The website re-checks products
+     once a minute (served from Cloudflare's edge cache). Writes show on this screen immediately. */
+  const API = window.TT_API;
+  const TOK = 'tt_tok';
+  const tok = () => { try { return localStorage.getItem(TOK) || ''; } catch (e) { return ''; } };
+  async function req(method, path, body, blob) {
+    const h = {}; const t = tok(); if (t) h.Authorization = 'Bearer ' + t;
+    let b; if (blob) { b = blob; h['Content-Type'] = blob.type; } else if (body !== undefined) { b = JSON.stringify(body); h['Content-Type'] = 'application/json'; }
+    const r = await fetch(API + path, { method, headers: h, body: b, cache: 'no-store' });
+    if (r.status === 401 && t) { try { localStorage.removeItem(TOK); } catch (e) { } }
+    if (!r.ok) { let m = ''; try { m = (await r.json()).error || ''; } catch (e) { } const e = new Error(m || method + ' ' + path + ' → ' + r.status); e.status = r.status; throw e; }
+    return r.json();
+  }
+  const enc = encodeURIComponent;
+  const cloud = {
     mode: 'live',
+    _c: {}, _timer: 0, _busy: false,
     async init() {
-      await loadScript(`https://www.gstatic.com/firebasejs/${FBV}/firebase-app-compat.js`);
-      await loadScript(`https://www.gstatic.com/firebasejs/${FBV}/firebase-firestore-compat.js`);
-      await loadScript(`https://www.gstatic.com/firebasejs/${FBV}/firebase-auth-compat.js`);
-      firebase.initializeApp(window.TT_FIREBASE);
-      fb.db = firebase.firestore();
-      try { await fb.db.enablePersistence({ synchronizeTabs: true }); } catch (e) { /* offline cache optional */ }
-      await new Promise(r => { const u = firebase.auth().onAuthStateChanged(() => { u(); r(); }); });
+      if (tok()) { try { await req('GET', '/me'); } catch (e) { } }   // a stale/removed login is cleared here
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) cloud._poll(); });
     },
-    async all(col) { const s = await fb.db.collection(col).get(); return s.docs.map(d => Object.assign({ id: d.id }, d.data())); },
-    async get(col, id) { const d = await fb.db.collection(col).doc(id).get(); return d.exists ? Object.assign({ id: d.id }, d.data()) : null; },
-    async put(col, obj) { await fb.db.collection(col).doc(obj.id).set(JSON.parse(JSON.stringify(obj))); return obj.id; },
-    async patch(col, id, part) { await fb.db.collection(col).doc(id).set(JSON.parse(JSON.stringify(part)), { merge: true }); },
-    async inc(col, id, field, delta) { await fb.db.collection(col).doc(id).update({ [field]: firebase.firestore.FieldValue.increment(delta) }); },
-    async del(col, id) { await fb.db.collection(col).doc(id).delete(); },
-    watch(col, cb) { return fb.db.collection(col).onSnapshot(s => cb(s.docs.map(d => Object.assign({ id: d.id }, d.data()))), e => console.warn('watch', col, e)); },
-    async signIn(email, pass) { try { await firebase.auth().signInWithEmailAndPassword(email, pass); return true; } catch (e) { console.warn(e); return false; } },
-    async signOut() { await firebase.auth().signOut(); },
-    isAdmin() { return !!(window.firebase && firebase.auth().currentUser); }
+    async _list(col) { return req('GET', '/db/' + col); },
+    async all(col) { return (await cloud._list(col)).rows; },
+    async get(col, id) { try { return await req('GET', '/db/' + col + '/' + enc(id)); } catch (e) { if (e.status === 404) return null; throw e; } },
+    put(col, obj) { return cloud._write(col, obj.id, () => JSON.parse(JSON.stringify(obj)), () => req('PUT', '/db/' + col + '/' + enc(obj.id), obj)).then(() => obj.id); },
+    patch(col, id, part) { return cloud._write(col, id, cur => cur ? Object.assign(cur, JSON.parse(JSON.stringify(part))) : undefined, () => req('PATCH', '/db/' + col + '/' + enc(id), part)); },
+    inc(col, id, field, delta) { return cloud._write(col, id, cur => { if (!cur) return; cur[field] = U.r2((Number(cur[field]) || 0) + delta); return cur; }, () => req('POST', '/db/' + col + '/' + enc(id) + '/inc', { field, delta })); },
+    del(col, id) { return cloud._write(col, id, () => null, () => req('DELETE', '/db/' + col + '/' + enc(id))); },
+    watch(col, cb) {
+      let w = cloud._c[col];
+      if (!w) {
+        w = cloud._c[col] = { raw: {}, cbs: [], ready: false, t: 0 };
+        const load = () => cloud._list(col).then(r => { w.raw = {}; r.rows.forEach(d => w.raw[d.id] = JSON.stringify(d)); w.t = r.t; w.ready = true; cloud._emit(col); })
+          .catch(e => { console.warn('watch', col, e.message); setTimeout(load, 5000); });
+        load();
+      }
+      w.cbs.push(cb); if (w.ready) cb(Object.values(w.raw).map(s => JSON.parse(s)));
+      cloud._loop();
+      return () => { w.cbs = w.cbs.filter(f => f !== cb); };
+    },
+    _emit(col) { const w = cloud._c[col]; w.cbs.forEach(cb => { try { cb(Object.values(w.raw).map(s => JSON.parse(s))); } catch (e) { console.error(e); } }); },
+    async _write(col, id, fn, call) {   // show the change here right away, roll back if the server refuses
+      const w = cloud._c[col]; const ok = w && w.ready; const before = ok ? w.raw[id] : undefined;
+      if (ok) { const next = fn(before ? JSON.parse(before) : null); if (next !== undefined) { if (next === null) delete w.raw[id]; else w.raw[id] = JSON.stringify(next); cloud._emit(col); } }
+      try { return await call(); }
+      catch (e) { if (ok) { if (before === undefined) delete w.raw[id]; else w.raw[id] = before; cloud._emit(col); } throw e; }
+      finally { setTimeout(() => cloud._poll(), 30); }
+    },
+    _loop() {
+      if (cloud._timer) return;
+      const tick = async () => { if (!document.hidden) await cloud._poll(); cloud._timer = setTimeout(tick, cloud.isAdmin() ? 5000 : 60000); };
+      cloud._timer = setTimeout(tick, cloud.isAdmin() ? 5000 : 60000);
+    },
+    async _poll() {
+      const cols = Object.keys(cloud._c).filter(c => cloud._c[c].ready); if (!cols.length || cloud._busy) return;
+      cloud._busy = true;
+      try {
+        if (cloud.isAdmin()) {
+          const since = Math.min(...cols.map(c => cloud._c[c].t)) - 15000;   // overlap: never miss a slow write
+          const r = await req('GET', '/sync?cols=' + cols.join(',') + '&since=' + since); const touched = new Set();
+          r.rows.forEach(x => { const w = cloud._c[x.c]; if (!w || !w.ready) return;
+            if (x.d === null) { if (w.raw[x.id] !== undefined) { delete w.raw[x.id]; touched.add(x.c); } }
+            else { const s = JSON.stringify(x.d); if (w.raw[x.id] !== s) { w.raw[x.id] = s; touched.add(x.c); } } });
+          cols.forEach(c => cloud._c[c].t = r.t); touched.forEach(c => cloud._emit(c));
+        } else {
+          for (const c of cols) { const r = await cloud._list(c); const w = cloud._c[c]; const raw = {}; r.rows.forEach(d => raw[d.id] = JSON.stringify(d));
+            if (JSON.stringify(raw) !== JSON.stringify(w.raw)) { w.raw = raw; cloud._emit(c); } }
+        }
+      } catch (e) { console.warn('sync', e.message); }
+      cloud._busy = false;
+    },
+    async upload(dataUrl) { const blob = await (await fetch(dataUrl)).blob(); return (await req('POST', '/upload', undefined, blob)).url; },
+    async signIn(email, pass) {
+      cloud.lastError = '';
+      try { const r = await req('POST', '/login', { email, pass }); localStorage.setItem(TOK, r.token); return true; }
+      catch (e) { cloud.lastError = e.message; return false; }
+    },
+    async signOut() { try { localStorage.removeItem(TOK); } catch (e) { } },
+    isAdmin() { return !!tok(); }
   };
 
   /* ---------------- Public API ---------------- */
-  const DB = window.TT_FIREBASE ? fb : local;
+  const DB = API ? cloud : local;
   const TT = {
     DB, U, CATS, SEED, DEFAULT_SETTINGS,
     ready: null,
@@ -177,7 +235,7 @@
       // products
       let prods = []; try { prods = await DB.all('products'); } catch (e) { }
       if (!prods.length && (DB.mode === 'local' || opts.admin)) {
-        for (const p of SEED) { try { await DB.put('products', Object.assign({ updated: Date.now() }, p)); } catch (e) { } }
+        await Promise.all(SEED.map(p => DB.put('products', Object.assign({ updated: Date.now() }, p)).catch(() => { })));   // all at once (fast on a new database)
         prods = SEED.slice();
       }
       if (!prods.length) prods = SEED.slice(); // public fallback

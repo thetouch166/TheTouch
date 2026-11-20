@@ -1,0 +1,14 @@
+# THE TOUCH — Cloudflare Pages project (website + admin + API)
+# Deploy from this folder:   npx wrangler pages deploy
+# Local test with the API:    npx wrangler pages dev   (put secrets in .dev.vars — never commit it)
+name = "the-touch"
+pages_build_output_dir = "public"
+compatibility_date = "2025-09-01"
+
+[vars]
+MAIL_FROM = "The Touch <orders@thetouch.ae>"   # must be on the domain verified in Resend
+SHOP_EMAIL = "hello@thetouch.ae"              # gets new-order + event-enquiry emails
+
+[[r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "the-touch-photos"

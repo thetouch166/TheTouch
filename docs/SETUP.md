@@ -1,80 +1,73 @@
 # The Touch — Website, Admin & POS · Go-live guide
 
-## ⚡ Final 3 steps (account → key → domain)
-1. **Account:** go to console.firebase.google.com and create the project `the-touch`. Enable **Firestore** (paste the rules below) and **Authentication → Email/Password**. Add a staff user under Authentication → Users.
-2. **Key:** open Project settings → Your apps → Web app, copy `firebaseConfig`, and paste it into `public/js/config.js` as `window.TT_FIREBASE = {…}`. This web key is meant to be public; the rules below keep orders and admin data private.
-3. **Domain:** drag the `public/` folder onto Cloudflare Pages (Workers & Pages → Create → Pages → Upload assets) or app.netlify.com/drop. In Netlify go to Domain management → Add a domain (e.g. `thetouch.ae`) and add the DNS records Netlify shows you at your domain registrar. HTTPS turns on automatically. Then in Firebase go to Authentication → Settings → **Authorized domains** → add `thetouch.ae` and `www.thetouch.ae`.
+## How it runs
+| Part | Service | Cost |
+|---|---|---|
+| Website + admin + API, worldwide CDN | **Cloudflare Pages** (+ Pages Functions in `functions/`) | Free |
+| Orders, products, shifts, stock, clients | **Neon** Postgres (region Frankfurt) | Free plan, or Launch ≈ USD 5–10 a month |
+| Product photos uploaded in the admin | **Cloudflare R2** bucket `the-touch-photos` | Free up to 10 GB (card needed to activate) |
+| Order and enquiry emails | **Resend**, from `orders@thetouch.ae` | Free up to 3,000 a month |
+| Receiving mail at `hello@thetouch.ae` | **Cloudflare Email Routing** → Gmail | Free |
 
-**Test after going live:** open `https://yourdomain/admin.html` on the shop laptop, sign in, and open a shift. On your phone, place an order on `https://yourdomain`. The laptop should chime within about 2 seconds. Then set the real prices in Products and the TRN in Settings.
+The browser never talks to the database directly. `functions/api/[[path]].js` checks every request.
+- The public can only read products and settings (the PIN is hidden). It can only create a web order (unpaid, status *new*), an event enquiry or a newsletter sign-up.
+- Everything else needs a staff sign-in.
+- The database table is created automatically on the first request.
 
+## Secrets (Cloudflare → Workers & Pages → the-touch → Settings → Variables and secrets → Add → type **Secret**)
+| Name | Value |
+|---|---|
+| `DATABASE_URL` | Neon → project → **Connect** → *Connection pooling ON* → the `postgresql://…` string |
+| `STAFF_LOGINS` | Who can open the admin. Format: `owner@thetouch.ae:LongPassword1; shop@thetouch.ae:LongPassword2`. Use a `;` between people and no `;` inside passwords. Removing someone signs them out everywhere. |
+| `RESEND_API_KEY` | Resend → API Keys → Create (Sending access, domain thetouch.ae) |
+
+`MAIL_FROM` and `SHOP_EMAIL` are plain settings in `wrangler.toml`. After changing a secret, deploy again (or Deployments → ⋯ → Retry deployment).
+
+## Deploy / update the site (from this folder, on the dev laptop)
+```
+npx wrangler login                     # once: a browser opens, click Allow
+npx wrangler pages deploy              # uploads public/ + functions/ (settings come from wrangler.toml)
+```
+- Once only, before the first deploy:
+  - `npx wrangler pages project create the-touch --production-branch main`
+  - `npx wrangler r2 bucket create the-touch-photos`
+- Drag-and-drop upload in the dashboard does **not** include the API. Always deploy with the command above.
+- Prices, products, stock and settings are changed in the admin. They don't need a re-deploy.
+
+## Custom domain
+Workers & Pages → the-touch → **Custom domains** → Set up a domain → `thetouch.ae`, then again for `www.thetouch.ae`. The domain must already be on Cloudflare. The padlock (HTTPS) appears by itself within minutes.
+
+## Email
+- **Sending (Resend):**
+  1. resend.com → Domains → Add domain → `thetouch.ae` (region Ireland).
+  2. Add the DNS records it shows in Cloudflare → DNS. Use *DNS only* (grey cloud). If Resend offers to configure Cloudflare automatically, use that instead.
+  3. Wait for "Verified", then create the API key (above).
+  4. Also add a TXT record `_dmarc` = `v=DMARC1; p=none;` so Gmail trusts the emails.
+- **Receiving (hello@):** Cloudflare → thetouch.ae → **Email → Email Routing** → Get started → create address `hello` → destination = the client's Gmail → verify the Gmail link.
+- What gets sent:
+  - A new web order emails `SHOP_EMAIL` with all details and an "Open the admin" button, and emails the customer (if they gave an email) a thank-you with the order summary and a WhatsApp button.
+  - A new event enquiry emails `SHOP_EMAIL`.
+
+## Local development
+- **Offline demo** (no accounts): `cd public && python -m http.server 5500` → http://localhost:5500/admin.html (PIN **1234**). On port 5500 everything is saved in this browser only.
+- **With the real API:**
+  1. Create `.dev.vars` in the repo root (git-ignored) with `DATABASE_URL="…a TEST Neon database…"` and `STAFF_LOGINS="owner@thetouch.ae:secret123"`.
+  2. Run `npx wrangler pages dev --port 8788` → http://127.0.0.1:8788.
+  3. Run `python tests/smoke_test.py --live`.
+
+  Never point local tests at the shop's database.
 
 ## What's in the folder
 | File | What it is |
 |---|---|
 | `public/index.html` | Customer website (shop, gifting, events, checkout) |
 | `public/admin.html` | Admin panel + POS (open on the shop laptop/tablet) |
-| `public/js/config.js` | Switch between Offline mode and Live mode |
-| `public/js/store.js` | Shared catalogue, prices, settings, data layer |
+| `public/js/config.js` | Live (`/api`) on the real site, offline on port 5500 |
+| `public/js/store.js` | Shared catalogue, settings, data layer |
 | `public/img/` | Product photos and logos |
-
-**Admin login (offline mode): PIN `1234`.** Change it in Admin → Settings.
-
----
-
-## Two modes
-
-**Offline mode (default, works right now)**
-Everything is saved inside the browser on that one device. The POS works fully on the shop laptop, even without internet.
-⚠️ In this mode, orders placed on a customer's phone **do not** reach the shop laptop. Customers can still tap "Send order on WhatsApp" after checkout, so you won't lose orders.
-
-**Live mode (recommended before launch, about 15 minutes, free)**
-Website orders appear on the admin screen instantly, with a sound alert, on any device.
-
-### Switch to Live mode (Firebase, free Spark plan)
-1. Go to https://console.firebase.google.com → **Add project** → name it `the-touch` (Analytics: off).
-2. **Build → Firestore Database → Create database** → Production mode → region `europe-west` or `me-central` (closest to the UAE).
-3. **Firestore → Rules**: paste the rules below → **Publish**.
-4. **Build → Authentication → Get started → Email/Password → Enable.** Then **Users → Add user** (for example `admin@thetouch.ae` + a strong password). Add one user per staff member.
-5. **Project settings (⚙) → Your apps → Web `</>`** → register the app → copy the `firebaseConfig` object.
-6. Paste it into `public/js/config.js` as `window.TT_FIREBASE = { ... }`.
-7. Open `admin.html` and sign in with the email and password. The catalogue is created automatically the first time.
-8. Deploy (see below). Open the website, place a test order, and watch it arrive in Admin → Orders.
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{db}/documents {
-    function staff() { return request.auth != null; }
-    match /products/{id}  { allow read: if true;  allow write: if staff(); }
-    match /settings/{id}  { allow read: if true;  allow write: if staff(); }
-    match /orders/{id} {
-      allow create: if staff() || (
-        request.resource.data.channel == 'web' &&
-        request.resource.data.status == 'new' &&
-        request.resource.data.stockApplied == false &&
-        request.resource.data.payment.paid == false &&
-        request.resource.data.payment.method in ['cod', 'card_on_delivery', 'link'] &&
-        request.resource.data.items is list && request.resource.data.items.size() > 0 && request.resource.data.items.size() < 50 &&
-        request.resource.data.total is number && request.resource.data.total > 0
-      );
-      allow read, update, delete: if staff();
-    }
-    match /enquiries/{id} {
-      allow create: if true;
-      allow read, update, delete: if staff();
-    }
-    match /shifts/{id} { allow read, write: if staff(); }
-  }
-}
-```
-
----
-
-## Put the website online (pick one)
-- **Netlify (easiest):** go to https://app.netlify.com/drop and drag the `public/` folder in. You get a link right away. Then go to Domain settings → add `thetouch.ae` (or your domain) and update DNS at your registrar.
-- **Firebase Hosting:** run `npm i -g firebase-tools` → `firebase login` → `firebase init hosting` (public dir = this folder) → `firebase deploy`.
-
-The site is static HTML, so it's very fast and has no server to maintain.
+| `functions/api/[[path]].js` | The API: Neon database, security checks, photo upload, Resend emails |
+| `functions/media/[[path]].js` | Serves uploaded photos from R2 (cached for a year) |
+| `wrangler.toml` | Cloudflare project settings (R2 binding, email addresses) |
 
 ---
 
@@ -104,4 +97,4 @@ The site is static HTML, so it's very fast and has no server to maintain.
 - [ ] Add your **VAT TRN** in Settings so it prints on tax invoices.
 - [ ] Check delivery fees per emirate, the free-delivery threshold and the same-day cut-off.
 - [ ] Confirm the WhatsApp number (currently 971526633823) and the email.
-- [ ] Online card payments: today customers choose cash/card on delivery or a payment link sent on WhatsApp (e.g. a UTap/Network/Stripe link). A fully automatic card checkout can be added later with a payment-gateway account.
+- [ ] Online card payments: today customers choose cash/card on delivery or pick-up, or a payment link sent on WhatsApp. Stripe checkout is added once the client's Stripe account is approved.

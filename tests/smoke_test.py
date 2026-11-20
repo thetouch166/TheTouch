@@ -5,23 +5,25 @@ Setup (once):
     pip install playwright
     playwright install chromium
 
-Run (with the site served from public/ on port 5500, e.g. VS Code Live Server or
+Offline mode (site served from public/ on port 5500, e.g. VS Code Live Server or
 `cd public && python -m http.server 5500`):
-    python tests/smoke_test.py            # offline mode (localStorage)
-    python tests/smoke_test.py --live     # live mode, using tests/fake_firebase.js instead of real Firebase
-    BASE_URL=http://localhost:8080 python tests/smoke_test.py
+    python tests/smoke_test.py
+
+Live mode = the real API (Cloudflare Functions + a Neon database). Use a TEST database, never the shop's:
+    1. .dev.vars in the repo root:  DATABASE_URL="postgresql://…test db…"
+                                    STAFF_LOGINS="owner@thetouch.ae:secret123"
+    2. npx wrangler pages dev --port 8788
+    3. python tests/smoke_test.py --live            (BASE_URL defaults to http://127.0.0.1:8788)
 
 Options: --headed (watch it run), CHROME_PATH=/path/to/chrome (use an installed Chrome).
 """
 import os, sys, json, pathlib
 from playwright.sync_api import sync_playwright
 
-BASE = os.environ.get('BASE_URL', 'http://localhost:5500').rstrip('/') + '/'
 LIVE = '--live' in sys.argv
+BASE = os.environ.get('BASE_URL', 'http://127.0.0.1:8788' if LIVE else 'http://localhost:5500').rstrip('/') + '/'
 HEADED = '--headed' in sys.argv
 HERE = pathlib.Path(__file__).parent
-FAKE_FB = (HERE / 'fake_firebase.js').read_text(encoding='utf-8')
-FAKE_CFG = 'window.TT_FIREBASE={apiKey:"test",authDomain:"test",projectId:"the-touch-test"};'
 
 results, errors = [], []
 
@@ -31,28 +33,27 @@ def check(name, ok, detail=''):
 
 def setup(ctx):
     ctx.route('**/fonts.g*/**', lambda r: r.abort())
-    if LIVE:
-        ctx.route('**/firebasejs/**', lambda r: r.fulfill(body=FAKE_FB if 'app-compat' in r.request.url else '',
-                                                          content_type='application/javascript'))
-        ctx.route('**/js/config.js', lambda r: r.fulfill(body=FAKE_CFG, content_type='application/javascript'))
 
 def watch(page, label):
     page.on('pageerror', lambda e: errors.append(f'{label}: {e}'))
     page.on('console', lambda m: errors.append(f'{label} console: {m.text}')
             if m.type == 'error' and 'Failed to load resource' not in m.text else None)
 
+STAFF = {'email': 'owner@thetouch.ae', 'pass': 'secret123'}
+
 def orders(page):
-    key = '__fakefs' if LIVE else 'tt_v1_orders'
-    raw = page.evaluate(f"localStorage.getItem('{key}')") or '{}'
-    data = json.loads(raw)
-    return list((data.get('orders', {}) if LIVE else data).values())
+    if LIVE:  # ask the API as staff (without signing this page in)
+        return page.evaluate("""s => fetch('/api/login',{method:'POST',body:JSON.stringify(s)}).then(r=>r.json())
+            .then(j=>fetch('/api/db/orders',{headers:{Authorization:'Bearer '+j.token}})).then(r=>r.json()).then(j=>j.rows)""", STAFF)
+    return list(json.loads(page.evaluate("localStorage.getItem('tt_v1_orders')") or '{}').values())
 
 def login(a):
     a.goto(BASE + 'admin.html'); a.wait_for_timeout(800)
     if LIVE:
-        a.fill('#lemail', 'owner@thetouch.ae'); a.fill('#lpass', 'secret123'); a.click('#emailUI button')
+        a.fill('#lemail', STAFF['email']); a.fill('#lpass', STAFF['pass']); a.click('#emailUI button')
     else:
         for k in '1234': a.click(f'#pad button[data-k="{k}"]')
+    if LIVE: a.wait_for_selector('#modePill.live', state='attached', timeout=30000)
     a.wait_for_timeout(1200)
     if a.is_visible('#sc'):
         a.fill('#sc', 'Test Cashier'); a.fill('#sf', '500'); a.click('#sok'); a.wait_for_timeout(2600)
@@ -71,10 +72,10 @@ with sync_playwright() as p:
     w.click('.opt[data-g="500"]'); w.click('#add'); w.wait_for_timeout(400)
     check('added to bag', w.evaluate("Cart.count()") >= 1)
     w.goto(BASE + 'index.html#/checkout'); w.wait_for_timeout(600)
-    if LIVE: w.evaluate("firebase.auth().currentUser=null")  # act as an anonymous customer
+    if LIVE: w.evaluate("localStorage.removeItem('tt_tok')")  # act as an anonymous customer
     w.fill('[name=name]', 'Smoke Test'); w.fill('[name=phone]', '0501234567')
     w.fill('[name=area]', 'Al Reem Island'); w.fill('[name=address]', 'Tower 1'); w.fill('[name=giftMsg]', 'Congratulations')
-    w.click('#place'); w.wait_for_timeout(1200)
+    w.click('#place'); w.wait_for_timeout(2500 if LIVE else 1200)
     check('order confirmation page', '#/order/' in w.url, w.url.split('#')[-1])
     web = [o for o in orders(w) if o.get('channel') == 'web']
     check('web order saved', len(web) >= 1)

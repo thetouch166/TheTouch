@@ -7,3 +7,7 @@ node_modules/
 # Backups exported from Admin → Settings contain customer data — keep them out of git
 the-touch-backup-*.json
 the-touch-sales-*.csv
+
+# Cloudflare local secrets + cache
+.dev.vars
+.wrangler/
