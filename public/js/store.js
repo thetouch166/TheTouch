@@ -14,41 +14,41 @@
   ];
 
   // price = AED. unit 'kg' → sold by weight (online: 250g / 500g / 1kg; POS: enter grams)
-  // PRICES ARE PLACEHOLDERS — edit them in Admin → Products.
+  // Opening prices: every product AED 185 per kg — edit them in Admin → Products.
   const P = (id, name, ar, cat, unit, price, desc, extra) => Object.assign({
     id, sku: id.toUpperCase().replace(/-/g, '').slice(0, 8), name, ar, cat, unit, price, desc,
     img: 'img/' + id + '.jpg', stock: unit === 'kg' ? 20 : 40, active: true, featured: false
   }, extra || {});
 
   const SEED = [
-    P('salted-caramel', 'Salted Caramel Hazelnut', 'كراميل مملّح بالبندق', 'pralines', 'kg', 420, 'A whole roasted hazelnut wrapped in soft salted caramel and enrobed in milk chocolate, finished with a dusting of cocoa.', { featured: true }),
-    P('truffle-rocher', 'Truffle Rocher Hazelnut', 'ترافل روشيه بالبندق', 'pralines', 'kg', 400, 'Crisp roasted nut shell around a velvet hazelnut truffle heart.', { featured: true }),
-    P('coconut-pistachio', 'Coconut & Pistachio', 'جوز الهند والفستق الحلبي', 'pralines', 'kg', 390, 'Snow-white coconut ganache with a centre of Aleppo pistachio, in fine milk chocolate.', { featured: true }),
-    P('chabelon-hazelnut', 'New Chabelon Hazelnut', 'نيو شابلون بالبندق', 'pralines', 'kg', 380, 'Our signature chabelon praline layered with hazelnut crunch and a whole hazelnut.'),
-    P('macadamia', 'Caramelized Macadamia', 'مكاديميا مكرملة', 'pralines', 'kg', 420, 'Buttery macadamia, slowly caramelised and coated in silky milk chocolate.', { featured: true }),
-    P('almond-quinball', 'Chopped Almond Quinball', 'كوين بول باللوز المقطّع', 'pralines', 'kg', 380, 'A round praline packed with roasted chopped almonds and gianduja.'),
-    P('earth', 'Earth', 'الأرض', 'pralines', 'kg', 380, 'Two textures, one sphere — a crisp wafer disc and a rich cocoa truffle.'),
-    P('monte-carlo', 'New Monte Carlo', 'نيو مونتي كارلو', 'pralines', 'kg', 370, 'Individually wrapped squares of milk chocolate with a crunchy nut praline core.'),
-    P('coffee-bean', 'Chocolate Coffee Bean', 'شوكولا حبة بن قهوة', 'pralines', 'kg', 370, 'A coffee-bean shaped praline with a smooth espresso ganache.'),
-    P('tiramisu', 'Tiramisu', 'تيراميسو', 'pralines', 'kg', 390, 'Mascarpone-style cream and coffee sponge in chocolate, dusted with cocoa.', { featured: true }),
-    P('cotton-candy', 'Cotton Candy', 'غزل البنات', 'pralines', 'kg', 380, 'A pyramid of chocolate filled with light, cloud-soft cotton candy cream.'),
-    P('cream-biscuit', 'Chocolate Cream Biscuit with Nuts', 'شوكولا مربعة كريم بسكوت كسر', 'pralines', 'kg', 380, 'A square of biscuit cream crowned with caramelised chopped nuts.'),
-    P('kunafah', 'Kunafah', 'كنافة', 'oriental', 'kg', 420, 'The beloved Arabic dessert reimagined — crisp kunafah and pistachio cream under a hand-painted chocolate shell.', { featured: true }),
-    P('pistachio-halawa', 'Pistachio Halawa Chocolate', 'شوكولا بالحلاوة والفستق الحلبي', 'oriental', 'kg', 400, 'Silky tahini halawa studded with pistachio in a bark-textured milk chocolate log.'),
-    P('pistachio-orange', 'Pistachio with Orange Blossom', 'فستق حلبي بماء الزهر', 'oriental', 'kg', 400, 'Pistachio paste scented with orange-blossom water in a fine chocolate bar.', { featured: true }),
-    P('snayniyeh', 'Chocolate Round Snayniyeh', 'شوكولا مدورة سنينية', 'oriental', 'kg', 380, 'A round chocolate inspired by the traditional snayniyeh, rich with nuts.'),
-    P('madlouka', 'Chocolate Madlouka', 'شوكولا تغطيس مدلوقة', 'oriental', 'kg', 400, 'Layers of creamy madlouka and nuts, topped with crushed pistachio.'),
-    P('fig-sesame', 'Chocolate Fig with Sesame, Almond & Walnut', 'شوكولا تغطيس تين مع سمسم لوز وجوز', 'oriental', 'kg', 390, 'Sun-dried fig with toasted sesame, almond and walnut, dipped in chocolate.'),
-    P('florentine-pistachio', 'Caramelized Florentine Pistachio', 'فلورنتين بالفستق الحلبي المكرمل', 'oriental', 'kg', 420, 'A dome of caramelised pistachio florentine enrobed in milk chocolate.'),
-    P('slim-almond', 'Slim Chopped Almond', 'شوكولا رفيعة باللوز المقطّع', 'bars', 'pc', 45, 'A slim, elegant bar of milk chocolate with fine chopped almonds.', { featured: true }),
-    P('chopped-nuts', 'Chopped Nuts Bar', 'مكسرات مقطّعة', 'bars', 'pc', 55, 'Our signature parquet-pattern bar filled with roasted chopped nuts.'),
-    P('exotic-chabelon', 'Exotic Chabelon', 'إكزوتيك شابلون', 'bars', 'pc', 25, 'A chocolate disc topped with almonds, hazelnuts, apricot and cranberries.'),
-    P('orange-slices', 'Dark Chocolate-Dipped Orange Slices', 'شرائح برتقال مغموسة بالشوكولا الداكنة', 'dipped', 'kg', 360, 'Candied orange slices half-dipped in intense dark chocolate.'),
-    P('fruit-nuts', 'Chocolate Fruit & Nuts', 'شوكولا تغطيس كروكان فستق', 'dipped', 'kg', 390, 'Squares crowned with cashew, pistachio, cranberry and apricot.'),
-    P('pecan-florentine', 'Pecan & Florentine Pistachio', 'جوز البيكان وفلورنتين بالفستق الحلبي', 'dipped', 'kg', 420, 'Glazed pecans on a pistachio florentine base.'),
-    P('gift-bag', 'Signature Gift Bag Arrangement', 'تنسيق حقيبة الهدايا', 'gifts', 'pc', 950, 'A luxurious designer-bag arrangement filled with an assortment of our finest pralines and wrapped chocolates. Customisable colours and ribbons.', { stock: 5, featured: true }),
-    P('gift-tray', 'Crystal Tray Arrangement', 'تنسيق صينية كريستال', 'gifts', 'pc', 650, 'An acrylic or crystal tray arranged with 1 kg of assorted pralines, perfect for Eid, weddings and new-baby receptions.', { img: 'img/gift-bag-sign.jpg', stock: 5 }),
-    P('box-500', 'Assorted Pralines Box — 500 g', 'علبة برالين مشكلة ٥٠٠ غ', 'gifts', 'pc', 220, 'Our chocolatier\'s selection of signature pralines in a reusable The Touch box.', { img: 'img/banner-coconut.jpg', stock: 20, featured: true })
+    P('salted-caramel', 'Salted Caramel Hazelnut', 'كراميل مملّح بالبندق', 'pralines', 'kg', 185, 'A whole roasted hazelnut wrapped in soft salted caramel and enrobed in milk chocolate, finished with a dusting of cocoa.', { featured: true }),
+    P('truffle-rocher', 'Truffle Rocher Hazelnut', 'ترافل روشيه بالبندق', 'pralines', 'kg', 185, 'Crisp roasted nut shell around a velvet hazelnut truffle heart.', { featured: true }),
+    P('coconut-pistachio', 'Coconut & Pistachio', 'جوز الهند والفستق الحلبي', 'pralines', 'kg', 185, 'Snow-white coconut ganache with a centre of Aleppo pistachio, in fine milk chocolate.', { featured: true }),
+    P('chabelon-hazelnut', 'New Chabelon Hazelnut', 'نيو شابلون بالبندق', 'pralines', 'kg', 185, 'Our signature chabelon praline layered with hazelnut crunch and a whole hazelnut.'),
+    P('macadamia', 'Caramelized Macadamia', 'مكاديميا مكرملة', 'pralines', 'kg', 185, 'Buttery macadamia, slowly caramelised and coated in silky milk chocolate.', { featured: true }),
+    P('almond-quinball', 'Chopped Almond Quinball', 'كوين بول باللوز المقطّع', 'pralines', 'kg', 185, 'A round praline packed with roasted chopped almonds and gianduja.'),
+    P('earth', 'Earth', 'الأرض', 'pralines', 'kg', 185, 'Two textures, one sphere — a crisp wafer disc and a rich cocoa truffle.'),
+    P('monte-carlo', 'New Monte Carlo', 'نيو مونتي كارلو', 'pralines', 'kg', 185, 'Individually wrapped squares of milk chocolate with a crunchy nut praline core.'),
+    P('coffee-bean', 'Chocolate Coffee Bean', 'شوكولا حبة بن قهوة', 'pralines', 'kg', 185, 'A coffee-bean shaped praline with a smooth espresso ganache.'),
+    P('tiramisu', 'Tiramisu', 'تيراميسو', 'pralines', 'kg', 185, 'Mascarpone-style cream and coffee sponge in chocolate, dusted with cocoa.', { featured: true }),
+    P('cotton-candy', 'Cotton Candy', 'غزل البنات', 'pralines', 'kg', 185, 'A pyramid of chocolate filled with light, cloud-soft cotton candy cream.'),
+    P('cream-biscuit', 'Chocolate Cream Biscuit with Nuts', 'شوكولا مربعة كريم بسكوت كسر', 'pralines', 'kg', 185, 'A square of biscuit cream crowned with caramelised chopped nuts.'),
+    P('kunafah', 'Kunafah', 'كنافة', 'oriental', 'kg', 185, 'The beloved Arabic dessert reimagined — crisp kunafah and pistachio cream under a hand-painted chocolate shell.', { featured: true }),
+    P('pistachio-halawa', 'Pistachio Halawa Chocolate', 'شوكولا بالحلاوة والفستق الحلبي', 'oriental', 'kg', 185, 'Silky tahini halawa studded with pistachio in a bark-textured milk chocolate log.'),
+    P('pistachio-orange', 'Pistachio with Orange Blossom', 'فستق حلبي بماء الزهر', 'oriental', 'kg', 185, 'Pistachio paste scented with orange-blossom water in a fine chocolate bar.', { featured: true }),
+    P('snayniyeh', 'Chocolate Round Snayniyeh', 'شوكولا مدورة سنينية', 'oriental', 'kg', 185, 'A round chocolate inspired by the traditional snayniyeh, rich with nuts.'),
+    P('madlouka', 'Chocolate Madlouka', 'شوكولا تغطيس مدلوقة', 'oriental', 'kg', 185, 'Layers of creamy madlouka and nuts, topped with crushed pistachio.'),
+    P('fig-sesame', 'Chocolate Fig with Sesame, Almond & Walnut', 'شوكولا تغطيس تين مع سمسم لوز وجوز', 'oriental', 'kg', 185, 'Sun-dried fig with toasted sesame, almond and walnut, dipped in chocolate.'),
+    P('florentine-pistachio', 'Caramelized Florentine Pistachio', 'فلورنتين بالفستق الحلبي المكرمل', 'oriental', 'kg', 185, 'A dome of caramelised pistachio florentine enrobed in milk chocolate.'),
+    P('slim-almond', 'Slim Chopped Almond', 'شوكولا رفيعة باللوز المقطّع', 'bars', 'kg', 185, 'A slim, elegant bar of milk chocolate with fine chopped almonds.', { featured: true }),
+    P('chopped-nuts', 'Chopped Nuts Bar', 'مكسرات مقطّعة', 'bars', 'kg', 185, 'Our signature parquet-pattern bar filled with roasted chopped nuts.'),
+    P('exotic-chabelon', 'Exotic Chabelon', 'إكزوتيك شابلون', 'bars', 'kg', 185, 'A chocolate disc topped with almonds, hazelnuts, apricot and cranberries.'),
+    P('orange-slices', 'Dark Chocolate-Dipped Orange Slices', 'شرائح برتقال مغموسة بالشوكولا الداكنة', 'dipped', 'kg', 185, 'Candied orange slices half-dipped in intense dark chocolate.'),
+    P('fruit-nuts', 'Chocolate Fruit & Nuts', 'شوكولا تغطيس كروكان فستق', 'dipped', 'kg', 185, 'Squares crowned with cashew, pistachio, cranberry and apricot.'),
+    P('pecan-florentine', 'Pecan & Florentine Pistachio', 'جوز البيكان وفلورنتين بالفستق الحلبي', 'dipped', 'kg', 185, 'Glazed pecans on a pistachio florentine base.'),
+    P('gift-bag', 'Signature Gift Bag Arrangement', 'تنسيق حقيبة الهدايا', 'gifts', 'kg', 185, 'A luxurious designer-bag arrangement filled with an assortment of our finest pralines and wrapped chocolates. Customisable colours and ribbons.', { stock: 5, featured: true }),
+    P('gift-tray', 'Crystal Tray Arrangement', 'تنسيق صينية كريستال', 'gifts', 'kg', 185, 'An acrylic or crystal tray arranged with 1 kg of assorted pralines, perfect for Eid, weddings and new-baby receptions.', { img: 'img/gift-bag-sign.jpg', stock: 5 }),
+    P('box-500', 'Assorted Pralines Box — 500 g', 'علبة برالين مشكلة ٥٠٠ غ', 'gifts', 'kg', 185, 'Our chocolatier\'s selection of signature pralines in a reusable The Touch box.', { img: 'img/banner-coconut.jpg', stock: 20, featured: true })
   ];
 
   const DEFAULT_SETTINGS = {

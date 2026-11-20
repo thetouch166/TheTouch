@@ -90,12 +90,12 @@ with sync_playwright() as p:
     a.evaluate("setStatus(ORDERS.find(o=>o.channel==='web'&&o.status==='new'),'confirmed')"); a.wait_for_timeout(800)
     check('confirming web order deducts stock', abs(a.evaluate("prod('kunafah').stock") - (stock0 - 0.5)) < 1e-6)
 
-    # 3. POS sale: weighed item + piece item, cash with change
+    # 3. POS sale: two weighed items (all products AED 185/kg), cash with change
     a.click('#rail button[data-v=pos]'); a.wait_for_timeout(500)
     a.click('.tile[data-id="salted-caramel"]'); a.click('.quick button[data-q="250"]'); a.click('#wok')
-    a.click('.tile[data-id="slim-almond"]'); a.wait_for_timeout(300)
+    a.click('.tile[data-id="slim-almond"]'); a.click('.quick button[data-q="500"]'); a.click('#wok'); a.wait_for_timeout(300)
     total = a.evaluate("tTotal()")
-    check('POS ticket total', abs(total - (420 * 0.25 + 45)) < 0.01, f'AED {total}')
+    check('POS ticket total', abs(total - (185 * 0.25 + 185 * 0.5)) < 0.01, f'AED {total}')
     a.click('#payBtn'); a.wait_for_timeout(400); a.fill('#tend', '200'); a.click('#pok'); a.wait_for_timeout(900)
     pos = [o for o in orders(a) if o.get('channel') == 'pos']
     check('POS sale saved with change', pos and abs(pos[-1]['payment'].get('change', 0) - (200 - total)) < 0.01)
