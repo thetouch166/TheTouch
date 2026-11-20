@@ -99,15 +99,20 @@ header.top.sc .hbar .logo img{height:38px}
   .c2{width:30vw;left:-8vw;bottom:1vw}.c5{width:27vw;right:-6vw;bottom:4vw}.c3{display:none}}
 .fade{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease),transform 1s var(--ease)}.fade.in{opacity:1;transform:none}
 
-/* brand statement on ivory: words fill from a soft ghost to burgundy as you scroll (JS: "ambient background" → paintStmt) */
-.stmt{color:var(--bur);text-align:center;padding:clamp(56px,7vw,104px) 0 clamp(80px,10vw,136px);position:relative}
-.stmt .rule{display:block;width:1px;height:clamp(56px,7vw,92px);margin:0 auto clamp(36px,4.4vw,56px);background:linear-gradient(var(--gold),rgba(205,151,84,0));transform-origin:top;transform:scaleY(var(--p,1))}
+/* brand statement = the boutique wall: champagne linen, brass lettering with a soft backlight halo.
+   Words fill from a faint ghost to brass as you scroll (JS: "ambient background" → paintStmt) */
+.stmt{--brass:linear-gradient(180deg,#a7773a 0%,#7c5020 52%,#5f3b15 100%);color:#6b4419;text-align:center;padding:clamp(84px,10vw,148px) 0;position:relative;overflow:hidden;isolation:isolate;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px),repeating-linear-gradient(0deg,rgba(110,78,40,.016) 0 1px,transparent 1px 4px),radial-gradient(130% 95% at 50% 40%,#f0e4d0 0%,#e5d4b9 50%,#d6c09e 100%)}
+.stmt:before{content:'';position:absolute;z-index:-1;left:50%;top:50%;width:min(1100px,130vw);height:72%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(255,247,232,.85),rgba(255,247,232,.35) 55%,rgba(255,247,232,0));pointer-events:none}
+.stmt:after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(124,80,32,.35),transparent)}
+.stmt .rule{display:block;width:1px;height:clamp(56px,7vw,92px);margin:0 auto clamp(36px,4.4vw,56px);background:linear-gradient(#8a5a26,rgba(138,90,38,0));transform-origin:top;transform:scaleY(var(--p,1))}
 .st{font-family:var(--serif);font-weight:500;font-size:clamp(28px,4.1vw,56px);line-height:1.26;max-width:20em;margin:0 auto clamp(40px,4.4vw,56px);text-wrap:balance}
-.st.js span{opacity:.17;transition:opacity .7s var(--ease)}
+.st span{background:var(--brass);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.st.js span{opacity:.24;transition:opacity .7s var(--ease)}
 .st.js span.on{opacity:1}
-.stmt .link{color:var(--bur);display:inline-flex;align-items:center;min-height:44px;border-bottom:0;text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:1px;text-underline-offset:7px;transition:color .3s var(--ease)}
-.stmt .link:hover{color:var(--car)}
-@media(max-width:700px){.st{line-height:1.3}}
+.stmt .link{color:#5f3b15;display:inline-flex;align-items:center;min-height:44px;border-bottom:0;text-decoration:underline;text-decoration-color:#a7773a;text-decoration-thickness:1px;text-underline-offset:7px;transition:color .3s var(--ease)}
+.stmt .link:hover{color:var(--bur)}
+@media(max-width:700px){.st{line-height:1.3}.stmt:before{height:80%}}
 
 /* sections */
 section.s{padding:96px 0}
