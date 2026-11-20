@@ -610,12 +610,12 @@ function pageHome(){
 function rail(id,d){const r=document.getElementById(id);r.scrollBy({left:d*r.clientWidth*.8,behavior:'smooth'})}
 
 function pageShop(cat){
-  cat=cat||'all';const c=TT.CATS.find(x=>x.id===cat);
+  cat=cat||'all';const c=TT.CATS.find(x=>x.id===cat);if(cat!=='all'&&!c){location.replace('#/shop/all');return}
   const sort=sessionStorage.getItem('tt_sort')||'feat';
   let list=visible().filter(p=>cat==='all'||p.cat===cat);
   if(sort==='low')list.sort((a,b)=>a.price-b.price);else if(sort==='high')list.sort((a,b)=>b.price-a.price);else if(sort==='az')list.sort((a,b)=>a.name.localeCompare(b.name));else list.sort((a,b)=>(b.featured?1:0)-(a.featured?1:0));
   app.innerHTML=`
-  <div class="phead"><span class="eyebrow">${c?c.ar:'The Touch'}</span><h1 class="h2">${c?c.name:'All Chocolates'}</h1><p>${c&&c.id==='gifts'?'Arranged by hand, finished with our signature ribbon — for every meaningful moment.':'Handcrafted in Abu Dhabi with the finest ingredients. Pralines are sold by weight and packed in our signature box.'}</p></div>
+  <div class="phead"><span class="eyebrow">${c?c.ar:'The Touch'}</span><h1 class="h2">${c?c.name:'All Chocolates'}</h1><p>${({all:'Handcrafted in Abu Dhabi with the finest ingredients — pralines by weight, bars and gifts by the piece, all in our signature box.',pralines:'Filled and enrobed by hand, sold by weight and packed in our signature box — choose 250 g, 500 g or 1 kg.',oriental:'Arabic sweets reimagined in fine chocolate — kunafah, halawa, pistachio and orange blossom, sold by weight.',bars:'Slim bars and chocolate discs for everyday indulgence and thoughtful small gifts.',dipped:'Candied fruits and roasted nuts dipped in fine chocolate, sold by weight.',gifts:'Arranged by hand, finished with our signature ribbon — for every meaningful moment.'})[cat]||''}</p></div>
   <div class="wrap">
     <div class="tabs"><a class="tab ${cat==='all'?'on':''}" href="#/shop/all">All</a>${TT.CATS.map(x=>`<a class="tab ${cat===x.id?'on':''}" href="#/shop/${x.id}">${x.name}</a>`).join('')}</div>
     <div class="toolbar"><span>${list.length} ${list.length===1?'creation':'creations'}</span>
@@ -684,6 +684,7 @@ function renderCart(){if(typeof PRODUCTS!=='undefined'&&PRODUCTS.length)syncCart
      <p style="font-size:11px;color:var(--mute);text-align:center;margin-top:10px">Delivery &amp; gift message at checkout · Prices incl. VAT</p></div>`;
 }
 
+const payName=(k,mode)=>mode==='pickup'&&k==='cod'?'Cash at pick-up':mode==='pickup'&&k==='card_on_delivery'?'Card at pick-up':TT.payLabel(k);
 const PAYDESC={delivery:{cod:'Pay in cash when your order arrives.',card_on_delivery:'Our driver brings a card machine.',link:'We send you a secure card payment link on WhatsApp to confirm.'},
   pickup:{cod:'Pay in cash when you collect at the boutique.',card_on_delivery:'Pay by card when you collect at the boutique.',link:'We send you a secure card payment link on WhatsApp to confirm.'}};
 const dxbNow=()=>{try{return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Dubai'}))}catch(e){return new Date()}};
@@ -721,7 +722,7 @@ function pageCheckout(){syncCart();
       <div class="fld full"><label>Your message (printed on our card)</label><textarea name="giftMsg" maxlength="300"></textarea></div>
       <div class="fld full"><label>Order notes</label><input name="notes" placeholder="Ribbon colour, allergies, delivery instructions…"></div></div>
       <h3><i>4</i>Payment</h3>
-      <div class="radio" id="pay">${(S.onlinePayments||[]).map((k,i)=>`<label class="${i?'':'on'}"><input type="radio" name="pay" value="${k}" ${i?'':'checked'}><div><b style="font-weight:500">${TT.payLabel(k)}</b><small data-k="${k}">${PAYDESC.delivery[k]||''}</small></div></label>`).join('')}</div>
+      <div class="radio" id="pay">${(S.onlinePayments||[]).map((k,i)=>`<label class="${i?'':'on'}"><input type="radio" name="pay" value="${k}" ${i?'':'checked'}><div><b style="font-weight:500" data-l="${k}">${TT.payLabel(k)}</b><small data-k="${k}">${PAYDESC.delivery[k]||''}</small></div></label>`).join('')}</div>
       <button class="btn btn-dark btn-block" style="margin-top:28px;height:58px" id="place">Place order</button>
       <p style="font-size:11.5px;color:var(--mute);text-align:center;margin-top:12px">Our concierge will confirm your order on WhatsApp.</p>
     </form>
@@ -734,7 +735,7 @@ function pageCheckout(){syncCart();
     $('#sumTot').innerHTML=`<div class="r"><span>Subtotal</span><span>${money(x.sub)}</span></div><div class="r"><span>${mode==='pickup'?'Boutique pick-up':'Delivery'}</span><span>${x.del?money(x.del):'Complimentary'}</span></div><div class="r t"><span>Total</span><span>${money(x.t)}</span></div><div class="r" style="color:var(--mute);font-size:11.5px"><span>Includes VAT (${S.vatRate}%)</span><span>${money(x.vat)}</span></div>`};
   draw();
   f.emirate.onchange=draw;
-  $('#mode').onclick=e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;$('#mode').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#addr').classList.toggle('hidden',mode==='pickup');$('#pnote').classList.toggle('hidden',mode!=='pickup');$('#pay').querySelectorAll('small[data-k]').forEach(x=>x.textContent=PAYDESC[mode][x.dataset.k]||'');$('#dl').textContent=mode==='pickup'?'Pick-up date *':'Delivery date *';draw()};
+  $('#mode').onclick=e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;$('#mode').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#addr').classList.toggle('hidden',mode==='pickup');$('#pnote').classList.toggle('hidden',mode!=='pickup');$('#pay').querySelectorAll('small[data-k]').forEach(x=>x.textContent=PAYDESC[mode][x.dataset.k]||'');$('#pay').querySelectorAll('b[data-l]').forEach(x=>x.textContent=payName(x.dataset.l,mode));$('#dl').textContent=mode==='pickup'?'Pick-up date *':'Delivery date *';draw()};
   const slotAvail=()=>{const dn=dxbNow();const today=f.date.value===iso(dn);const h=dn.getHours();
     $('#slots').querySelectorAll('button').forEach(b=>{const end=parseInt(b.dataset.s.split('–')[1]);const off=today&&end-1<=h;b.disabled=off;if(off&&b.classList.contains('on')){b.classList.remove('on');slot=''}})};
   slotAvail();f.date.addEventListener('change',slotAvail);
@@ -761,14 +762,14 @@ function pageCheckout(){syncCart();
   };
 }
 function waOrderText(o){
-  return `✦ THE TOUCH — New order ${o.no}\n\n${o.items.map(i=>`• ${i.name}${i.unit==='kg'?' ('+U.qtyLabel(i)+')':''} × ${i.qty} — ${money(U.lineTotal(i))}`).join('\n')}\n\nSubtotal: ${money(o.subtotal)}\nDelivery: ${o.delivery?money(o.delivery):'Free'}\nTOTAL: ${money(o.total)}\nPayment: ${TT.payLabel(o.payment.method)}\n\nName: ${o.customer.name}\nMobile: ${o.customer.phone}\n${o.fulfil==='pickup'?'Boutique pick-up':'Delivery: '+[o.address,o.area,o.emirate].filter(Boolean).join(', ')}\nDate: ${o.date} ${o.slot||''}${o.gift.msg?'\nGift message: '+o.gift.msg+(o.gift.to?' (to '+o.gift.to+')':''):''}${o.notes?'\nNotes: '+o.notes:''}`}
+  return `✦ THE TOUCH — New order ${o.no}\n\n${o.items.map(i=>`• ${i.name}${i.unit==='kg'?' ('+U.qtyLabel(i)+')':''} × ${i.qty} — ${money(U.lineTotal(i))}`).join('\n')}\n\nSubtotal: ${money(o.subtotal)}\nDelivery: ${o.delivery?money(o.delivery):'Free'}\nTOTAL: ${money(o.total)}\nPayment: ${payName(o.payment.method,o.fulfil)}\n\nName: ${o.customer.name}\nMobile: ${o.customer.phone}\n${o.fulfil==='pickup'?'Boutique pick-up':'Delivery: '+[o.address,o.area,o.emirate].filter(Boolean).join(', ')}\nDate: ${o.date} ${o.slot||''}${o.gift.msg?'\nGift message: '+o.gift.msg+(o.gift.to?' (to '+o.gift.to+')':''):''}${o.notes?'\nNotes: '+o.notes:''}`}
 function fmtDay(d){if(!d)return'';const x=new Date(d+'T12:00:00');return isNaN(x)?d:x.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'})}
 function pageOrder(no){
   const o=JSON.parse(sessionStorage.getItem('tt_last')||'null');
   const wa=o&&o.no===no?waLink(waOrderText(o)):waLink('Hello, about my order '+no);
   app.innerHTML=`<div class="ok"><img class="mono" src="img/monogram-gold.png" alt=""><span class="eyebrow">Thank you${o?', '+U.esc(o.customer.name.split(' ')[0]):''}</span>
    <h1 class="h2" style="margin-top:14px">Your order has been received</h1><div class="no">ORDER ${U.esc(no)}</div>
-   ${o?`<div class="meta"><div><span>Total</span><b style="font-weight:600">${money(o.total)}</b></div><div><span>Payment</span>${TT.payLabel(o.payment.method)}</div><div><span>${o.fulfil==='pickup'?'Boutique pick-up':'Delivery'}</span>${o.fulfil==='pickup'?'':U.esc([o.area,o.emirate].filter(Boolean).join(', '))}</div><div><span>Date</span>${U.esc(fmtDay(o.date))}</div>${o.slot?`<div><span>Time</span>${U.esc(o.slot)}</div>`:''}</div>`:''}
+   ${o?`<div class="meta"><div><span>Total</span><b style="font-weight:600">${money(o.total)}</b></div><div><span>Payment</span>${payName(o.payment.method,o.fulfil)}</div><div><span>${o.fulfil==='pickup'?'Boutique pick-up':'Delivery'}</span>${o.fulfil==='pickup'?'':U.esc([o.area,o.emirate].filter(Boolean).join(', '))}</div><div><span>Date</span>${U.esc(fmtDay(o.date))}</div>${o.slot?`<div><span>Time</span>${U.esc(o.slot)}</div>`:''}</div>`:''}
    <p style="margin:20px 0 30px">Our concierge will confirm your order shortly on WhatsApp. For a faster confirmation, send us your order now:</p>
    <a class="btn btn-gold" href="${wa}" target="_blank" rel="noopener" id="waBtn">Send order on WhatsApp</a>
    <div style="margin-top:22px"><a class="link" href="#/">Continue shopping</a></div></div>`;

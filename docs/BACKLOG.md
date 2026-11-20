@@ -6,12 +6,11 @@ roughly in priority order. Each is small and independent — good one-at-a-time 
 ## Before / right after launch
 1. **Content**: real prices, stock, TRN, product names/Arabic spelling, photos for `gift-tray` and `box-500`
    (they reuse other images in `public/js/store.js` SEED). Prefer editing in Admin → Products once live.
-2. **Shop header copy** (index.html `pageShop`): "Pralines are sold by weight…" shows on every category,
-   including Bars and Gifts — make it per category.
+2. ~~**Shop header copy**~~ — DONE 20 Nov (per-category intro).
 3. **Payment label for pick-up**: `TT.payLabel('cod')` says "Cash on delivery" even for pick-up orders
    (store.js `payLabel`, used in checkout + admin). Show "Pay at pick-up" when `fulfil==='pickup'`.
-   *Admin side DONE 20 Nov (`payName()` in admin.html: receipts, invoices, orders). Website checkout still to do.*
-4. **Unknown category URL** (`#/shop/xyz`) shows "All Chocolates" with 0 items → redirect to `#/shop/all`.
+   *DONE 20 Nov: admin `payName()` + website checkout/confirmation/WhatsApp text say "Cash/Card at pick-up".*
+4. ~~**Unknown category URL**~~ — DONE 20 Nov (redirects to `#/shop/all`).
 5. ~~**POS split payment**~~ — DONE 20 Nov: shows the change to give and saves it as a cash sale.
 6. **Order list scroll**: every route change scrolls to top, so Back doesn't restore the shop list position
    (index.html `route()`).
