@@ -11,10 +11,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bur:#40050e;--bur2:#5a0a17;--gold:#cd9754;--car:#9c6036;--cocoa:#39261f;--ink:#221f2d;--slate:#3b3d50;--mute:#7a6f7b;--cream:#f8f3ec;--cream2:#f1e8dc;--line:#e9e0d4;--w:#fff;
---serif:'Cormorant Garamond','Didot','Bodoni 72',Georgia,serif;--sans:'Montserrat','Helvetica Neue',Arial,sans-serif;--ease:cubic-bezier(.2,.7,.2,1)}
+--serif:'Cormorant Garamond','Didot','Bodoni 72',Georgia,serif;--sans:'Montserrat','Helvetica Neue',Arial,sans-serif;--ease:cubic-bezier(.2,.7,.2,1);--ivory:#fdfaf6}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{font-family:var(--sans);color:var(--ink);background:var(--w);font-size:14px;line-height:1.6;font-weight:400;-webkit-font-smoothing:antialiased}
+body{font-family:var(--sans);color:var(--ink);background:var(--ivory);font-size:14px;line-height:1.6;font-weight:400;-webkit-font-smoothing:antialiased}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
@@ -35,7 +35,7 @@ input,select,textarea{font:inherit;color:inherit}
 /* announcement + header */
 .ann{background:var(--bur);color:#ead7bd;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;text-align:center;padding:10px 16px}
 @media(max-width:700px){.ann{font-size:9px;letter-spacing:.08em;padding:8px 12px;line-height:1.5}.wa{width:50px;height:50px;right:14px;bottom:14px}}
-header.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line);transition:box-shadow .3s}
+header.top{position:sticky;top:0;z-index:50;background:rgba(253,250,246,.94);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line);transition:box-shadow .3s}
 header.top.sc{box-shadow:0 6px 30px rgba(64,5,14,.06)}
 .hbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:84px}
 .hbar .logo img{height:46px;width:auto;transition:height .3s}
@@ -63,28 +63,51 @@ header.top.sc .hbar .logo img{height:38px}
 .mlinks a{display:flex;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.2em;text-transform:uppercase}
 .mlinks a span{font-family:var(--serif);letter-spacing:0;text-transform:none;color:var(--mute);font-size:16px}
 
-/* hero */
-.hero{display:grid;grid-template-columns:1fr 1.15fr;min-height:min(80vh,760px);background:var(--bur)}
-.hero .txt{color:#f3e6d4;display:flex;flex-direction:column;justify-content:center;padding:70px clamp(28px,6vw,96px);position:relative;overflow:hidden}
-.hero .txt .mono{width:84px;margin-bottom:34px;opacity:.95}
-.hero .txt .eyebrow{color:var(--gold);margin-bottom:22px}
-.hero .txt .h1{color:#fff;margin-bottom:22px}
-.hero .txt .h1 em{color:var(--gold);font-style:italic}
-.hero .txt p{max-width:420px;color:#d9c5b0;font-size:14.5px;margin-bottom:38px;font-weight:300}
-.hero .txt .row{display:flex;gap:14px;flex-wrap:wrap}
-.hero .img{background:#f3e5d3 url(img/hero-slim.jpg) center/cover no-repeat;position:relative}
-.hero .img:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(64,5,14,.18),transparent 30%)}
-.hero .txt:before{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;border:1px solid rgba(205,151,84,.18);border-radius:50%}
-.hero .txt:after{content:'';position:absolute;right:-80px;bottom:-80px;width:300px;height:300px;border:1px solid rgba(205,151,84,.12);border-radius:50%}
-@media(max-width:900px){.hero{grid-template-columns:1fr;min-height:0}.hero .img{height:58vw;min-height:280px;order:-1}.hero .txt{padding:46px 24px 54px}.hero .txt .mono{display:none}}
+/* hero — the collection on display: real chocolates float on ivory under boutique light.
+   JS ("ambient background") moves each .choc at its own depth (data-s) and lets the copy drift back on scroll. */
+.hero{position:relative;min-height:min(calc(100svh - 121px),860px);display:grid;place-items:center;overflow:hidden;padding:72px 24px 84px}
+.hero:before{content:'';position:absolute;left:50%;top:50%;width:min(980px,130vw);aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(205,151,84,.17),rgba(205,151,84,.05) 55%,rgba(205,151,84,0));z-index:-1;pointer-events:none}
+.hero .copy{position:relative;z-index:2;text-align:center;max-width:860px;display:flex;flex-direction:column;align-items:center;will-change:transform,opacity}
+.hero .mono{width:62px;margin-bottom:26px}
+.hero .eyebrow{margin-bottom:22px}
+.hero .h1{font-size:clamp(44px,8.2vw,124px);line-height:.98;color:var(--bur);margin-bottom:28px}
+.hero .h1 em{display:block;font-style:italic;font-weight:400;color:var(--car)}
+.hero p{max-width:440px;color:#5f514c;font-size:15px;font-weight:300;line-height:1.75;margin-bottom:36px;text-wrap:balance}
+.hero .row{display:flex;gap:8px 34px;flex-wrap:wrap;align-items:center;justify-content:center}
+.hero .tlink{display:inline-flex;align-items:center;min-height:44px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:500;color:var(--bur);text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:1px;text-underline-offset:7px;transition:color .3s var(--ease)}
+.hero .tlink:hover{color:var(--car)}
+.hero .copy>.fade:nth-child(2){transition-delay:.12s}.hero .copy>.fade:nth-child(3){transition-delay:.24s}
+.hero .copy>.fade:nth-child(4){transition-delay:.4s}.hero .copy>.fade:nth-child(5){transition-delay:.52s}
+.choc{position:absolute;z-index:1;pointer-events:none;mix-blend-mode:multiply;will-change:transform}
+.choc img{width:100%;aspect-ratio:1;-webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);animation:chocIn 1.9s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--d,0s)}
+/* idle float only on mouse devices: on phones it cost frames while scrolling and drains battery */
+@media(hover:hover) and (pointer:fine){.choc img{animation:chocIn 1.9s cubic-bezier(.16,1,.3,1) both,chocFloat 7s ease-in-out infinite alternate;animation-delay:var(--d,0s),calc(var(--d,0s) + 1.9s)}}
+@keyframes chocIn{from{opacity:0;transform:translateY(46px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes chocFloat{to{transform:translateY(-12px) rotate(2.5deg)}}
+.c1{width:clamp(150px,21vw,330px);left:2%;top:5%;--d:.1s}
+.c2{width:clamp(120px,15vw,240px);left:10%;bottom:5%;--d:.35s}.c2 img{animation-duration:1.9s,8.5s}
+.c3{width:clamp(80px,8.5vw,140px);left:4%;top:49%;--d:.6s}.c3 img{animation-duration:1.9s,6s}
+.c4{width:clamp(140px,19vw,300px);right:3%;top:8%;--d:.22s}.c4 img{animation-duration:1.9s,9s}
+.c5{width:clamp(110px,14vw,230px);right:10%;bottom:7%;--d:.48s}.c5 img{animation-duration:1.9s,7.5s}
+.c6{width:clamp(70px,7.5vw,125px);right:26%;top:2%;--d:.7s}.c6 img{animation-duration:1.9s,6.5s}
+@media(max-width:700px){
+  .hero{min-height:0;padding:44vw 20px 34vw}
+  .hero .mono{width:50px;margin-bottom:20px}.hero .eyebrow{margin-bottom:16px}.hero .h1{margin-bottom:20px}
+  .hero p{font-size:14.5px;margin-bottom:28px;max-width:34ch}
+  .hero .row{flex-direction:column;gap:4px}
+  .c1{width:42vw;left:-5vw;top:1vw}.c4{width:35vw;right:-4vw;top:5vw}.c6{width:19vw;left:41vw;right:auto;top:-1vw}
+  .c2{width:30vw;left:-8vw;bottom:1vw}.c5{width:27vw;right:-6vw;bottom:4vw}.c3{display:none}}
 .fade{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease),transform 1s var(--ease)}.fade.in{opacity:1;transform:none}
 
-/* values marquee */
-.marq{background:var(--cream);border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;padding:16px 0}
-.marq div{display:inline-block;animation:mq 40s linear infinite}
-.marq span{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--car);margin:0 26px}
-.marq b{color:var(--gold);font-weight:400}
-@keyframes mq{to{transform:translateX(-50%)}}
+/* brand statement on ivory: words fill from a soft ghost to burgundy as you scroll (JS: "ambient background" → paintStmt) */
+.stmt{color:var(--bur);text-align:center;padding:clamp(56px,7vw,104px) 0 clamp(80px,10vw,136px);position:relative}
+.stmt .rule{display:block;width:1px;height:clamp(56px,7vw,92px);margin:0 auto clamp(36px,4.4vw,56px);background:linear-gradient(var(--gold),rgba(205,151,84,0));transform-origin:top;transform:scaleY(var(--p,1))}
+.st{font-family:var(--serif);font-weight:500;font-size:clamp(28px,4.1vw,56px);line-height:1.26;max-width:20em;margin:0 auto clamp(40px,4.4vw,56px);text-wrap:balance}
+.st.js span{opacity:.17;transition:opacity .7s var(--ease)}
+.st.js span.on{opacity:1}
+.stmt .link{color:var(--bur);display:inline-flex;align-items:center;min-height:44px;border-bottom:0;text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:1px;text-underline-offset:7px;transition:color .3s var(--ease)}
+.stmt .link:hover{color:var(--car)}
+@media(max-width:700px){.st{line-height:1.3}}
 
 /* sections */
 section.s{padding:96px 0}
@@ -105,12 +128,13 @@ section.s{padding:96px 0}
 @media(max-width:1100px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr);gap:28px 12px}}
 .card{display:flex;flex-direction:column;position:relative}
-.card .ph{position:relative;aspect-ratio:1;background:var(--cream);overflow:hidden;margin-bottom:16px}
+.card .pw{position:relative;margin-bottom:16px}
+.card .ph{position:relative;display:block;aspect-ratio:1;background:var(--cream);overflow:hidden}
 .card .ph img{width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;transition:transform 1.1s var(--ease)}
 .card:hover .ph img{transform:scale(1.06)}
 .card .tag{position:absolute;top:12px;left:12px;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;background:#fff;padding:5px 9px;color:var(--bur)}
 .card .quick{position:absolute;left:12px;right:12px;bottom:12px;height:44px;background:var(--bur);color:#fff;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;opacity:0;transform:translateY(10px);transition:all .4s var(--ease)}
-.card:hover .quick{opacity:1;transform:none}
+.card:hover .quick,.card .quick:focus-visible{opacity:1;transform:none}
 @media(hover:none){.card .quick{display:none}}
 .card .n{font-family:var(--serif);font-size:19px;line-height:1.25;margin-bottom:2px}
 .card .a{font-size:12px;color:var(--mute);margin-bottom:6px;direction:rtl;text-align:left}
@@ -136,13 +160,18 @@ section.s{padding:96px 0}
 /* events band */
 .events{background:var(--bur);color:#f3e6d4;padding:100px 0;position:relative;overflow:hidden}
 .events .h2{color:#fff}.events .eyebrow{color:var(--gold)}
-.evgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(205,151,84,.22);margin-top:56px;border:1px solid rgba(205,151,84,.22)}
-.ev{background:var(--bur);padding:38px 30px}
-.ev .k{font-family:var(--serif);font-size:42px;color:var(--gold);font-style:italic;line-height:1;margin-bottom:18px}
-.ev h4{font-family:var(--serif);font-size:23px;font-weight:500;color:#fff;margin-bottom:10px}
-.ev p{color:#cdb8a3;font-size:13px;font-weight:300}
-@media(max-width:900px){.evgrid{grid-template-columns:1fr 1fr}.ev{padding:28px 20px}}
-@media(max-width:520px){.evgrid{grid-template-columns:1fr}}
+/* occasions: a "carte" — serif names, one line each, fine gold rules instead of boxes */
+.evgrid{display:grid;grid-template-columns:repeat(4,1fr);margin-top:60px}
+.ev{padding:6px 28px;text-align:center}
+.ev+.ev{border-left:1px solid rgba(205,151,84,.3)}
+.ev h4{font-family:var(--serif);font-size:25px;font-weight:500;color:#fff;line-height:1.2;margin-bottom:10px}
+.ev p{color:#cdb8a3;font-size:13px;font-weight:300;max-width:30ch;margin:0 auto}
+.ev:nth-child(2){transition-delay:.1s}.ev:nth-child(3){transition-delay:.2s}.ev:nth-child(4){transition-delay:.3s}
+@media(max-width:900px){.evgrid{grid-template-columns:1fr 1fr;margin-top:44px;border-bottom:1px solid rgba(205,151,84,.3)}
+  .ev,.ev+.ev{border-left:0;border-top:1px solid rgba(205,151,84,.3);padding:28px 22px}
+  .ev:nth-child(even){border-left:1px solid rgba(205,151,84,.3)}}
+@media(max-width:520px){.events{padding:76px 0}.evgrid{grid-template-columns:1fr;margin-top:36px}
+  .ev,.ev:nth-child(even){border-left:0;padding:24px 8px}.ev h4{font-size:24px;margin-bottom:6px}}
 
 .pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center}
 .pillar svg{width:38px;height:38px;stroke:var(--gold);fill:none;stroke-width:1.1;margin:0 auto 18px}
@@ -327,7 +356,7 @@ body.sbar-on .toast{bottom:96px}
   .fld input,.fld select,.fld textarea,.toolbar select,.news input{font-size:16px}
   .search .bar{padding:14px 16px;gap:10px}.search input{font-size:24px}.search .res{padding:22px 16px}
   .cats,.rail{scroll-padding-inline:24px}
-  .hero .txt .row .btn{flex:1 1 100%}
+  .hero .eyebrow{font-size:10px;letter-spacing:.22em}
   .fgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 20px}
   .toolbar{gap:12px}
   .ci .q{height:40px}.ci .q button{width:40px}
@@ -338,10 +367,17 @@ body.sbar-on .toast{bottom:96px}
 }
 @media(max-width:900px){.cats,.rail{scroll-padding-inline:24px}}
 @media(min-width:701px) and (max-width:900px){.cats{grid-template-columns:repeat(5,38%)}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.fade{opacity:1;transform:none}html{scroll-behavior:auto}}
+/* ambient background: soft boutique light that glides with scroll (JS: "ambient background") */
+.amb{position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;overflow:hidden;contain:strict}
+.amb i{position:absolute;border-radius:50%;will-change:transform}
+.amb .g1{width:76vmax;height:76vmax;left:44%;top:-34%;background:radial-gradient(closest-side,rgba(205,151,84,.17),rgba(205,151,84,.07) 48%,rgba(205,151,84,0))}
+.amb .g2{width:66vmax;height:66vmax;left:-30%;top:36%;background:radial-gradient(closest-side,rgba(156,96,54,.11),rgba(156,96,54,.04) 50%,rgba(156,96,54,0))}
+.amb .g3{width:52vmax;height:52vmax;left:34%;top:68%;background:radial-gradient(closest-side,rgba(110,18,32,.06),rgba(110,18,32,0))}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.fade{opacity:1;transform:none}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
+<div class="amb" id="amb" aria-hidden="true"><i class="g1"></i><i class="g2"></i><i class="g3"></i></div>
 <div class="ann" id="ann"></div>
 <header class="top" id="top">
   <div class="wrap hbar">
@@ -427,7 +463,8 @@ body.sbar-on .toast{bottom:96px}
 'use strict';
 const {DB,U}=TT; const $=s=>document.querySelector(s); const app=$('#app');
 let S, PRODUCTS=[];
-const VALUES=['Serenity','Caramel','Depth','Bliss','Purity','Intensity','Mystery','Passion'];
+// Home brand statement (edit the words here). Each word lights up as the visitor scrolls past.
+const STATEMENT='Single-origin cocoa, tempered by hand in small batches, then boxed and ribboned to be given. Every piece is made for a moment worth remembering.';
 
 /* ---------- Cart (kept on this device) ---------- */
 const Cart={
@@ -465,8 +502,8 @@ const icon={
 function card(p){
   const out=(p.stock!=null&&p.stock<=0);
   return `<div class="card ${out?'out':''}">
-    <a href="#/p/${p.id}" class="ph"><img loading="lazy" src="${U.esc(p.img)}" alt="${U.esc(p.name)}">${p.featured?'<span class="tag">Signature</span>':''}${out?'<span class="tag">Sold out</span>':''}</a>
-    ${out?'':`<button class="quick" onclick="quickAdd('${p.id}')">Add to bag</button>`}
+    <div class="pw"><a href="#/p/${p.id}" class="ph"><img loading="lazy" src="${U.esc(p.img)}" alt="${U.esc(p.name)}">${p.featured?'<span class="tag">Signature</span>':''}${out?'<span class="tag">Sold out</span>':''}</a>
+    ${out?'':`<button class="quick" onclick="quickAdd('${p.id}')">Add to bag</button>`}</div>
     <a href="#/p/${p.id}"><div class="n">${U.esc(p.name)}</div><div class="a">${U.esc(p.ar||'')}</div><div class="pr">${priceLabel(p)}</div></a>
   </div>`}
 function quickAdd(id){const p=byId(id);Cart.add(p,1,p.unit==='kg'?250:0);toast(`<b>${U.esc(p.name)}</b>&nbsp;added to your bag`);bump()}
@@ -476,19 +513,28 @@ function bump(){const b=$('#cartCount');b.animate([{transform:'scale(1)'},{trans
 function pageHome(){
   const feat=visible().filter(p=>p.featured);const orient=visible().filter(p=>p.cat==='oriental');
   const catImg={pralines:'img/salted-caramel.jpg',oriental:'img/kunafah.jpg',bars:'img/slim-almond.jpg',dipped:'img/orange-slices.jpg',gifts:'img/gift-bag.jpg'};
-  const vals=VALUES.map(v=>`<span>${v}</span><b>✦</b>`).join('');
+  const stWords=STATEMENT.split(' ').map(w=>`<span>${U.esc(w)}</span>`).join(' ');
   app.innerHTML=`
   <section class="hero">
-    <div class="txt">
+    <div class="choc c1" data-s=".34" aria-hidden="true"><img src="img/salted-caramel.jpg" alt=""></div>
+    <div class="choc c2" data-s=".06" aria-hidden="true"><img src="img/kunafah.jpg" alt=""></div>
+    <div class="choc c3" data-s=".09" aria-hidden="true"><img src="img/orange-slices.jpg" alt=""></div>
+    <div class="choc c4" data-s=".27" aria-hidden="true"><img src="img/pecan-florentine.jpg" alt=""></div>
+    <div class="choc c5" data-s=".05" aria-hidden="true"><img src="img/truffle-rocher.jpg" alt=""></div>
+    <div class="choc c6" data-s=".4" aria-hidden="true"><img src="img/cotton-candy.jpg" alt=""></div>
+    <div class="copy">
       <img class="mono fade" src="img/monogram-gold.png" alt="">
       <div class="eyebrow fade">Abu Dhabi · Handcrafted Chocolates</div>
-      <h1 class="h1 fade">Where Luxury<br>Finds Its <em>Flavor</em></h1>
+      <h1 class="h1 fade">Where Luxury <em>Finds Its Flavor</em></h1>
       <p class="fade">Premium pralines, oriental creations and bespoke arrangements — crafted to say what words sometimes can't.</p>
-      <div class="row fade"><a class="btn btn-gold" href="#/shop/all">Discover the collection</a><a class="btn btn-ghost" href="#/shop/gifts">Gifting</a></div>
+      <div class="row fade"><a class="btn btn-dark" href="#/shop/all">Discover the collection</a><a class="tlink" href="#/shop/gifts">Explore gifting</a></div>
     </div>
-    <div class="img" role="img" aria-label="The Touch slim chopped almond chocolate"></div>
   </section>
-  <div class="marq"><div>${vals}${vals}${vals}${vals}</div></div>
+  <section class="stmt"><div class="wrap">
+    <span class="rule" aria-hidden="true"></span>
+    <p class="st">${stWords}</p>
+    <a class="link" href="#/story">Discover our story</a>
+  </div></section>
 
   <section class="s"><div class="wrap">
     <div class="shead fade"><span class="eyebrow">The Collections</span><h2 class="h2">Crafted for every <span class="it">meaningful</span> moment</h2></div>
@@ -518,11 +564,11 @@ function pageHome(){
   <section class="events"><div class="wrap">
     <div class="shead fade" style="margin-bottom:0"><span class="eyebrow">Events &amp; Bespoke Arrangements</span><h2 class="h2">Unforgettable chocolate<br><span class="it">experiences</span></h2>
     <p style="color:#cdb8a3">From grand weddings to corporate galas, our team designs displays, favours and gifts tailored to your celebration.</p></div>
-    <div class="evgrid fade">
-      <div class="ev"><div class="k">i.</div><h4>VIP Weddings</h4><p>Elegant multi-tiered chocolate displays and tailored favour boxes for grand celebrations.</p></div>
-      <div class="ev"><div class="k">ii.</div><h4>Corporate Galas</h4><p>Custom-branded corporate gifts and luxury chocolate dessert stations.</p></div>
-      <div class="ev"><div class="k">iii.</div><h4>Family Celebrations</h4><p>Arrangements for baby receptions, Eid, anniversaries and private gatherings.</p></div>
-      <div class="ev"><div class="k">iv.</div><h4>Personalised</h4><p>Custom colour themes, luxury acrylic and crystal trays, signature ribbons.</p></div>
+    <div class="evgrid">
+      <div class="ev fade"><h4>VIP Weddings</h4><p>Elegant multi-tiered chocolate displays and tailored favour boxes for grand celebrations.</p></div>
+      <div class="ev fade"><h4>Corporate Galas</h4><p>Custom-branded corporate gifts and luxury chocolate dessert stations.</p></div>
+      <div class="ev fade"><h4>Family Celebrations</h4><p>Arrangements for baby receptions, Eid, anniversaries and private gatherings.</p></div>
+      <div class="ev fade"><h4>Personalised</h4><p>Custom colour themes, luxury acrylic and crystal trays, signature ribbons.</p></div>
     </div>
     <div style="text-align:center;margin-top:50px"><a class="btn btn-gold" href="#/events">Plan your event</a></div>
   </div></section>
@@ -780,6 +826,47 @@ $('#q').addEventListener('input',doSearch);$('#qres').addEventListener('click',e
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawers();closeSearch()}});
 addEventListener('scroll',()=>$('#top').classList.toggle('sc',scrollY>20),{passive:true});
 addEventListener('hashchange',route);
+
+/* ambient background: three soft pools of boutique light glide as you scroll.
+   Native scrolling is untouched (no scroll-jacking); each frame eases toward the scroll position, then stops.
+   Reduced motion → static light. */
+(function(){
+  const amb=$('#amb');if(!amb)return;
+  const g=amb.querySelectorAll('i'),Sn=Math.sin,Cs=Math.cos;
+  let W=innerWidth,H=innerHeight,f=0,tf=0,raf=0,last=0;
+  let hero=null,hh=0,hc=[],hcp=null; // home hero: floating chocolates (depth = data-s) + copy that drifts back
+  function bindHero(){hero=document.querySelector('.hero');hc=hero?[...hero.querySelectorAll('.choc')].map(e=>[e,+e.dataset.s||.2]):[];hcp=hero&&hero.querySelector('.copy');hh=hero?hero.offsetHeight:0}
+  function target(){tf=scrollY/H}
+  function paintHero(){
+    if(!hero||!hero.isConnected)bindHero();if(!hero)return;
+    const y=Math.min(Math.max(0,f*H),hh*1.3);
+    hc.forEach(([e,s])=>{e.style.transform=`translate3d(0,${(-y*s).toFixed(1)}px,0) rotate(${(y*s*.02).toFixed(2)}deg)`});
+    if(hcp){hcp.style.transform=`translate3d(0,${(y*.08).toFixed(1)}px,0)`;hcp.style.opacity=Math.max(0,1-y/(hh*.9)).toFixed(3)}
+  }
+  let st=null,sw=[],sr=null,lit=-1; // home brand statement: words light up in reading order, gold rule draws down
+  function bindStmt(){st=document.querySelector('.st');sw=st?[...st.querySelectorAll('span')]:[];sr=document.querySelector('.stmt .rule');lit=-1;if(st)st.classList.add('js')}
+  function paintStmt(){
+    if(!st||!st.isConnected)bindStmt();if(!st)return;
+    // 0 when the sentence enters at 90% of the screen height → 1 when its centre reaches 55% (fully lit by mid-screen)
+    const r=st.getBoundingClientRect(),vh=innerHeight,p=Math.min(1,Math.max(0,(vh*.9-r.top)/(vh*.35+r.height/2)));
+    const n=Math.round(p*sw.length);if(n!==lit){sw.forEach((w,i)=>w.classList.toggle('on',i<n));lit=n}
+    if(sr)sr.style.setProperty('--p',Math.min(1,p*2.2).toFixed(3));
+  }
+  function paint(){
+    paintStmt();paintHero(); // statement reads layout first, then all style writes (avoids a forced style recalc every frame)
+    g[0].style.transform=`translate3d(${(-18*Sn(f*.55)).toFixed(2)}vw,${(22*Sn(f*.4)).toFixed(2)}vh,0) scale(${(1+.08*Sn(f*.6)).toFixed(3)})`;
+    g[1].style.transform=`translate3d(${(16*Sn(f*.45+1)).toFixed(2)}vw,${(-20*Sn(f*.35)).toFixed(2)}vh,0)`;
+    g[2].style.transform=`translate3d(${(12*Sn(f*.5)).toFixed(2)}vw,${(-16*Sn(f*.5+2)).toFixed(2)}vh,0) scale(${(1+.1*Cs(f*.5)).toFixed(3)})`;
+  }
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return; // everything stays at rest and fully visible; no scroll-linked motion
+  function tick(t){const dt=last?Math.min(50,t-last):16.7;last=t;const k=1-Math.pow(.92,dt/16.7);
+    f+=(tf-f)*k;const done=Math.abs(tf-f)<5e-4;if(done){f=tf;last=0}
+    paint();raf=done?0:requestAnimationFrame(tick)}
+  function kick(){target();if(!raf)raf=requestAnimationFrame(tick)}
+  addEventListener('scroll',kick,{passive:true});
+  addEventListener('resize',()=>{if(innerWidth!==W){W=innerWidth;H=innerHeight;hero=null}kick()}); // ignore phone toolbar height changes
+  target();f=tf;paint();
+})();
 
 (async function(){
   await TT.boot();S=TT.settings;PRODUCTS=TT.products;
