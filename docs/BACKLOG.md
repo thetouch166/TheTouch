@@ -10,14 +10,14 @@ roughly in priority order. Each is small and independent — good one-at-a-time 
    including Bars and Gifts — make it per category.
 3. **Payment label for pick-up**: `TT.payLabel('cod')` says "Cash on delivery" even for pick-up orders
    (store.js `payLabel`, used in checkout + admin). Show "Pay at pick-up" when `fulfil==='pickup'`.
+   *Admin side DONE 20 Nov (`payName()` in admin.html: receipts, invoices, orders). Website checkout still to do.*
 4. **Unknown category URL** (`#/shop/xyz`) shows "All Chocolates" with 0 items → redirect to `#/shop/all`.
-5. **POS split payment**: a cash part bigger than the total is silently clipped (admin.html `payModal`) →
-   show change or switch to Cash.
+5. ~~**POS split payment**~~ — DONE 20 Nov: shows the change to give and saves it as a cash sale.
 6. **Order list scroll**: every route change scrolls to top, so Back doesn't restore the shop list position
    (index.html `route()`).
 7. **Newsletter form** only shows a thank-you; store emails in a `subscribers` collection (+ Firestore rule
    `allow create: if true`).
-8. **Board on 820px tablets** scrolls sideways — consider 2 columns at that width (admin.html `.board`).
+8. ~~**Board on 820px tablets**~~ — DONE 20 Nov: 2×2 board from 761 to 1100 px.
 
 ## Later upgrades
 - Online card payment at checkout (payment gateway: e.g. Network International, Stripe, Tap) — today customers

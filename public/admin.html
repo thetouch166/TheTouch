@@ -307,6 +307,7 @@ table.t tr:hover td{background:#fdfbf8}
 .bc .w{font-size:11.5px;color:var(--mute)}
 .bc .nx{margin-top:9px;width:100%;height:34px;border-radius:8px;background:var(--bg);font-size:11.5px;font-weight:700;color:var(--bur)}
 @media(max-width:900px){.ord{grid-template-columns:1fr}.odet{display:none}}
+@media(min-width:761px) and (max-width:1100px){.board{grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;align-items:start}.view.ov .board{height:auto!important}.col .cl{overflow:visible}}
 .view.ov{display:flex;flex-direction:column}
 .view.ov #obody{flex:1;min-height:0}
 .view.ov .ord,.view.ov .board{height:100%}
@@ -883,15 +884,16 @@ function payModal(){
         body.querySelectorAll('.quick button').forEach(b=>b.classList.toggle('on',tend!==''&&+b.dataset.v===+tend))};upd();ti.oninput=upd;
       body.querySelector('.quick').onclick=e=>{const b=e.target.closest('button');if(b){ti.value=b.dataset.v;upd()}};if(posFine())setTimeout(()=>ti.focus(),60)}
     else if(method==='card'){body.innerHTML=`<div style="text-align:center;padding:12px 0 6px"><div class="muted small">Charge this amount on the card terminal</div><div class="bigval">${money(tot)}</div></div><div class="fld"><label>Approval / ref no. (optional)</label><input id="ref" value="${esc(ref)}"></div>`;body.querySelector('#ref').oninput=e=>ref=e.target.value}
-    else if(method==='split'){body.innerHTML=`<div class="grid2"><div class="fld"><label>Cash part</label><input id="cp" type="number" inputmode="decimal" value="${cashPart}" style="height:56px;font-size:20px;font-weight:700"></div><div class="fld"><label>Card part</label><input id="kp" disabled style="height:56px;font-size:20px;font-weight:700;background:#faf7f2"></div></div>`;
-      const cp=body.querySelector('#cp');const upd=()=>{cashPart=cp.value;body.querySelector('#kp').value=U.r2(Math.max(0,tot-(+cashPart||0)))};upd();cp.oninput=upd;if(posFine())setTimeout(()=>cp.focus(),60)}
+    else if(method==='split'){body.innerHTML=`<div class="grid2"><div class="fld"><label>Cash part</label><input id="cp" type="number" inputmode="decimal" value="${cashPart}" style="height:56px;font-size:20px;font-weight:700"></div><div class="fld"><label>Card part</label><input id="kp" disabled style="height:56px;font-size:20px;font-weight:700;background:#faf7f2"></div></div><div id="schg"></div>`;
+      const cp=body.querySelector('#cp');const upd=()=>{cashPart=cp.value;const c=+cashPart||0;body.querySelector('#kp').value=U.r2(Math.max(0,tot-c));
+        body.querySelector('#schg').innerHTML=c>tot?`<div class="change big"><small>Cash covers the total · change to give</small>${money(U.r2(c-tot))}</div>`:c>0?'':'<div class="change idle">Enter the cash part — the rest goes on the card</div>'};upd();cp.oninput=upd;if(posFine())setTimeout(()=>cp.focus(),60)}
     else{body.innerHTML=`<div class="giftbox" style="margin:0;font-size:14px">The order is saved as <b>unpaid</b>. Collect payment on ${T.fulfil==='delivery'?'delivery':'pick-up'} and tap <b>Mark as paid</b> in Orders.</div><div class="fld" style="margin-top:14px"><label>Expected payment</label><select id="lm"><option value="cod">Cash on ${T.fulfil==='delivery'?'delivery':'pick-up'}</option><option value="card_on_delivery">Card on ${T.fulfil==='delivery'?'delivery':'pick-up'}</option><option value="link">Payment link (WhatsApp)</option></select></div>`}};
   draw();m.querySelector('.paytabs').onclick=e=>{const b=e.target.closest('button');if(b){method=b.dataset.m;draw()}};
   m.querySelector('#pok').onclick=async()=>{
     let pay={method,paid:true,ref,paidAt:Date.now(),paidShift:SHIFT.id};
     if(method==='cash'){const t=+tend||tot;if(t<tot){toast('Cash received is less than total');return}pay.cash=tot;pay.card=0;pay.tendered=t;pay.change=U.r2(t-tot)}
     else if(method==='card'){pay.cash=0;pay.card=tot}
-    else if(method==='split'){const c=Math.min(tot,+cashPart||0);pay.cash=c;pay.card=U.r2(tot-c)}
+    else if(method==='split'){const given=+cashPart||0,c=Math.min(tot,given);pay.cash=c;pay.card=U.r2(tot-c);if(given>tot){pay.tendered=given;pay.change=U.r2(given-tot)}if(!pay.card)pay.method='cash';else if(!c)pay.method='card'}
     else pay={method:body.querySelector('#lm').value,paid:false};
     const btn=m.querySelector('#pok');btn.disabled=true;btn.textContent='Saving…';const D=T.details;const inst=T.fulfil==='instore';
     const o={id:U.uid('o_'),no:U.orderNo('S'),channel:'pos',status:inst?'completed':'confirmed',created:Date.now(),customer:{name:T.customer.name,phone:T.customer.phone,email:''},
