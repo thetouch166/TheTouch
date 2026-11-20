@@ -162,15 +162,19 @@ section.s{padding:96px 0}
 .split.rev .im{order:2}
 @media(max-width:900px){.split{grid-template-columns:1fr;min-height:0}.split .im{height:92vw;max-height:560px}.split.rev .im{order:0}.split .tx{padding:50px 24px}}
 
-/* events band */
-.events{background:var(--bur);color:#f3e6d4;padding:100px 0;position:relative;overflow:hidden}
-.events .h2{color:#fff}.events .eyebrow{color:var(--gold)}
+/* events band = the boutique's black lacquer gift bag with brass lettering, framed like a gift box */
+.events{background:radial-gradient(80% 60% at 50% 0%,rgba(201,160,99,.16),rgba(201,160,99,0) 70%),linear-gradient(180deg,#141110,#0d0b0a);color:#e9dccb;padding:110px 0;position:relative;overflow:hidden;isolation:isolate}
+.events:before{content:'';position:absolute;inset:22px;border:1px solid rgba(201,160,99,.28);pointer-events:none;z-index:-1}
+.events .h2{background:linear-gradient(180deg,#f2d7a3 0%,#d2a764 45%,#a8783a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.events .eyebrow{color:#c9a063}.events .shead p{color:#bcae9c}
+.events .btn-gold{background:linear-gradient(180deg,#dcb679,#b98848);border-color:transparent;color:#17110d}.events .btn-gold:hover{background:linear-gradient(180deg,#e6c58e,#c5965a)}
+@media(max-width:700px){.events:before{inset:12px}}
 /* occasions: a "carte" — serif names, one line each, fine gold rules instead of boxes */
 .evgrid{display:grid;grid-template-columns:repeat(4,1fr);margin-top:60px}
 .ev{padding:6px 28px;text-align:center}
-.ev+.ev{border-left:1px solid rgba(205,151,84,.3)}
-.ev h4{font-family:var(--serif);font-size:25px;font-weight:500;color:#fff;line-height:1.2;margin-bottom:10px}
-.ev p{color:#cdb8a3;font-size:13px;font-weight:300;max-width:30ch;margin:0 auto}
+.ev+.ev{border-left:1px solid rgba(201,160,99,.24)}
+.ev h4{font-family:var(--serif);font-size:25px;font-weight:500;color:#f4e8d6;line-height:1.2;margin-bottom:10px}
+.ev p{color:#a99a87;font-size:13px;font-weight:300;max-width:30ch;margin:0 auto}
 .ev:nth-child(2){transition-delay:.1s}.ev:nth-child(3){transition-delay:.2s}.ev:nth-child(4){transition-delay:.3s}
 @media(max-width:900px){.evgrid{grid-template-columns:1fr 1fr;margin-top:44px;border-bottom:1px solid rgba(205,151,84,.3)}
   .ev,.ev+.ev{border-left:0;border-top:1px solid rgba(205,151,84,.3);padding:28px 22px}
@@ -191,17 +195,21 @@ section.s{padding:96px 0}
 @media(max-width:600px){.stats b{font-size:38px}.stats span{font-size:9px;letter-spacing:.12em}}
 
 /* footer */
-footer{background:#1e0207;color:#bfa992;padding:80px 0 30px;font-size:13px}
+footer{background:linear-gradient(180deg,#141110,#0c0a09);color:#b9a993;padding:80px 0 30px;font-size:13px;border-top:1px solid rgba(201,160,99,.3)}
 .fgrid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:40px}
 footer .flogo{height:54px;width:auto;margin-bottom:22px}
 footer h5{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#fff;font-weight:500;margin-bottom:18px}
 footer li{list-style:none;margin-bottom:10px}footer a:hover{color:var(--gold)}
-.news{display:flex;border-bottom:1px solid #5b3a2c;margin-top:8px}.news input{flex:1;background:none;border:0;padding:12px 0;color:#fff;outline:0}.news button{color:var(--gold);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
-.fbot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid #3a1a14;margin-top:60px;padding-top:26px;font-size:11px;letter-spacing:.06em}
+.news{display:flex;border-bottom:1px solid rgba(201,160,99,.35);margin-top:8px}.news input{flex:1;background:none;border:0;padding:12px 0;color:#fff;outline:0}.news button{color:var(--gold);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.fbot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid rgba(201,160,99,.18);margin-top:60px;padding-top:26px;font-size:11px;letter-spacing:.06em}
 @media(max-width:900px){.fgrid{grid-template-columns:1fr 1fr}.fgrid>div:first-child{grid-column:1/-1}}
 
 /* page head + shop */
 .phead{background:var(--cream);text-align:center;padding:64px 24px 54px}
+.phead.noir{background:radial-gradient(80% 90% at 50% 0%,rgba(201,160,99,.16),rgba(201,160,99,0) 70%),linear-gradient(180deg,#141110,#0d0b0a);color:#e9dccb;position:relative;isolation:isolate}
+.phead.noir:before{content:'';position:absolute;inset:14px;border:1px solid rgba(201,160,99,.26);z-index:-1;pointer-events:none}
+.phead.noir .eyebrow{color:#c9a063}.phead.noir p{color:#bcae9c}
+.phead.noir .h2{background:linear-gradient(180deg,#f2d7a3 0%,#d2a764 45%,#a8783a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 .phead .eyebrow{display:block;margin-bottom:12px}.phead p{color:var(--mute);max-width:560px;margin:14px auto 0}
 .crumbs{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);padding:20px 0}
 .crumbs a:hover{color:var(--bur)}
@@ -568,7 +576,7 @@ function pageHome(){
 
   <section class="events"><div class="wrap">
     <div class="shead fade" style="margin-bottom:0"><span class="eyebrow">Events &amp; Bespoke Arrangements</span><h2 class="h2">Unforgettable chocolate<br><span class="it">experiences</span></h2>
-    <p style="color:#cdb8a3">From grand weddings to corporate galas, our team designs displays, favours and gifts tailored to your celebration.</p></div>
+    <p>From grand weddings to corporate galas, our team designs displays, favours and gifts tailored to your celebration.</p></div>
     <div class="evgrid">
       <div class="ev fade"><h4>VIP Weddings</h4><p>Elegant multi-tiered chocolate displays and tailored favour boxes for grand celebrations.</p></div>
       <div class="ev fade"><h4>Corporate Galas</h4><p>Custom-branded corporate gifts and luxury chocolate dessert stations.</p></div>
@@ -780,7 +788,7 @@ function pageStory(){
   observe();
 }
 function pageEvents(){
-  app.innerHTML=`<div class="phead" style="background:var(--bur);color:#fff"><span class="eyebrow" style="color:var(--gold)">Weddings · Corporate · Celebrations</span><h1 class="h2">Bespoke chocolate<br><span class="it">arrangements</span></h1><p style="color:#cdb8a3">Tell us about your occasion — our team will design a proposal within 24 hours.</p></div>
+  app.innerHTML=`<div class="phead noir"><span class="eyebrow">Weddings · Corporate · Celebrations</span><h1 class="h2">Bespoke chocolate<br><span class="it">arrangements</span></h1><p>Tell us about your occasion — our team will design a proposal within 24 hours.</p></div>
   <section class="s"><div class="wrap"><div class="co evco" style="padding:0">
     <form id="evf" novalidate>
       <h3><i>✦</i>Event enquiry</h3>
