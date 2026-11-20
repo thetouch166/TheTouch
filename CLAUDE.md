@@ -66,6 +66,16 @@ customItem, detailsModal, custModal, discModal, heldModal, startPay, payModal, d
 EVENTS renderEvents · SETTINGS renderSettings. Shared helpers at the top: toast, modal, ask (in-app confirm —
 never use window.confirm/alert), chime, waLink, applyStock, shift functions (openShiftModal, closeShiftModal).
 
+### Admin language & theme (per device, localStorage `tt_lang` / `tt_theme`)
+- Arabic/English: UI is written in English; in Arabic mode a MutationObserver (`/* === language === */` block, `AR`
+  dictionary + `AR_RX` patterns) translates text, placeholders, aria-labels and titles, and the page is `dir="rtl"`.
+  **When you add UI text, add its Arabic to `AR`.** Mark elements that must stay English with `data-en`; receipts,
+  invoices, CSVs and printouts (`#printArea`, `.rcpt`, `.inv4`) are never translated. `pn(p)` shows `p.ar` in Arabic.
+  CSS uses logical properties (margin-inline-start, text-align:start…) so layouts mirror; `<option>` without a
+  `value` is not translated (its text is its value).
+- Dark/Light: colours are tokens in `:root` / `:root[data-theme=dark]` (`--card --soft --hd --acc --on-acc …`).
+  Use tokens, not hex, for new UI. Product photo wells stay cream; print stays light.
+
 ## index.html map
 Router `route()` on `location.hash`: `#/` pageHome · `#/shop/<cat>` pageShop · `#/p/<id>` pageProduct ·
 `#/checkout` pageCheckout · `#/order/<no>` pageOrder · `#/story` · `#/events` · `#/delivery`.
