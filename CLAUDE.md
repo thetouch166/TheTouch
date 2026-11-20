@@ -38,7 +38,7 @@ tests/fake_firebase.js  in-memory Firebase stand-in to test live mode without an
 - `TT.DB` = backend with the SAME API in both modes: `init, all(col), get(col,id), put(col,obj), patch(col,id,part),
   inc(col,id,field,delta), del(col,id), watch(col,cb) → unsubscribe, signIn, signOut, isAdmin`, plus `DB.mode`
   (`'local'` | `'live'`). Always go through `TT.DB`; never call localStorage/Firestore directly for business data.
-- Collections: `products`, `orders`, `settings` (doc id `main`), `enquiries`, `shifts`.
+- Collections: `products`, `orders`, `settings` (doc id `main`), `enquiries`, `shifts`, `stock` (stock movement log).
 - `TT.boot({admin})` loads settings + products (seeds the catalogue when empty). `TT.U` = utils
   (`money, r2, uid, orderNo, esc, vatPart, lineTotal, qtyLabel, dayKey, fmtTime, compressImage`).
 - `TT.cleanOrder(o)` normalises/sanitises every order read by the admin (protects against malformed or
@@ -46,21 +46,23 @@ tests/fake_firebase.js  in-memory Firebase stand-in to test live mode without an
 - Prices are **AED, VAT-inclusive (5%)**: `vat = total − total/1.05` (`U.vatPart`). Use `U.r2` for money math.
 
 ### Shapes (do not rename fields — stored data and Firestore rules depend on them)
-- **product**: `{id, sku, name, ar, cat, unit:'kg'|'pc', price, stock, img, desc, active, featured, updated}`
+- **product**: `{id, sku, name, ar, cat, unit:'kg'|'pc', price, stock, min, img, desc, active, featured, updated}`
+  — `min` = low-stock alert level (optional; default 2 kg / 5 pcs, see `lowLevel()`)
   — `unit:'kg'` → price per kg, stock in kg, sold by grams.
 - **order**: `{id, no, channel:'web'|'pos', status:'new'|'confirmed'|'preparing'|'ready'|'completed'|'cancelled',
   created, customer:{name,phone,email}, fulfil:'instore'|'pickup'|'delivery', emirate, area, address, date, slot,
   gift:{to,phone,msg}, notes, items:[{pid,name,unit,price,grams,qty,disc}], subtotal, discount, delivery, total, vat,
   payment:{method, paid, cash, card, other, tendered, change, ref, paidAt, paidShift}, stockApplied, cashier, shiftId}`
 - **shift**: `{id, cashier, openedAt, float, status, closedAt, counted, expected, cash, card, other, variance}`
+- **stock** (movement log): `{id, pid, name, unit, type:'receive'|'count'|'remove'|'adjust', qty, before, after, note, by, at}`
 - Stock rule: POS sales deduct at sale; web orders deduct when moved past `new`; cancel/void restores
   (`applyStock` in admin.html, guarded by `order.stockApplied`).
 
 ## admin.html map (search these section comments)
 `/* === HOME / DASHBOARD === */` renderHome · `/* === POS === */` renderPOS, drawTiles, drawTicket, weighModal,
-customItem, detailsModal, custModal, discModal, heldModal, startPay, payModal, doneModal, receiptHTML ·
+customItem, detailsModal, custModal, discModal, heldModal, startPay, payModal, doneModal, receiptHTML · invoice: invoiceCanvas (WhatsApp image), invoiceA4 (print/PDF), invoiceModal ·
 `/* === ORDERS === */` renderOrders, drawBoard, drawList, orderHTML, bindOrder, markPaid, setStatus ·
-`/* === PRODUCTS === */` renderProducts, productModal · REPORTS renderReports, exportCSV · CLIENTS clientStats ·
+`/* === PRODUCTS === */` renderProducts, productModal, stockModal, stockHistory, stockCSV, countSheet · REPORTS renderReports, exportCSV · CLIENTS clientStats ·
 EVENTS renderEvents · SETTINGS renderSettings. Shared helpers at the top: toast, modal, ask (in-app confirm —
 never use window.confirm/alert), chime, waLink, applyStock, shift functions (openShiftModal, closeShiftModal).
 
