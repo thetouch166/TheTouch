@@ -14,8 +14,7 @@ roughly in priority order. Each is small and independent — good one-at-a-time 
 5. ~~**POS split payment**~~ — DONE 20 Nov: shows the change to give and saves it as a cash sale.
 6. **Order list scroll**: every route change scrolls to top, so Back doesn't restore the shop list position
    (index.html `route()`).
-7. **Newsletter form** only shows a thank-you; store emails in a `subscribers` collection (+ Firestore rule
-   `allow create: if true`).
+7. ~~**Newsletter form**~~ — DONE 20 Nov: saved to `subscribers` (create-only rule); Admin → Clients → Newsletter CSV.
 8. ~~**Board on 820px tablets**~~ — DONE 20 Nov: 2×2 board from 761 to 1100 px.
 
 ## Later upgrades

@@ -430,7 +430,7 @@ body.sbar-on .toast{bottom:96px}
         <li><a href="#/story">Our Story</a></li><li><a href="#/events">Weddings &amp; Events</a></li><li><a href="#/events">Corporate Gifting</a></li><li><a href="#/delivery">Delivery &amp; Care</a></li></ul></div>
       <div><h5>Boutique</h5><ul id="fContact"></ul>
         <h5 style="margin-top:26px">Newsletter</h5>
-        <form class="news" onsubmit="event.preventDefault();this.reset();toast('Thank you — welcome to The Touch.')"><input type="email" required placeholder="Your email"><button>Join</button></form>
+        <form class="news" onsubmit="event.preventDefault();subscribe(this)"><input type="email" required maxlength="120" placeholder="Your email" aria-label="Your email for the newsletter"><button>Join</button></form>
       </div>
     </div>
     <div class="fbot"><span>© <span id="yr"></span> The Touch Chocolates · Abu Dhabi, UAE</span><span>Prices in AED, inclusive of 5% VAT · <a href="admin.html" style="opacity:.6">Staff</a></span></div>
@@ -475,6 +475,9 @@ body.sbar-on .toast{bottom:96px}
 <script>
 'use strict';
 const {DB,U}=TT; const $=s=>document.querySelector(s); const app=$('#app');
+async function subscribe(f){const i=f.querySelector('input'),b=f.querySelector('button');const e=i.value.trim().toLowerCase().slice(0,120);if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)){i.focus();return}
+  b.disabled=true;try{await DB.put('subscribers',{id:'s_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),email:e,created:Date.now(),source:'footer'})}catch(err){console.warn(err)}
+  f.reset();b.disabled=false;toast('Thank you — welcome to The Touch.')}
 let S, PRODUCTS=[];
 // Home brand statement (edit the words here). Each word lights up as the visitor scrolls past.
 const STATEMENT='Single-origin cocoa, tempered by hand in small batches, then boxed and ribboned to be given. Every piece is made for a moment worth remembering.';

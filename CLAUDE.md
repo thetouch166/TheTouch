@@ -38,7 +38,7 @@ tests/fake_firebase.js  in-memory Firebase stand-in to test live mode without an
 - `TT.DB` = backend with the SAME API in both modes: `init, all(col), get(col,id), put(col,obj), patch(col,id,part),
   inc(col,id,field,delta), del(col,id), watch(col,cb) → unsubscribe, signIn, signOut, isAdmin`, plus `DB.mode`
   (`'local'` | `'live'`). Always go through `TT.DB`; never call localStorage/Firestore directly for business data.
-- Collections: `products`, `orders`, `settings` (doc id `main`), `enquiries`, `shifts`, `stock` (stock movement log).
+- Collections: `products`, `orders`, `settings` (doc id `main`), `enquiries`, `shifts`, `stock` (stock movement log), `subscribers` (newsletter `{id,email,created,source}`; public create-only).
 - `TT.boot({admin})` loads settings + products (seeds the catalogue when empty). `TT.U` = utils
   (`money, r2, uid, orderNo, esc, vatPart, lineTotal, qtyLabel, dayKey, fmtTime, compressImage`).
 - `TT.cleanOrder(o)` normalises/sanitises every order read by the admin (protects against malformed or

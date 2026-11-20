@@ -383,6 +383,9 @@ table.t tr:hover td{background:#fdfbf8}
 .rcpt .b{font-weight:700}.rcpt .big{font-size:15px;font-weight:700}
 .rprev{background:#f4f1ec;padding:16px;border-radius:12px;display:flex;justify-content:center;max-height:46vh;overflow:auto}
 .rprev .rcpt{background:#fff;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+/* clients */
+.newsc{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;padding:16px 20px}.ctools{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:760px){.ctools{display:grid;grid-template-columns:1fr 1fr;width:100%}}
 /* stock */
 .ptop{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center}.ptop #pq{flex:1;min-width:200px}
 .ptools{display:flex;gap:8px;flex-wrap:wrap}
@@ -1312,8 +1315,13 @@ function clientStats(){const m={};ORDERS.filter(o=>o.status!=='cancelled'&&o.cus
 let cQ='';
 function renderCustomers(){const all=clientStats();const cs=all.filter(c=>!cQ||(c.name+' '+c.phone).toLowerCase().includes(cQ.toLowerCase()));
   $('#view').innerHTML=`<div class="kpis k3"><div class="card kpi"><div class="l">Clients</div><div class="v">${all.length}</div></div><div class="card kpi"><div class="l">VIP (3+ orders)</div><div class="v">${all.filter(c=>c.count>=3).length}</div></div><div class="card kpi"><div class="l">Avg. lifetime value</div><div class="v">${money(all.length?U.r2(all.reduce((a,c)=>a+c.spent,0)/all.length):0)}</div></div></div>
+   <div class="card sec newsc"><div><b>Newsletter</b><div class="small muted" id="nlc">Loading sign-ups…</div></div><div class="ctools"><button class="btn b-line b-sm" id="ccsv">⬇ Clients CSV</button><button class="btn b-line b-sm" id="nlcsv">⬇ Newsletter CSV</button></div></div>
    <input class="inp" id="cq" placeholder="Search clients…" value="${esc(cQ)}" style="margin-bottom:14px"><div class="card" style="overflow:auto"><table class="t ctbl"><thead><tr><th>Client</th><th>Mobile</th><th>Orders</th><th>Total spent</th><th>Last order</th><th></th></tr></thead><tbody>
    ${cs.map(c=>`<tr><td><b>${esc(c.name||'—')}</b>${c.count>=3?' <span class="tag" style="background:var(--gold)">VIP</span>':''}<div class="small muted">${[c.email,c.emirate].filter(Boolean).map(esc).join(' · ')}</div></td><td><a href="tel:${esc(c.phone)}" style="text-decoration:none">${esc(c.phone)}</a></td><td>${c.count}</td><td><b>${money(c.spent)}</b></td><td class="small">${U.fmtTime(c.last)}</td><td><a class="btn b-line b-sm" target="_blank" rel="noopener" href="${waLink(c.phone,'Dear '+(c.name||'')+', ')}">WhatsApp</a></td></tr>`).join('')||`<tr class="emp"><td colspan="6" class="empty">${cQ?'No clients match “'+esc(cQ)+'”':'Clients appear here automatically from orders with a mobile number'}</td></tr>`}</tbody></table></div>`;
+  DB.all('subscribers').then(l=>{const n=$('#nlc');if(n)n.textContent=l.length?plural(l.length,'email')+' signed up on the website':'Emails from the website footer appear here'}).catch(()=>{const n=$('#nlc');if(n)n.textContent='Not available'});
+  $('#nlcsv').onclick=async()=>{let l=[];try{l=await DB.all('subscribers')}catch(e){}if(!l.length){toast('No newsletter sign-ups yet');return}
+    downloadCSV([['Email','Signed up']].concat(l.sort((a,b)=>(+b.created||0)-(+a.created||0)).map(x=>[x.email,new Date(+x.created||0).toLocaleString('en-GB')])),'the-touch-newsletter-'+todayISO()+'.csv')};
+  $('#ccsv').onclick=()=>downloadCSV([['Name','Mobile','Email','Emirate','Orders','Total spent (AED)','Last order']].concat(all.map(c=>[c.name,c.phone,c.email,c.emirate,c.count,c.spent,new Date(c.last).toLocaleString('en-GB')])),'the-touch-clients-'+todayISO()+'.csv');
   const q=$('#cq');q.oninput=()=>{cQ=q.value;renderCustomers();const n=$('#cq');n.focus();n.setSelectionRange(n.value.length,n.value.length)}}
 
 /* =================== EVENTS =================== */

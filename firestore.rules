@@ -21,6 +21,11 @@ service cloud.firestore {
       allow read, update, delete: if staff();
     }
     match /shifts/{id} { allow read, write: if staff(); }
+    match /subscribers/{id} {   // newsletter sign-ups from the website footer
+      allow create: if request.resource.data.keys().hasOnly(['id', 'email', 'created', 'source']) &&
+                       request.resource.data.email is string && request.resource.data.email.size() < 121;
+      allow read, update, delete: if staff();
+    }
     match /stock/{id}  { allow read, write: if staff(); }   // stock movement log (receive / count / remove)
   }
 }
