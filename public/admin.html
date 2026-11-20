@@ -398,6 +398,22 @@ table.t tr:hover td{background:#fdfbf8}
 @media(max-width:760px){.ptools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}.ptools .btn{padding:0 6px;font-size:12px}.ptools #padd{grid-column:1/-1;order:-1}
  .shtbl thead{display:none}.shtbl,.shtbl tbody{display:block}.shtbl tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:12px 2px;border-bottom:1px solid var(--line)}
  .shtbl td{padding:0!important;border:0!important}.shtbl td:nth-child(1){grid-column:1/-1;order:-1}.shtbl td:nth-child(3){grid-column:2;grid-row:2;text-align:right}.shtbl td:nth-child(4){grid-column:1/-1}.shtbl td:nth-child(5){grid-column:1/-1}}
+/* reports */
+.rtop{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.rtop .chips{min-width:0;flex:1 1 420px}
+.rtools{display:flex;gap:8px;flex-wrap:wrap}
+.rcustom{display:flex;gap:12px;align-items:flex-end;padding:14px 16px;margin-bottom:14px;flex-wrap:wrap}.rcustom .fld{width:180px}.rcustom .rlab{margin-left:auto;align-self:center;font-weight:600;color:var(--bur)}
+.bars.dense{gap:2px}.bars.dense span{font-size:9px}
+.cbar{padding-bottom:9px}.cbar .meter{border-bottom:0;padding-bottom:6px}.cbar i{display:block;height:4px;border-radius:2px;background:linear-gradient(90deg,#b98443,var(--gold))}
+.cbar+.cbar{border-top:1px solid #f1ebe3}
+@media(max-width:760px){.rtools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}.rtools .btn{height:42px;padding:0 6px;font-size:11.5px}.rtools #rpdf{grid-column:1/-1}.rcustom .fld{flex:1 1 130px;width:auto}.rcustom .rlab{margin:0;width:100%}}
+.inv4 .rk{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin:7mm 0}
+.inv4 .rk>div{border:.6pt solid #eadfce;border-radius:2mm;padding:4mm}
+.inv4 .rk b{display:block;font-family:var(--serif);font-weight:600;font-size:17pt;color:var(--bur);line-height:1.15}
+.inv4 .rk small{color:#857873;font-size:8pt}
+.inv4 .r2{display:grid;grid-template-columns:1fr 1fr;gap:10mm;margin-bottom:8mm}
+.inv4 .r2>div>div:not(.lb){display:flex;justify-content:space-between;padding:1.2mm 0;border-bottom:.5pt solid #f1e9dd}
+.inv4 .r2 .b{font-weight:700}
 /* invoice */
 .mbox.inv{width:min(640px,100%)}
 .invprev{background:#ece4d8;border-radius:14px;padding:18px;display:flex;justify-content:center;min-height:240px}
@@ -406,7 +422,7 @@ table.t tr:hover td{background:#fdfbf8}
 .ivacts .btn:disabled{opacity:.45}
 @media(max-width:760px){.mbox.inv .mb{padding:14px}.invprev{padding:12px}.ivacts{display:grid;grid-template-columns:1fr 1fr}.ivacts .ivsend{grid-column:1/-1;order:-1;height:52px}.ivacts .btn{padding:0 10px}
  .donea{display:grid;grid-template-columns:1fr 1fr}.donea [data-close]{grid-column:1/-1;order:-1;height:52px}}
-.inv4{width:100%;max-width:182mm;font-family:var(--sans);color:#2a2228;font-size:9.5pt;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.inv4{font-variant-numeric:lining-nums;width:100%;max-width:182mm;font-family:var(--sans);color:#2a2228;font-size:9.5pt;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .inv4 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:10mm;padding-bottom:6mm;border-bottom:1.5pt solid #b8843f}
 .inv4 .top img{height:22mm;width:auto}
 .inv4 h1{font-family:var(--serif);font-weight:600;font-size:28pt;line-height:1;color:var(--bur);text-align:right}
@@ -1209,10 +1225,19 @@ function productModal(p){
 }
 
 /* =================== REPORTS =================== */
-let rRange='today';
-function rangeBounds(){const d=new Date();d.setHours(0,0,0,0);const t0=+d;const day=864e5;
-  return ({today:[t0,t0+day],yesterday:[t0-day,t0],week:[t0-6*day,t0+day],month:[t0-29*day,t0+day],all:[0,Infinity]})[rRange]}
-function renderReports(){
+let rRange='today',rFrom='',rTo='';
+const DAY=864e5;
+function rangeBounds(){const d=new Date();d.setHours(0,0,0,0);const t0=+d;
+  if(rRange==='mtd')return [+new Date(d.getFullYear(),d.getMonth(),1),t0+DAY];
+  if(rRange==='lastm')return [+new Date(d.getFullYear(),d.getMonth()-1,1),+new Date(d.getFullYear(),d.getMonth(),1)];
+  if(rRange==='custom'){let a=rFrom?+new Date(rFrom+'T00:00'):t0,b=rTo?+new Date(rTo+'T00:00')+DAY:t0+DAY;if(b<=a)[a,b]=[b-DAY,a+DAY];return [a,b]}
+  return ({today:[t0,t0+DAY],yesterday:[t0-DAY,t0],week:[t0-6*DAY,t0+DAY],month:[t0-29*DAY,t0+DAY],all:[0,Infinity]})[rRange]}
+function rangeLabel(){const [a,b]=rangeBounds();const f=(t,y)=>new Date(t).toLocaleDateString('en-GB',y?{day:'numeric',month:'short',year:'numeric'}:{day:'numeric',month:'short'});
+  if(rRange==='mtd'||rRange==='lastm')return new Date(a).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  if(rRange==='custom')return b-a<=DAY?f(a,1):f(a)+' – '+f(b-DAY,1);
+  return ({today:'Today',yesterday:'Yesterday',week:'Last 7 days',month:'Last 30 days',all:'All time'})[rRange]}
+/* everything the screen, the A4 report, the till slip and the CSVs need for the chosen period */
+function reportData(){
   const [a,b]=rangeBounds();const os=ORDERS.filter(o=>o.created>=a&&o.created<b&&o.status!=='cancelled');
   const sum=f=>U.r2(os.reduce((x,o)=>x+f(o),0));
   const total=sum(o=>o.total),vat=sum(o=>o.vat),disc=sum(o=>o.discount||0),dfee=sum(o=>o.delivery||0);
@@ -1220,32 +1245,58 @@ function renderReports(){
   const paidIn=ORDERS.filter(o=>o.status!=='cancelled'&&o.payment&&o.payment.paid&&(o.payment.paidAt||o.created)>=a&&(o.payment.paidAt||o.created)<b);
   const cash=U.r2(paidIn.reduce((x,o)=>x+(o.payment.cash||0),0)),card=U.r2(paidIn.reduce((x,o)=>x+(o.payment.card||0),0)),other=U.r2(paidIn.reduce((x,o)=>x+(o.payment.other||0),0));
   const unpaid=U.r2(os.filter(o=>!o.payment.paid).reduce((x,o)=>x+o.total,0));
-  const top={};os.forEach(o=>o.items.forEach(l=>{const k=l.name;top[k]=top[k]||{n:k,qty:0,kg:0,rev:0};if(l.unit==='kg')top[k].kg+=l.grams*l.qty/1000;else top[k].qty+=l.qty;top[k].rev+=U.lineTotal(l)}));
-  const tops=Object.values(top).sort((x,y)=>y.rev-x.rev).slice(0,8);
-  const days=[];for(let i=13;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const k=U.dayKey(d);days.push({k,l:d.getDate(),v:U.r2(ORDERS.filter(o=>o.status!=='cancelled'&&U.dayKey(o.created)===k).reduce((x,o)=>x+o.total,0))})}
-  const mx=Math.max(1,...days.map(d=>d.v));
+  const top={},cats={};os.forEach(o=>o.items.forEach(l=>{const k=l.name;const p=l.pid&&prod(l.pid);const c=p?TT.catName(p.cat):'Custom & services';
+    top[k]=top[k]||{n:k,c,qty:0,kg:0,rev:0};if(l.unit==='kg')top[k].kg+=l.grams*l.qty/1000;else top[k].qty+=l.qty;top[k].rev+=U.lineTotal(l);cats[c]=U.r2((cats[c]||0)+U.lineTotal(l))}));
+  const items=Object.values(top).sort((x,y)=>y.rev-x.rev);
   const byStaff={};pos.forEach(o=>{const k=o.cashier||'—';byStaff[k]=U.r2((byStaff[k]||0)+o.total)});
-  const label=({today:'Today',yesterday:'Yesterday',week:'Last 7 days',month:'Last 30 days',all:'All time'})[rRange];
-  $('#view').innerHTML=`<div style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px"><div class="chips" id="rr">${[['today','Today'],['yesterday','Yesterday'],['week','7 days'],['month','30 days'],['all','All time']].map(([k,n])=>`<button class="chip ${rRange===k?'on':''}" data-r="${k}">${n}</button>`).join('')}</div>
-    <div style="display:flex;gap:8px"><button class="btn b-line b-sm" id="zrep">🖨 Day-end report</button><button class="btn b-line b-sm" id="csv">⬇ Export CSV</button></div></div>
-   <div class="kpis"><div class="card kpi hero"><div class="l">Sales · ${label}</div><div class="v">${money(total)}</div><div class="s">${plural(os.length,'order')} · VAT ${money(vat)}</div></div>
-    <div class="card kpi"><div class="l">Average ticket</div><div class="v">${money(os.length?U.r2(total/os.length):0)}</div><div class="s">Discounts ${money(disc)}</div></div>
-    <div class="card kpi"><div class="l">Boutique</div><div class="v">${money(sum(o=>o.channel==='pos'?o.total:0))}</div><div class="s">${plural(pos.length,'order')}</div></div>
-    <div class="card kpi"><div class="l">Website</div><div class="v">${money(sum(o=>o.channel==='web'?o.total:0))}</div><div class="s">${plural(web.length,'order')}${unpaid?' · '+money(unpaid)+' unpaid':''}</div></div></div>
-   <div class="split" style="margin-bottom:14px"><div class="card sec"><h4>Last 14 days</h4><div class="bars">${days.map((d,i)=>`<div><em>${d.v?Math.round(d.v):''}</em><i class="${i===13?'today':''}" style="height:${d.v/mx*130}px"></i><span>${d.l}</span></div>`).join('')}</div></div>
-    <div class="card sec"><h4>Money collected <small>${label}</small></h4>
-      <div class="meter"><span>💵 Cash</span><b>${money(cash)}</b></div><div class="meter"><span>💳 Card</span><b>${money(card)}</b></div><div class="meter"><span>🔗 Link / online</span><b>${money(other)}</b></div>
-      <div class="meter"><span>⏳ Still unpaid</span><b style="color:var(--warn)">${money(unpaid)}</b></div><div class="meter"><span>🚚 Delivery fees</span><b>${money(dfee)}</b></div></div></div>
-   <div class="split"><div class="card sec"><h4>Best sellers</h4>${tops.length?tops.map(t=>`<div class="meter"><span>${esc(t.n)} <span class="small muted">${t.kg?U.r2(t.kg)+' kg':''}${t.kg&&t.qty?' + ':''}${t.qty?t.qty+' pcs':''}</span></span><b>${money(U.r2(t.rev))}</b></div>`).join(''):'<div class="muted small">No sales in this period</div>'}</div>
-    <div class="card sec"><h4>Sales by staff</h4>${Object.keys(byStaff).length?Object.keys(byStaff).sort((x,y)=>byStaff[y]-byStaff[x]).map(k=>`<div class="meter"><span>${esc(k)}</span><b>${money(byStaff[k])}</b></div>`).join(''):'<div class="muted small">No boutique sales</div>'}</div></div>`;
-  $('#rr').onclick=e=>{const b=e.target.closest('.chip');if(b){rRange=b.dataset.r;renderReports()}};
-  $('#csv').onclick=()=>exportCSV(os);
-  $('#zrep').onclick=()=>printHTML(`<div class="rcpt"><div class="c"><img src="img/logo-burgundy.png"><div class="b">SALES REPORT</div><div>${label} · printed ${new Date().toLocaleString('en-GB')}</div></div><hr>
-    <div class="row"><span>Orders</span><span>${os.length}</span></div><div class="row b"><span>Total sales</span><span>${total.toFixed(2)}</span></div><div class="row"><span>VAT included</span><span>${vat.toFixed(2)}</span></div><div class="row"><span>Discounts</span><span>${disc.toFixed(2)}</span></div><div class="row"><span>Delivery fees</span><span>${dfee.toFixed(2)}</span></div><hr>
-    <div class="row"><span>Boutique</span><span>${pos.length}</span></div><div class="row"><span>Website</span><span>${web.length}</span></div><hr>
-    <div class="row"><span>Cash collected</span><span>${cash.toFixed(2)}</span></div><div class="row"><span>Card collected</span><span>${card.toFixed(2)}</span></div><div class="row"><span>Link/online</span><span>${other.toFixed(2)}</span></div><div class="row"><span>Unpaid</span><span>${unpaid.toFixed(2)}</span></div><hr>
-    ${tops.map(t=>`<div class="row"><span>${esc(t.n).slice(0,24)}</span><span>${U.r2(t.rev).toFixed(2)}</span></div>`).join('')}<hr><div class="c">Signature: ____________</div></div>`);
+  return {a,b,os,total,vat,disc,dfee,web,pos,cash,card,other,unpaid,items,cats,byStaff,label:rangeLabel(),
+    net:U.r2(total-vat),avg:os.length?U.r2(total/os.length):0,posT:sum(o=>o.channel==='pos'?o.total:0),webT:sum(o=>o.channel==='web'?o.total:0)}}
+/* chart: the days of the period (or the last 14 days for short periods), months for long ones */
+function reportSeries(a,b){const today=new Date();today.setHours(0,0,0,0);const end=Math.min(b,+today+DAY);
+  const first=ORDERS.length?Math.min(...ORDERS.map(o=>o.created)):+today;const start=a||first;const span=(end-start)/DAY;
+  const val=(x,y)=>U.r2(ORDERS.filter(o=>o.status!=='cancelled'&&o.created>=x&&o.created<y).reduce((s,o)=>s+o.total,0));
+  if(rRange==='all'||span>62){const out=[];const e=new Date(end-1);for(let i=11;i>=0;i--){const m0=new Date(e.getFullYear(),e.getMonth()-i,1),m1=new Date(e.getFullYear(),e.getMonth()-i+1,1);
+      out.push({l:m0.toLocaleDateString('en-GB',{month:'short'}),v:val(+m0,+m1),hl:+m0<=Date.now()&&Date.now()<+m1})}return {title:'Monthly sales',bars:out}}
+  const s0=span<7?end-14*DAY:start;const out=[];for(let t=s0;t<end;t+=DAY){const d=new Date(t);out.push({l:d.getDate(),v:val(t,t+DAY),hl:span<7?(t>=a&&t<b):t===+today})}
+  return {title:span<7?'Last 14 days':'Daily sales',bars:out}}
+function renderReports(){
+  const R=reportData();const ser=reportSeries(R.a,R.b);const mx=Math.max(1,...ser.bars.map(d=>d.v));const step=Math.ceil(ser.bars.length/16);
+  const catMax=Math.max(1,...Object.values(R.cats));
+  $('#view').innerHTML=`<div class="rtop"><div class="chips" id="rr">${[['today','Today'],['yesterday','Yesterday'],['week','7 days'],['month','30 days'],['mtd','This month'],['lastm','Last month'],['custom','Custom…'],['all','All time']].map(([k,n])=>`<button class="chip ${rRange===k?'on':''}" data-r="${k}">${n}</button>`).join('')}</div>
+    <div class="rtools"><button class="btn b-dark b-sm" id="rpdf">🖨 Report (A4 / PDF)</button><button class="btn b-line b-sm" id="zrep">🧾 Till slip</button><button class="btn b-line b-sm" id="csv">⬇ Sales CSV</button><button class="btn b-line b-sm" id="pcsv2">⬇ Products CSV</button></div></div>
+   ${rRange==='custom'?`<div class="rcustom card"><div class="fld"><label>From</label><input type="date" id="rf" value="${esc(rFrom||todayISO())}" max="${todayISO()}"></div><div class="fld"><label>To</label><input type="date" id="rt" value="${esc(rTo||todayISO())}" max="${todayISO()}"></div><div class="small muted rlab">${esc(R.label)}</div></div>`:''}
+   <div class="kpis"><div class="card kpi hero"><div class="l">Sales · ${esc(R.label)}</div><div class="v">${money(R.total)}</div><div class="s">${plural(R.os.length,'order')} · VAT ${money(R.vat)}</div></div>
+    <div class="card kpi"><div class="l">Average ticket</div><div class="v">${money(R.avg)}</div><div class="s">Discounts ${money(R.disc)}</div></div>
+    <div class="card kpi"><div class="l">Boutique</div><div class="v">${money(R.posT)}</div><div class="s">${plural(R.pos.length,'order')}</div></div>
+    <div class="card kpi"><div class="l">Website</div><div class="v">${money(R.webT)}</div><div class="s">${plural(R.web.length,'order')}${R.unpaid?' · '+money(R.unpaid)+' unpaid':''}</div></div></div>
+   <div class="split" style="margin-bottom:14px"><div class="card sec"><h4>${ser.title}</h4><div class="bars ${ser.bars.length>16?'dense':''}">${ser.bars.map((d,i)=>`<div title="${money(d.v)}"><em>${d.v&&ser.bars.length<=16?Math.round(d.v):''}</em><i class="${d.hl?'today':''}" style="height:${d.v/mx*130}px"></i><span>${i%step===0||i===ser.bars.length-1?d.l:''}</span></div>`).join('')}</div></div>
+    <div class="card sec"><h4>Money collected <small>${esc(R.label)}</small></h4>
+      <div class="meter"><span>💵 Cash</span><b>${money(R.cash)}</b></div><div class="meter"><span>💳 Card</span><b>${money(R.card)}</b></div><div class="meter"><span>🔗 Link / online</span><b>${money(R.other)}</b></div>
+      <div class="meter"><span>⏳ Still unpaid</span><b style="color:var(--warn)">${money(R.unpaid)}</b></div><div class="meter"><span>🚚 Delivery fees</span><b>${money(R.dfee)}</b></div><div class="meter"><span>Net sales (excl. VAT)</span><b>${money(R.net)}</b></div></div></div>
+   <div class="split"><div class="card sec"><h4>Best sellers <small>${R.items.length?plural(R.items.length,'product')+' sold':''}</small></h4>${R.items.length?R.items.slice(0,10).map(t=>`<div class="meter"><span>${esc(t.n)} <span class="small muted">${t.kg?U.r2(t.kg)+' kg':''}${t.kg&&t.qty?' + ':''}${t.qty?t.qty+' pcs':''}</span></span><b>${money(U.r2(t.rev))}</b></div>`).join(''):'<div class="muted small">No sales in this period</div>'}</div>
+    <div style="display:grid;gap:14px;align-content:start;min-width:0"><div class="card sec"><h4>By category</h4>${Object.keys(R.cats).length?Object.keys(R.cats).sort((x,y)=>R.cats[y]-R.cats[x]).map(k=>`<div class="cbar"><div class="meter"><span>${esc(k)}</span><b>${money(R.cats[k])}</b></div><i style="width:${Math.max(2,R.cats[k]/catMax*100)}%"></i></div>`).join(''):'<div class="muted small">No sales in this period</div>'}</div>
+     <div class="card sec"><h4>Sales by staff</h4>${Object.keys(R.byStaff).length?Object.keys(R.byStaff).sort((x,y)=>R.byStaff[y]-R.byStaff[x]).map(k=>`<div class="meter"><span>${esc(k)}</span><b>${money(R.byStaff[k])}</b></div>`).join(''):'<div class="muted small">No boutique sales</div>'}</div></div></div>`;
+  {const on=$('#rr .chip.on');if(on&&on.offsetLeft+on.offsetWidth>$('#rr').clientWidth)$('#rr').scrollLeft=on.offsetLeft-16}
+  $('#rr').onclick=e=>{const b=e.target.closest('.chip');if(b){rRange=b.dataset.r;if(rRange==='custom'&&!rFrom){rFrom=localISO(new Date(Date.now()-6*DAY));rTo=todayISO()}renderReports()}};
+  if($('#rf')){const upd=()=>{rFrom=$('#rf').value;rTo=$('#rt').value;renderReports()};$('#rf').onchange=upd;$('#rt').onchange=upd}
+  $('#csv').onclick=()=>exportCSV(R.os);
+  $('#pcsv2').onclick=()=>{const rows=[['Product','Category','Pieces','Weight (kg)','Revenue (AED)']];R.items.forEach(t=>rows.push([t.n,t.c,t.qty||'',t.kg?U.r2(t.kg):'',U.r2(t.rev)]));downloadCSV(rows,'the-touch-products-sold-'+todayISO()+'.csv')};
+  $('#rpdf').onclick=()=>printHTML(reportA4(R),true);
+  $('#zrep').onclick=()=>printHTML(`<div class="rcpt"><div class="c"><img src="img/logo-burgundy.png"><div class="b">SALES REPORT</div><div>${esc(R.label)} · printed ${new Date().toLocaleString('en-GB')}</div></div><hr>
+    <div class="row"><span>Orders</span><span>${R.os.length}</span></div><div class="row b"><span>Total sales</span><span>${R.total.toFixed(2)}</span></div><div class="row"><span>VAT included</span><span>${R.vat.toFixed(2)}</span></div><div class="row"><span>Discounts</span><span>${R.disc.toFixed(2)}</span></div><div class="row"><span>Delivery fees</span><span>${R.dfee.toFixed(2)}</span></div><hr>
+    <div class="row"><span>Boutique</span><span>${R.pos.length}</span></div><div class="row"><span>Website</span><span>${R.web.length}</span></div><hr>
+    <div class="row"><span>Cash collected</span><span>${R.cash.toFixed(2)}</span></div><div class="row"><span>Card collected</span><span>${R.card.toFixed(2)}</span></div><div class="row"><span>Link/online</span><span>${R.other.toFixed(2)}</span></div><div class="row"><span>Unpaid</span><span>${R.unpaid.toFixed(2)}</span></div><hr>
+    ${R.items.slice(0,8).map(t=>`<div class="row"><span>${esc(t.n.slice(0,24))}</span><span>${U.r2(t.rev).toFixed(2)}</span></div>`).join('')}<hr><div class="c">Signature: ____________</div></div>`);
 }
+function reportA4(R){const row=(k,v,b)=>`<div class="${b?'b':''}"><span>${k}</span><span>${v}</span></div>`;
+  return `<div class="inv4 rep"><div class="top"><img src="img/logo-burgundy.png" alt="The Touch"><div><h1>Sales report</h1><div class="no">${esc(R.label)}</div></div></div>
+   <div class="rk"><div><div class="lb">Total sales</div><b>${money(R.total)}</b><small>${plural(R.os.length,'order')}</small></div><div><div class="lb">Net (excl. VAT)</div><b>${money(R.net)}</b><small>VAT ${money(R.vat)}</small></div>
+    <div><div class="lb">Boutique</div><b>${money(R.posT)}</b><small>${plural(R.pos.length,'order')}</small></div><div><div class="lb">Website</div><b>${money(R.webT)}</b><small>${plural(R.web.length,'order')}</small></div></div>
+   <div class="r2"><div><div class="lb">Money collected</div>${row('Cash',money(R.cash))}${row('Card',money(R.card))}${row('Link / online',money(R.other))}${row('Still unpaid',money(R.unpaid))}${row('Delivery fees',money(R.dfee))}${row('Discounts given',money(R.disc))}${row('Average ticket',money(R.avg),1)}</div>
+    <div><div class="lb">By category</div>${Object.keys(R.cats).sort((x,y)=>R.cats[y]-R.cats[x]).map(k=>row(esc(k),money(R.cats[k]))).join('')||'<div>—</div>'}
+     ${Object.keys(R.byStaff).length?`<div class="lb" style="margin-top:5mm">Boutique sales by staff</div>${Object.keys(R.byStaff).sort((x,y)=>R.byStaff[y]-R.byStaff[x]).map(k=>row(esc(k),money(R.byStaff[k]))).join('')}`:''}</div></div>
+   <table><thead><tr><th>Product</th><th>Category</th><th class="r">Sold</th><th class="r">Revenue</th></tr></thead><tbody>${R.items.map(t=>`<tr><td><b>${esc(t.n)}</b></td><td>${esc(t.c)}</td><td class="r">${[t.kg?U.r2(t.kg)+' kg':'',t.qty?t.qty+' pcs':''].filter(Boolean).join(' + ')}</td><td class="r">${money(U.r2(t.rev))}</td></tr>`).join('')||'<tr><td colspan="4">No sales in this period</td></tr>'}</tbody></table>
+   <div class="foot">Printed ${new Date().toLocaleString('en-GB')} · ${esc(S.storeName||'The Touch')}${S.trn?' · TRN '+esc(S.trn):''}</div></div>`}
 function exportCSV(os){
   const rows=[['Order','Date','Channel','Fulfilment','Status','Client','Phone','Emirate','Items','Subtotal','Discount','Delivery','VAT','Total','Payment','Paid','Cash','Card','Cashier']];
   os.forEach(o=>rows.push([o.no,new Date(o.created).toLocaleString('en-GB'),o.channel,o.fulfil||'',o.status,o.customer.name,o.customer.phone,o.emirate||'',o.items.map(l=>l.name+(l.unit==='kg'?' '+U.qtyLabel(l):'')+' x'+l.qty).join('; '),o.subtotal,o.discount||0,o.delivery||0,o.vat,o.total,TT.payLabel(o.payment.method),o.payment.paid?'yes':'no',o.payment.cash||'',o.payment.card||'',o.cashier||'']));
