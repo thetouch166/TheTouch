@@ -378,13 +378,42 @@ table.t tr:hover td{background:#fdfbf8}
 .rcpt .b{font-weight:700}.rcpt .big{font-size:15px;font-weight:700}
 .rprev{background:#f4f1ec;padding:16px;border-radius:12px;display:flex;justify-content:center;max-height:46vh;overflow:auto}
 .rprev .rcpt{background:#fff;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+/* invoice */
+.mbox.inv{width:min(640px,100%)}
+.invprev{background:#ece4d8;border-radius:14px;padding:18px;display:flex;justify-content:center;min-height:240px}
+.invprev img{width:min(440px,100%);height:auto;box-shadow:0 14px 34px rgba(57,38,31,.2);border-radius:3px;align-self:flex-start}
+.ivacts .ivsend{min-width:200px}.ivsend svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6}
+.ivacts .btn:disabled{opacity:.45}
+@media(max-width:760px){.mbox.inv .mb{padding:14px}.invprev{padding:12px}.ivacts{display:grid;grid-template-columns:1fr 1fr}.ivacts .ivsend{grid-column:1/-1;order:-1;height:52px}.ivacts .btn{padding:0 10px}
+ .donea{display:grid;grid-template-columns:1fr 1fr}.donea [data-close]{grid-column:1/-1;order:-1;height:52px}}
+.inv4{width:100%;max-width:182mm;font-family:var(--sans);color:#2a2228;font-size:9.5pt;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.inv4 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:10mm;padding-bottom:6mm;border-bottom:1.5pt solid #b8843f}
+.inv4 .top img{height:22mm;width:auto}
+.inv4 h1{font-family:var(--serif);font-weight:600;font-size:28pt;line-height:1;color:var(--bur);text-align:right}
+.inv4 .no{text-align:right;font-weight:600;letter-spacing:.06em;margin-top:2mm}
+.inv4 .lb{font-size:6.8pt;letter-spacing:.22em;text-transform:uppercase;color:#857873;font-weight:600;margin-bottom:1.2mm}
+.inv4 .meta{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:7mm;margin:7mm 0 8mm}
+.inv4 table{width:100%;border-collapse:collapse}
+.inv4 th{font-size:6.8pt;letter-spacing:.22em;text-transform:uppercase;color:#857873;font-weight:600;text-align:left;padding:0 0 2.5mm;border-bottom:1.2pt solid #2a2228}
+.inv4 td{padding:3.2mm 0;border-bottom:.6pt solid #eadfce;vertical-align:top}.inv4 .r{text-align:right;white-space:nowrap}
+.inv4 td b{font-weight:600}.inv4 .d{color:#857873;font-size:8.5pt}
+.inv4 .tw{display:flex;justify-content:space-between;align-items:flex-start;gap:10mm;margin-top:6mm}
+.inv4 .pay{font-size:7.5pt;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:2mm 4mm;border-radius:10mm;background:#fbf0df;color:#9a5b12;margin-top:1mm}
+.inv4 .pay.ok{background:#eaf3ec;color:#2f6b3a}
+.inv4 .tot{width:78mm}.inv4 .tot>div{display:flex;justify-content:space-between;padding:1.1mm 0}.inv4 .tot>div span:first-child{color:#857873}
+.inv4 .grand{border-top:1.5pt solid #b8843f;margin-top:2mm;padding-top:3mm!important;align-items:baseline}.inv4 .grand span{font-family:var(--serif);font-weight:600;font-size:21pt;color:var(--bur)!important}
+.inv4 .tot>.vi{display:block;text-align:right;color:#857873;font-size:7.5pt;padding:0}
+.inv4 .gift{margin-top:8mm;background:#f6eee2;border-radius:3mm;padding:5mm 6mm;font-family:var(--serif);font-style:italic;font-size:13pt;color:var(--bur)}
+.inv4 .gift .lb{font-family:var(--sans);font-style:normal}
+.inv4 .foot{margin-top:12mm;padding-top:6mm;border-top:.6pt solid #eadfce;text-align:center;color:#857873;font-size:8pt}
+.inv4 .foot i{font-family:var(--serif);font-size:13pt;color:var(--bur)}
 @media print{
-  @page{size:80mm auto;margin:3mm}
   body{background:#fff;overflow:visible}
   body>*:not(#printArea){display:none!important}
   #printArea{display:block}
 }
 </style>
+<style id="pgsz">@page{size:80mm auto;margin:3mm}</style>
 </head>
 <body>
 
@@ -836,12 +865,12 @@ function payModal(){
 function doneModal(o){
   const inst=o.fulfil==='instore';
   const m=modal(`<div class="mb"><div class="done"><div class="ck"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></div>
-    <h3 style="font-size:22px">${inst?'Sale complete':'Order confirmed'}</h3><div class="muted">${esc(o.no)} · ${money(o.total)} · ${TT.payLabel(o.payment.method)}${o.payment.paid?'':' (unpaid)'}</div>
+    <h3 style="font-size:22px">${inst?'Sale complete':'Order confirmed'}</h3><div class="muted">${esc(o.no)} · ${money(o.total)} · ${payName(o)}${o.payment.paid?'':' (unpaid)'}</div>
     ${!inst?`<div class="muted small" style="margin-top:6px">${fulfilLabel(o)} ${niceDate(o.date)} ${esc(o.slot||'')} — now in Orders</div>`:''}
     ${o.payment.change?`<div class="change big" style="margin:16px auto 0;max-width:300px"><small>Change to give</small>${money(o.payment.change)}</div>`:''}</div>
     <div class="rprev" style="margin-top:18px">${receiptHTML(o)}</div></div>
-   <div class="mf" style="justify-content:center"><button class="btn b-line" id="rpr">🖨 Print</button>${o.customer.phone?`<a class="btn b-line" target="_blank" rel="noopener" href="${waLink(o.customer.phone,receiptText(o))}">WhatsApp receipt</a>`:''}<button class="btn b-dark" data-close data-ok style="min-width:150px">New sale</button></div>`,'pm');
-  m.querySelector('#rpr').onclick=()=>printReceipt(o);m._key=e=>{if(e.key==='p'||e.key==='P'){printReceipt(o);return true}return false};
+   <div class="mf donea" style="justify-content:center"><button class="btn b-line" id="rpr">🖨 Print receipt</button><button class="btn b-line" id="rinv">Invoice · WhatsApp</button><button class="btn b-dark" data-close data-ok style="min-width:150px">New sale</button></div>`,'pm');
+  m.querySelector('#rpr').onclick=()=>printReceipt(o);m.querySelector('#rinv').onclick=()=>invoiceModal(o);m._key=e=>{if(e.key==='p'||e.key==='P'){printReceipt(o);return true}return false};
   m.onclose=()=>{if(posFine()&&$('#posQ'))$('#posQ').focus()};
 }
 
@@ -859,15 +888,93 @@ function receiptHTML(o){
    <div class="row"><span>Net (excl. VAT)</span><span>${U.r2(o.total-o.vat).toFixed(2)}</span></div>
    <div class="row"><span>VAT ${S.vatRate}%</span><span>${o.vat.toFixed(2)}</span></div>
    <div class="row big"><span>TOTAL ${S.currency}</span><span>${o.total.toFixed(2)}</span></div><hr>
-   <div>Payment: ${TT.payLabel(p.method)}${p.paid?'':' (UNPAID)'}</div>
+   <div>Payment: ${payName(o)}${p.paid?'':' (UNPAID)'}</div>
    ${p.cash?`<div class="row"><span>Cash received</span><span>${(p.tendered||p.cash).toFixed(2)}</span></div>`:''}
    ${p.card?`<div class="row"><span>Card</span><span>${p.card.toFixed(2)}</span></div>`:''}
    ${p.change?`<div class="row"><span>Change</span><span>${p.change.toFixed(2)}</span></div>`:''}<hr>
    ${o.gift&&o.gift.msg?`<div><b>Gift message${o.gift.to?' to '+esc(o.gift.to):''}:</b><br>${esc(o.gift.msg)}</div><hr>`:''}
    <div class="c">${esc(S.receiptFooter)}<br>@${esc(S.instagram)}</div></div>`}
-function receiptText(o){return `The Touch — ${o.fulfil==='instore'?'Receipt':'Order'} ${o.no}\n${new Date(o.created).toLocaleString('en-GB')}\n\n${o.items.map(l=>`${l.name}${l.unit==='kg'?' '+U.qtyLabel(l):''} x${l.qty} — ${money(U.lineTotal(l))}`).join('\n')}\n\n${o.discount?'Discount: −'+money(o.discount)+'\n':''}${o.delivery?'Delivery: '+money(o.delivery)+'\n':''}Total: ${money(o.total)} (incl. VAT ${money(o.vat)})\n${o.payment.paid?'Paid: '+TT.payLabel(o.payment.method):'Payment: '+TT.payLabel(o.payment.method)}${o.fulfil&&o.fulfil!=='instore'?`\n${fulfilLabel(o)}: ${niceDate(o.date)} ${o.slot||''}`:''}\n\n${S.receiptFooter}`}
-function printHTML(h){$('#printArea').innerHTML=h;const img=$('#printArea img');const go=()=>setTimeout(()=>{try{window.print()}catch(e){}},80);if(img&&!img.complete){img.onload=go;img.onerror=go}else go()}
+function receiptText(o){const L=[`*The Touch* — ${invTitle()} ${o.no}`,invDate(o),''];
+  o.items.forEach(l=>L.push(`• ${l.name}${l.unit==='kg'?' '+U.qtyLabel(l):''} × ${l.qty} — ${money(U.lineTotal(l))}`));
+  L.push('');if(o.discount)L.push('Discount: −'+money(o.discount));if(o.delivery)L.push('Delivery: '+money(o.delivery));
+  L.push(`*Total: ${money(o.total)}* (incl. VAT ${money(o.vat)})`,((o.payment||{}).paid?'Paid · ':'Payment: ')+payName(o));
+  if(o.fulfil&&o.fulfil!=='instore')L.push(`${fulfilLabel(o)}: ${niceDate(o.date)} ${o.slot||''}`.trim());
+  L.push('',S.receiptFooter);if(S.instagram)L.push('@'+S.instagram);return L.join('\n')}
+function printHTML(h,a4){$('#printArea').innerHTML=h;$('#pgsz').textContent=a4?'@page{size:A4;margin:12mm 14mm}':'@page{size:80mm auto;margin:3mm}';const img=$('#printArea img');const go=()=>setTimeout(()=>{try{window.print()}catch(e){}},80);if(img&&!img.complete){img.onload=go;img.onerror=go}else go()}
 function printReceipt(o){printHTML(receiptHTML(o))}
+
+/* =================== invoice: branded image (WhatsApp / download) + A4 print / PDF =================== */
+const LOGO=new Image();LOGO.src='img/logo-burgundy.png';
+const IV={bur:'#40050e',gold:'#b8843f',ink:'#2a2228',mute:'#857873',line:'#eadfce',cream:'#f6eee2',ivory:'#fdfaf6',ok:'#2f6b3a',warn:'#9a5b12'};
+function invTitle(){return S.trn?'Tax Invoice':'Invoice'}
+function payName(o){const m=(o.payment||{}).method;if(o.fulfil==='pickup'){if(m==='cod')return 'Cash on pick-up';if(m==='card_on_delivery')return 'Card on pick-up'}return TT.payLabel(m)}
+function invDate(o){const d=new Date(o.created);return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
+function invItems(o){return o.items.map(l=>({n:l.name,d:(l.unit==='kg'?(l.qty>1?l.qty+' × ':'')+U.qtyLabel(l)+' @ '+money(l.price)+' / kg':l.qty+' × '+money(l.price))+(l.disc?' · less '+money(l.disc):''),a:money(U.lineTotal(l))}))}
+function invTotals(o){const r=[['Subtotal',money(o.subtotal)]];if(o.discount)r.push(['Discount','− '+money(o.discount)]);if(o.fulfil==='delivery')r.push(['Delivery',o.delivery?money(o.delivery):'Complimentary']);r.push(['Net (excl. VAT)',money(U.r2(o.total-o.vat))],['VAT '+S.vatRate+'%',money(o.vat)]);return r}
+function invFulfil(o){return o.fulfil==='pickup'?'Boutique pick-up':[o.address,o.area,o.emirate].filter(Boolean).join(', ')}
+async function invoiceCanvas(o){
+  try{await Promise.race([Promise.all(['600 60px "Cormorant Garamond"','italic 500 34px "Cormorant Garamond"','400 22px Montserrat','500 26px Montserrat','600 26px Montserrat'].map(f=>document.fonts.load(f))),new Promise(r=>setTimeout(r,2500))])}catch(e){}
+  if(!LOGO.complete)await new Promise(r=>{LOGO.onload=LOGO.onerror=r;setTimeout(r,2500)});
+  const W=1080,P=84,c=document.createElement('canvas'),x=c.getContext('2d');let H=0;
+  const SER='"Cormorant Garamond",Georgia,serif',SAN='Montserrat,"Helvetica Neue",Arial,sans-serif';
+  const run=draw=>{let y=0;
+    const font=(w,s,f)=>{x.font=`${w} ${s}px ${f||SAN}`};
+    const txt=(t,X,Y,al,col)=>{if(!draw)return;x.textAlign=al||'left';x.fillStyle=col||IV.ink;x.fillText(t,X,Y)};
+    const sw=(t,sp)=>[...t].reduce((a,ch)=>a+x.measureText(ch).width,0)+sp*([...t].length-1);
+    const spaced=(t,X,Y,sp,al,col)=>{const w=sw(t,sp);let sx=al==='center'?X-w/2:al==='right'?X-w:X;if(draw){x.textAlign='left';x.fillStyle=col;[...t].forEach(ch=>{x.fillText(ch,sx,Y);sx+=x.measureText(ch).width+sp})}return w};
+    const wrap=(t,mw)=>{const out=[];let ln='';String(t||'').split(/\s+/).forEach(w=>{const tt=ln?ln+' '+w:w;if(x.measureText(tt).width>mw&&ln){out.push(ln);ln=w}else ln=tt});if(ln)out.push(ln);return out};
+    const rule=(Y,x0,x1,col,h)=>{if(draw){x.fillStyle=col;x.fillRect(x0,Y,x1-x0,h||1.5)}};
+    const rrect=(X,Y,w,h,r,col)=>{if(!draw)return;x.fillStyle=col;x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath();x.fill()};
+    const label=(t,X,Y,al)=>{font(600,17);spaced(t.toUpperCase(),X,Y,3.5,al||'left',IV.mute)};
+    if(draw){x.fillStyle=IV.ivory;x.fillRect(0,0,W,H);x.fillStyle=IV.bur;x.fillRect(0,0,W,12);x.fillStyle=IV.gold;x.fillRect(0,12,W,3)}
+    y=78;const lh=140,lw=lh*900/388;if(draw&&LOGO.naturalWidth)x.drawImage(LOGO,(W-lw)/2,y,lw,lh);y+=lh+44;
+    font(600,19);spaced(invTitle().toUpperCase(),W/2,y,8,'center',IV.gold);y+=42;
+    font(400,21);[S.address,[S.phone,S.email].filter(Boolean).join('   ·   '),S.trn?'TRN  '+S.trn:''].filter(Boolean).forEach(t=>{txt(t,W/2,y,'center',IV.mute);y+=32});
+    y+=22;rule(y,P,W-P,IV.line);y+=58;
+    const cr=W/2+60;let yl=y,yr=y;
+    label('Billed to',P,yl);yl+=42;font(600,28);wrap(o.customer.name||'Walk-in client',cr-P-40).forEach(t=>{txt(t,P,yl);yl+=36});
+    font(400,22);[o.customer.phone,o.customer.email].filter(Boolean).forEach(t=>{txt(t,P,yl,'left',IV.mute);yl+=32});
+    label('Invoice no.',cr,yr);yr+=42;font(600,25);txt(o.no,cr,yr);yr+=50;label('Date',cr,yr);yr+=40;font(500,22);txt(invDate(o),cr,yr);
+    y=Math.max(yl,yr)+30;
+    if(o.fulfil&&o.fulfil!=='instore'){label(fulfilLabel(o),P,y);y+=40;font(500,23);wrap(invFulfil(o),W-2*P).forEach(t=>{txt(t,P,y);y+=32});font(400,22);const w=[niceDate(o.date),o.slot].filter(Boolean).join('  ·  ');if(w){txt(w,P,y,'left',IV.mute);y+=32}y+=10}
+    y+=26;label('Description',P,y);label('Amount',W-P,y,'right');y+=22;rule(y,P,W-P,IV.ink,2);y+=52;
+    invItems(o).forEach(l=>{font(500,25);wrap(l.n,W-2*P-250).forEach((t,i)=>{txt(t,P,y);if(!i){font(600,25);txt(l.a,W-P,y,'right');font(500,25)}y+=34});font(400,20);txt(l.d,P,y,'left',IV.mute);y+=30;rule(y,P,W-P,IV.line,1);y+=50});
+    y+=6;const lx=W/2+10,tx=W-P;
+    invTotals(o).forEach(([k,v])=>{font(400,22);txt(k,lx,y,'left',IV.mute);font(500,23);txt(v,tx,y,'right');y+=40});
+    rule(y-8,lx,tx,IV.gold,2);y+=60;font(600,19);spaced('TOTAL',lx,y-10,6,'left',IV.bur);font(600,62,SER);txt(money(o.total),tx,y,'right',IV.bur);y+=34;font(400,19);txt('VAT inclusive',tx,y,'right',IV.mute);y+=64;
+    const p=o.payment||{};const pt=(p.paid?'Paid':'Awaiting payment')+'  ·  '+payName(o)+(p.ref?'  ·  Ref '+p.ref:'');font(600,18);const pw=sw(pt.toUpperCase(),2.5);
+    rrect(P,y-38,pw+56,58,29,p.paid?'#eaf3ec':'#fbf0df');spaced(pt.toUpperCase(),P+28,y-2,2.5,'left',p.paid?IV.ok:IV.warn);y+=58;
+    if(o.gift&&o.gift.msg){font('italic 500',30,SER);const gl=wrap('“'+o.gift.msg+'”',W-2*P-80);const gh=86+gl.length*40;rrect(P,y,W-2*P,gh,18,IV.cream);let gy=y+50;label('Gift message'+(o.gift.to?' for '+o.gift.to:''),P+40,gy);gy+=46;font('italic 500',30,SER);gl.forEach(t=>{txt(t,P+40,gy,'left',IV.bur);gy+=40});y+=gh+46}
+    y+=20;rule(y,W/2-40,W/2+40,IV.gold,2);y+=64;font('italic 500',34,SER);wrap(S.receiptFooter,W-2*P-60).forEach(t=>{txt(t,W/2,y,'center',IV.bur);y+=44});
+    y+=8;font(400,20);txt(['@'+S.instagram,'thetouch.ae'].join('   ·   '),W/2,y,'center',IV.mute);y+=70;
+    if(draw){x.fillStyle=IV.gold;x.fillRect(0,y,W,3);x.fillStyle=IV.bur;x.fillRect(0,y+3,W,12)}return y+15};
+  H=Math.ceil(run(false));c.width=W;c.height=H;run(true);return c}
+function invoiceA4(o){const p=o.payment||{};
+  return `<div class="inv4"><div class="top"><img src="img/logo-burgundy.png" alt="The Touch"><div><h1>${invTitle()}</h1><div class="no">${esc(o.no)}</div></div></div>
+   <div class="meta"><div><div class="lb">From</div><b>${esc(S.storeName||'The Touch')}</b><br>${esc(S.address)}<br>${esc(S.phone)}${S.email?'<br>'+esc(S.email):''}${S.trn?'<br>TRN '+esc(S.trn):''}</div>
+    <div><div class="lb">Billed to</div><b>${esc(o.customer.name||'Walk-in client')}</b>${o.customer.phone?'<br>'+esc(o.customer.phone):''}${o.customer.email?'<br>'+esc(o.customer.email):''}</div>
+    <div><div class="lb">Date</div>${invDate(o)}${o.fulfil&&o.fulfil!=='instore'?`<div class="lb" style="margin-top:3mm">${fulfilLabel(o)}</div>${esc(invFulfil(o))}<br>${esc([niceDate(o.date),o.slot].filter(Boolean).join(' · '))}`:''}</div></div>
+   <table><thead><tr><th>Description</th><th class="r">Amount</th></tr></thead><tbody>${invItems(o).map(l=>`<tr><td><b>${esc(l.n)}</b><div class="d">${esc(l.d)}</div></td><td class="r">${l.a}</td></tr>`).join('')}</tbody></table>
+   <div class="tw"><div class="pay ${p.paid?'ok':''}">${p.paid?'Paid':'Awaiting payment'} · ${esc(payName(o))}${p.ref?' · Ref '+esc(p.ref):''}</div>
+    <div class="tot">${invTotals(o).map(([k,v])=>`<div><span>${k}</span><span>${v}</span></div>`).join('')}<div class="grand"><span>Total</span><span>${money(o.total)}</span></div><div class="vi">VAT inclusive</div></div></div>
+   ${o.gift&&o.gift.msg?`<div class="gift"><div class="lb">Gift message${o.gift.to?' for '+esc(o.gift.to):''}</div>“${esc(o.gift.msg)}”</div>`:''}
+   <div class="foot"><i>${esc(S.receiptFooter)}</i><br>@${esc(S.instagram)} · thetouch.ae</div></div>`}
+function invShareText(o){return `${invTitle()} ${o.no} — The Touch\nTotal ${money(o.total)} (VAT incl.)\n${S.receiptFooter}`}
+function invoiceModal(o){
+  const m=modal(`<div class="mh"><h3>${invTitle()} · ${esc(o.no)}</h3><button class="x" data-close aria-label="Close">×</button></div>
+   <div class="mb"><div class="invprev" id="ivp"><div class="muted small" style="align-self:center">Preparing invoice…</div></div></div>
+   <div class="mf ivacts"><button class="btn b-line" id="ivpdf">🖨 Print / PDF (A4)</button><button class="btn b-line" id="ivdl" disabled>⬇ Download</button>
+    ${o.customer.phone?`<a class="btn b-line" id="ivwa" target="_blank" rel="noopener" href="${waLink(o.customer.phone,receiptText(o))}">WhatsApp text</a>`:''}
+    <button class="btn b-dark ivsend" id="ivsh" data-ok disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 00-7.8 13.5L3 21l4.6-1.2A9 9 0 1012 3z"/><path d="M8.8 8.6c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.7c.1.2 0 .4-.1.6l-.5.6c-.1.1-.2.3 0 .5.5.9 1.3 1.7 2.3 2.2.2.1.4.1.5-.1l.6-.7c.2-.2.4-.2.6-.1l1.6.8c.2.1.4.3.3.5 0 .6-.3 1.3-.9 1.6-.6.3-1.4.4-2.6-.1a10 10 0 01-4.6-4.3c-.6-1.1-.4-2.1.3-2.7z"/></svg>Send on WhatsApp</button></div>`,'pm inv');
+  let blob=null;const name='The-Touch-'+invTitle().replace(' ','-')+'-'+o.no+'.png';
+  const dl=()=>{if(!blob)return;const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)};
+  m.querySelector('#ivpdf').onclick=()=>printHTML(invoiceA4(o),true);
+  m.querySelector('#ivdl').onclick=()=>{dl();toast('Invoice image saved ✓')};
+  m.querySelector('#ivsh').onclick=async()=>{if(!blob)return;const file=new File([blob],name,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:invTitle()+' '+o.no,text:invShareText(o)})}catch(e){if(e&&e.name!=='AbortError')toast('Could not open sharing — use Download instead')}return}
+    dl();window.open(waLink(o.customer.phone||'',invShareText(o)),'_blank','noopener');toast('Invoice image saved to Downloads — drag it into the WhatsApp chat',true)};
+  invoiceCanvas(o).then(c=>new Promise(r=>c.toBlob(b=>r([c,b]),'image/png'))).then(([c,b])=>{blob=b;if(!m.isConnected)return;const im=new Image();im.alt=invTitle()+' '+o.no;im.src=URL.createObjectURL(b);const pv=m.querySelector('#ivp');pv.innerHTML='';pv.appendChild(im);m.querySelector('#ivdl').disabled=false;m.querySelector('#ivsh').disabled=false}).catch(e=>{console.error(e);m.querySelector('#ivp').innerHTML='<div class="muted small">Could not draw the invoice image — use Print / PDF.</div>'});
+  return m}
 
 /* =================== ORDERS =================== */
 let oFilter='active',oChan='all',oQ='',oSel=null,oMode=localStorage.getItem('tt_omode')||'board';
@@ -926,7 +1033,7 @@ function orderHTML(o,inModal){
    <dl class="kv">
      <dt>Client</dt><dd><b>${esc(o.customer.name||'Walk-in')}</b> ${o.customer.phone?`· ${esc(o.customer.phone)}`:''}${o.customer.email?'<br>'+esc(o.customer.email):''}</dd>
      ${o.fulfil&&o.fulfil!=='instore'?`<dt>${fulfilLabel(o)}</dt><dd>${o.fulfil==='pickup'?'Boutique pick-up':esc([o.address,o.area,o.emirate].filter(Boolean).join(', '))}<br><b>${niceDate(o.date)}</b> ${esc(o.slot||'')}</dd>`:''}
-     <dt>Payment</dt><dd>${TT.payLabel(p.method)} · ${p.paid?'<b style="color:var(--ok)">Paid</b>':'<b style="color:var(--warn)">Not paid yet</b>'}${p.ref?' · ref '+esc(p.ref):''}</dd>
+     <dt>Payment</dt><dd>${payName(o)} · ${p.paid?'<b style="color:var(--ok)">Paid</b>':'<b style="color:var(--warn)">Not paid yet</b>'}${p.ref?' · ref '+esc(p.ref):''}</dd>
      ${o.notes?`<dt>Notes</dt><dd>${esc(o.notes)}</dd>`:''}
    </dl>
    ${o.gift&&(o.gift.msg||o.gift.to)?`<div class="giftbox">🎁 <b>Gift${o.gift.to?' for '+esc(o.gift.to):''}</b>${o.gift.phone?' · '+esc(o.gift.phone):''}<br>${esc(o.gift.msg||'')}</div>`:''}
@@ -937,14 +1044,14 @@ function orderHTML(o,inModal){
     <div class="it" style="font-weight:700;font-size:16px;border:0"><span>Total <span class="small muted" style="font-weight:500">incl. VAT ${money(o.vat)}</span></span><span>${money(o.total)}</span></div></div>
    <div class="sline" style="margin-bottom:0">
      ${!p.paid&&o.status!=='cancelled'?`<button class="btn b-gold b-sm" data-paid="1">Mark as paid</button>`:''}
-     <button class="btn b-line b-sm" data-print="1">🖨 Print</button>
+     <button class="btn b-line b-sm" data-print="1">🖨 Receipt</button><button class="btn b-line b-sm" data-inv="1">Invoice · WhatsApp</button>
      ${o.customer.phone?`<a class="btn b-line b-sm" target="_blank" rel="noopener" href="${waLink(o.customer.phone,`Dear ${o.customer.name||'client'}, thank you for your order ${o.no} with The Touch (${money(o.total)}).`+(o.fulfil&&o.fulfil!=='instore'?` We confirm your ${o.fulfil==='pickup'?'pick-up':'delivery'} on ${niceDate(o.date)} ${o.slot||''}.`:''))}">WhatsApp client</a>`:''}
      ${o.fulfil==='delivery'?`<a class="btn b-line b-sm" target="_blank" rel="noopener" href="${waLink('',`🚚 The Touch delivery ${o.no}\n${o.customer.name} · ${o.customer.phone}\n${[o.address,o.area,o.emirate].filter(Boolean).join(', ')}\n${niceDate(o.date)} ${o.slot||''}\n${o.payment.paid?'PAID':'COLLECT '+money(o.total)+' ('+TT.payLabel(o.payment.method)+')'}${o.gift&&o.gift.to?'\nRecipient: '+o.gift.to+' '+(o.gift.phone||''):''}`)}">Send to driver</a>`:''}
    </div>`}
 function bindOrder(root,o,m){
   root.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{await setStatus(o,b.dataset.s);if(m)m.close()});
   const pd=root.querySelector('[data-paid]');if(pd)pd.onclick=()=>{markPaid(o,m?()=>openOrder(o.id):null);if(m)m.close()};
-  root.querySelector('[data-print]').onclick=()=>printReceipt(o);
+  root.querySelector('[data-print]').onclick=()=>printReceipt(o);root.querySelector('[data-inv]').onclick=()=>invoiceModal(o);
 }
 function markPaid(o,after){
   if(!SHIFT){openShiftModal(()=>markPaid(o,after));return}
