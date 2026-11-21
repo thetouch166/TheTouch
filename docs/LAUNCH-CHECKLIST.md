@@ -24,19 +24,19 @@ All known bugs are fixed and tested. What's left is real content from the client
 **A. Domain to Cloudflare (do first)**: dash.cloudflare.com → Add a domain → Free plan → copy the 2 nameservers → set them at the registrar (turn DNSSEC off there first) → wait for "Active".
 **B. R2 for photos**: R2 Object Storage → activate (card on file, 10 GB free) → Create bucket `the-touch-photos`, location Automatic.
 **C. Deploy**: on the dev laptop in this folder: `npx wrangler login` → `npx wrangler pages project create the-touch --production-branch main` → `npx wrangler pages deploy`. Then Workers & Pages → the-touch → Settings → Variables and secrets → add **Secrets** `DATABASE_URL`, `STAFF_LOGINS` (`owner@thetouch.ae:Password; …`), `RESEND_API_KEY` → deploy once more.
-**D. Connect**: the-touch → Custom domains → add `thetouch.ae` and `www.thetouch.ae`.
+**D. Connect**: the-touch → Custom domains → add `thetouchchocolate.com` and `www.thetouchchocolate.com`.
 - [ ] Nameservers changed · [ ] Domain Active · [ ] R2 bucket · [ ] Deployed (`the-touch.pages.dev`) · [ ] Secrets set · [ ] Custom domains + padlock
 
 Updating later: `npx wrangler pages deploy` from this folder (drag-and-drop does not include the API). Prices/products/settings are changed in the admin — no re-deploy.
 
 ## 4. Email (~20 min, free)
-Send (order emails): resend.com → Domains → Add `thetouch.ae` → add the shown records in Cloudflare DNS (DNS only) or use Resend's Cloudflare auto-setup → Verified → API Keys → Create (Sending access) → paste as `RESEND_API_KEY`. Add TXT `_dmarc` = `v=DMARC1; p=none;`.
+Send (order emails): resend.com → Domains → Add `thetouchchocolate.com` → add the shown records in Cloudflare DNS (DNS only) or use Resend's Cloudflare auto-setup → Verified → API Keys → Create (Sending access) → paste as `RESEND_API_KEY`. Add TXT `_dmarc` = `v=DMARC1; p=none;`.
 Receive: Cloudflare → domain → Email → Email Routing → enable → verify the Gmail destination → create address `hello` → send to the Gmail.
-Reply as hello@ from Gmail (optional): Gmail with 2-Step Verification → App password → Settings → Accounts → Send mail as → `hello@thetouch.ae`, SMTP `smtp.gmail.com`, port 587.
+Reply as hello@ from Gmail (optional): Gmail with 2-Step Verification → App password → Settings → Accounts → Send mail as → `hello@thetouchchocolate.com`, SMTP `smtp.gmail.com`, port 587.
 - [ ] Resend domain verified · [ ] API key set · [ ] hello@ forwarding works · [ ] Test order email arrives (shop + customer)
 
 ## 5. Shop setup (~30 min)
-- [ ] Shop laptop/tablet: open `https://thetouch.ae/admin.html` in Chrome, sign in
+- [ ] Shop laptop/tablet: open `https://thetouchchocolate.com/admin.html` in Chrome, sign in
 - [ ] Chrome → Install app (full-screen POS)
 - [ ] Allow notifications, volume up (new-order chime)
 - [ ] 80 mm receipt printer: test print (margins None, headers off, always use this printer)
@@ -46,7 +46,7 @@ Reply as hello@ from Gmail (optional): Gmail with 2-Step Verification → App pa
 
 ## 6. Launch test (two devices: shop laptop + your phone)
 - [ ] Admin shows **Live · synced**
-- [ ] `https://thetouch.ae` and `www` load with padlock
+- [ ] `https://thetouchchocolate.com` and `www` load with padlock
 - [ ] Phone: delivery order (cash on delivery, gift message) → laptop chimes, order on board
 - [ ] Confirm → stock down; Cancel → stock back
 - [ ] Pick-up order → Completed → record payment as Card

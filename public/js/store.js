@@ -5,12 +5,14 @@
   'use strict';
 
   /* ---------------- Seed catalogue ---------------- */
+  // nav = short label for the website menu. The website and POS only show categories that have products on sale.
   const CATS = [
-    { id: 'pralines', name: 'Pralines & Bonbons', ar: 'برالين' },
-    { id: 'oriental', name: 'Oriental Collection', ar: 'تشكيلة شرقية' },
-    { id: 'bars', name: 'Bars & Slims', ar: 'ألواح' },
-    { id: 'dipped', name: 'Dipped Fruits & Nuts', ar: 'فواكه ومكسرات' },
-    { id: 'gifts', name: 'Gifts & Arrangements', ar: 'هدايا وتنسيقات' }
+    { id: 'national', name: 'National Day Collection', ar: 'تشكيلة اليوم الوطني', nav: 'National Day' },
+    { id: 'pralines', name: 'Pralines & Bonbons', ar: 'برالين', nav: 'Pralines' },
+    { id: 'oriental', name: 'Oriental Collection', ar: 'تشكيلة شرقية', nav: 'Oriental' },
+    { id: 'bars', name: 'Bars & Slims', ar: 'ألواح', nav: 'Bars & Slims' },
+    { id: 'dipped', name: 'Dipped Fruits & Nuts', ar: 'فواكه ومكسرات', nav: 'Fruits & Nuts' },
+    { id: 'gifts', name: 'Gifts & Arrangements', ar: 'هدايا وتنسيقات', nav: 'Gifting' }
   ];
 
   // price = AED. unit 'kg' → sold by weight (online: 250g / 500g / 1kg; POS: enter grams)
@@ -19,6 +21,7 @@
     id, sku: id.toUpperCase().replace(/-/g, '').slice(0, 8), name, ar, cat, unit, price, desc,
     img: 'img/' + id + '.jpg', stock: unit === 'kg' ? 20 : 40, active: true, featured: false
   }, extra || {});
+  const G = (id, name, ar, cat, price, desc, extra) => P(id, name, ar, cat, 'pc', price, desc, Object.assign({ img: 'POS_products/' + id + '.jpg', stock: 10, min: 2 }, extra || {}));
 
   const SEED = [
     P('salted-caramel', 'Salted Caramel Hazelnut', 'كراميل مملّح بالبندق', 'pralines', 'kg', 185, 'A whole roasted hazelnut wrapped in soft salted caramel and enrobed in milk chocolate, finished with a dusting of cocoa.', { featured: true }),
@@ -48,7 +51,18 @@
     P('pecan-florentine', 'Pecan & Florentine Pistachio', 'جوز البيكان وفلورنتين بالفستق الحلبي', 'dipped', 'kg', 185, 'Glazed pecans on a pistachio florentine base.'),
     P('gift-bag', 'Signature Gift Bag Arrangement', 'تنسيق حقيبة الهدايا', 'gifts', 'kg', 185, 'A luxurious designer-bag arrangement filled with an assortment of our finest pralines and wrapped chocolates. Customisable colours and ribbons.', { stock: 5, featured: true }),
     P('gift-tray', 'Crystal Tray Arrangement', 'تنسيق صينية كريستال', 'gifts', 'kg', 185, 'An acrylic or crystal tray arranged with 1 kg of assorted pralines, perfect for Eid, weddings and new-baby receptions.', { img: 'img/gift-bag-sign.jpg', stock: 5 }),
-    P('box-500', 'Assorted Pralines Box — 500 g', 'علبة برالين مشكلة ٥٠٠ غ', 'gifts', 'kg', 185, 'Our chocolatier\'s selection of signature pralines in a reusable The Touch box.', { img: 'img/banner-coconut.jpg', stock: 20, featured: true })
+    P('box-500', 'Assorted Pralines Box — 500 g', 'علبة برالين مشكلة ٥٠٠ غ', 'gifts', 'kg', 185, 'Our chocolatier\'s selection of signature pralines in a reusable The Touch box.', { img: 'img/banner-coconut.jpg', stock: 20, featured: true }),
+    // Grand-opening collection (Nov 2026): fixed-price pieces, in-store photos in POS_products/.
+    // For the opening the live shop sells ONLY these; the products above are switched off (Admin → Products → On sale).
+    G('nd-flag-box', 'UAE Flag Box — 1,205 g', 'علبة علم الإمارات — ١٢٠٥ غ', 'national', 465, 'Our black keepsake box, foiled in gold with The Touch crest, holding hand-wrapped chocolates laid out as the UAE flag in red, green, white and black. Net weight 1,205 g.'),
+    G('nd-wood-bowl', 'National Day Wooden Bowl — 952 g', 'وعاء خشبي لليوم الوطني — ٩٥٢ غ', 'national', 465, 'A hand-turned wooden bowl with rope handles, ringed with green, white and black wrapped chocolates and crowned in red with a UAE flag and a gold emblem. Net weight 952 g.'),
+    G('nd-crystal-tray', 'Proud of UAE Crystal Tray — 1,220 g', 'صينية كريستال فخور بالإمارات — ١٢٢٠ غ', 'national', 680, 'A cut-crystal platter of hand-wrapped chocolates in rings of black, white, green and red, finished with a “Proud of UAE” centrepiece and a flag. Net weight 1,220 g.'),
+    G('nd-trio-tray', 'National Day Trio Tray — 1,815 g', 'صينية ثلاثية لليوم الوطني — ١٨١٥ غ', 'national', 795, 'A sculpted wooden tray on black hairpin legs, with three compartments of wrapped chocolates in the colours of the flag. Net weight 1,815 g.'),
+    G('dragee-jar', 'Chocolate Dragées Jar — 350 g', 'علبة دراجيه بالشوكولاتة — ٣٥٠ غ', 'gifts', 105, 'Roasted almonds and hazelnuts coated in milk or dark chocolate, in a clear keepsake jar with The Touch lid. Net weight 350 g.', { featured: true }),
+    G('gold-truffle-tray', 'Golden Truffle Tray — 1,074 g', 'صينية ذهبية بالترافل والمكسرات — ١٠٧٤ غ', 'gifts', 675, 'A cut-crystal bowl wrapped in gold and piled with chocolate truffles and nut-topped squares of almond, cashew and pistachio, finished with white blossoms. Net weight 1,074 g.', { featured: true }),
+    G('gold-pecan-tray', 'Golden Pecan Tray — 1,164 g', 'صينية ذهبية بالبيكان — ١١٦٤ غ', 'gifts', 695, 'A cut-crystal bowl wrapped in gold and piled with pecan clusters and milk chocolate truffles, finished with white blossoms. Net weight 1,164 g.', { featured: true }),
+    G('signature-box', 'Assorted Signature Box — 1,100 g', 'علبة الشوكولاتة المشكّلة — ١١٠٠ غ', 'gifts', 315, 'Our burgundy keepsake box with nine rows of signature chocolates: truffles, pralines, nut crunch and pistachio squares. Net weight 1,100 g.', { featured: true }),
+    G('designer-bag', 'Designer Bag Arrangement — 1,350 g', 'تنسيق حقيبة فاخرة — ١٣٥٠ غ', 'gifts', 635, 'A black patent designer tote filled with gold-wrapped and milk chocolate pralines and finished with blossoms. Net weight 1,350 g.', { featured: true })
   ];
 
   const DEFAULT_SETTINGS = {
@@ -58,7 +72,7 @@
     phone: '+971 52 663 3823',
     whatsapp: '971526633823',
     instagram: 'the.touch.chocolates',
-    email: 'hello@thetouch.ae',
+    email: 'hello@thetouchchocolate.com',
     address: 'Abu Dhabi, United Arab Emirates',
     trn: '',
     vatRate: 5,

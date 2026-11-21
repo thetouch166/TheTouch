@@ -226,7 +226,7 @@ async function send(env, msg) {
   if (!env.RESEND_API_KEY) return;
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST', headers: { Authorization: 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(Object.assign({ from: env.MAIL_FROM || 'The Touch <orders@thetouch.ae>' }, msg))
+    body: JSON.stringify(Object.assign({ from: env.MAIL_FROM || 'The Touch <orders@thetouchchocolate.com>' }, msg))
   });
   if (!r.ok) console.error('resend', r.status, (await r.text()).slice(0, 300));
 }

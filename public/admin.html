@@ -181,6 +181,7 @@ table.t tr:hover td{background:var(--soft2)}
 .tile:active{transform:scale(.96);border-color:var(--gold)}
 .tile .im{flex:none;aspect-ratio:1.25;background:#f7f2ec;overflow:hidden}
 .tile .im img{width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply}
+.tile .im img.photo{mix-blend-mode:normal}
 .tile .tx{padding:10px 12px 12px}
 .tile .nm{font-size:12.5px;font-weight:600;line-height:1.25;height:31px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .tile .pr{font-size:13.5px;font-weight:700;color:var(--hd);margin-top:6px}
@@ -624,7 +625,7 @@ const AR={
  'Stock history':'سجل المخزون','Loading…':'جارٍ التحميل…','When':'الوقت','Change':'التغيير','By · note':'بواسطة · ملاحظة','Received':'مستلم','Removed':'مسحوب','Adjusted':'معدّل','No stock movements yet':'لا توجد حركات مخزون بعد',
  'Receiving, stock counts and removals appear here. Sales are listed in Orders.':'تظهر هنا عمليات الاستلام والجرد والسحب. المبيعات موجودة في الطلبات.','pcs':'قطعة','kg':'كغ','g':'غ','(kg)':'(كغ)','(pcs)':'(قطع)',
  // categories
- 'Pralines & Bonbons':'برالين وبونبون','Oriental Collection':'التشكيلة الشرقية','Bars & Slims':'ألواح ورقائق','Dipped Fruits & Nuts':'فواكه ومكسرات مغطّاة','Gifts & Arrangements':'هدايا وتنسيقات','Custom & services':'مخصص وخدمات',
+ 'National Day Collection':'تشكيلة اليوم الوطني','Pralines & Bonbons':'برالين وبونبون','Oriental Collection':'التشكيلة الشرقية','Bars & Slims':'ألواح ورقائق','Dipped Fruits & Nuts':'فواكه ومكسرات مغطّاة','Gifts & Arrangements':'هدايا وتنسيقات','Custom & services':'مخصص وخدمات',
  // reports
  'Yesterday':'أمس','7 days':'7 أيام','30 days':'30 يوماً','This month':'هذا الشهر','Last month':'الشهر الماضي','Custom…':'مخصص…','All time':'كل الفترات','Report (A4 / PDF)':'التقرير (A4 / PDF)','Till slip':'إيصال الصندوق','Sales CSV':'المبيعات CSV','Products CSV':'المنتجات CSV',
  'From':'من','To':'إلى','Sales':'المبيعات','Last 7 days':'آخر 7 أيام','Last 30 days':'آخر 30 يوماً','Last 14 days':'آخر 14 يوماً','Daily sales':'المبيعات اليومية','Monthly sales':'المبيعات الشهرية','Money collected':'المبالغ المحصّلة',
@@ -902,7 +903,8 @@ document.addEventListener('keydown',e=>{
 function posSetQ(v){posQ=v;const q=$('#posQ');if(!q)return;q.value=v;$('#posQx').classList.toggle('hidden',!v);drawTiles()}
 const posFine=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;
 const posKb=keys=>posFine()?`<span class="kbd">${keys}</span>`:'';
-function drawCats(){const pop=topSellers(8).length;$('#posCats').innerHTML=[{id:'all',name:'All'}].concat(pop?[{id:'pop',name:'★ Best sellers'}]:[]).concat(TT.CATS).map(c=>`<button class="chip ${posCat===c.id?'on':''}" data-c="${c.id}">${c.name}</button>`).join('');$('#posCats').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;posCat=b.dataset.c;drawCats();drawTiles()}}
+function drawCats(){const pop=topSellers(8).length;const cats=TT.CATS.filter(c=>PRODUCTS.some(p=>p.active!==false&&p.cat===c.id));if(posCat!=='all'&&posCat!=='pop'&&!cats.some(c=>c.id===posCat))posCat='all';
+  $('#posCats').innerHTML=[{id:'all',name:'All'}].concat(pop?[{id:'pop',name:'★ Best sellers'}]:[]).concat(cats).map(c=>`<button class="chip ${posCat===c.id?'on':''}" data-c="${c.id}">${c.name}</button>`).join('');$('#posCats').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;posCat=b.dataset.c;drawCats();drawTiles()}}
 function topSellers(n){const m={};ORDERS.filter(o=>o.status!=='cancelled'&&o.created>Date.now()-30*864e5).forEach(o=>o.items.forEach(l=>{if(l.pid&&prod(l.pid))m[l.pid]=(m[l.pid]||0)+U.lineTotal(l)}));return Object.keys(m).sort((a,b)=>m[b]-m[a]).slice(0,n)}
 function visibleTiles(){const q=posQ.trim().toLowerCase();const pop=posCat==='pop'?topSellers(12):null;
   let l=PRODUCTS.filter(p=>p.active!==false&&(posCat==='all'||posCat==='pop'||p.cat===posCat)&&(!pop||pop.includes(p.id))&&(!q||(p.name+' '+(p.ar||'')+' '+(p.sku||'')).toLowerCase().includes(q)));
@@ -911,7 +913,7 @@ function drawTiles(){const el=$('#tiles');if(!el)return;
   const inT={};T.lines.forEach(l=>{inT[l.pid]=(inT[l.pid]||0)+(l.unit==='kg'?1:l.qty)});
   const vis=visibleTiles();
   el.innerHTML=(vis.length?'':`<div class="pnone">${posQ.trim()?`No products match <b>“${esc(posQ.trim())}”</b>`:'No products in this category'}<br><button data-custom="1">Sell as a custom item</button></div>`)+vis.map(p=>{const out=p.stock<=0;
-    return `<button class="tile" data-id="${p.id}"><div class="im"><img loading="lazy" src="${esc(p.img)}" alt=""></div><span class="st ${out?'out':isLow(p)?'low':''}">${fmtStock(p)}</span>${inT[p.id]?`<span class="inc">${inT[p.id]}</span>`:''}<div class="tx"><div class="nm">${esc(pn(p))}</div><div class="pr">${money(p.price)}${p.unit==='kg'?' <small>/ kg</small>':''}</div></div></button>`}).join('')+
+    return `<button class="tile" data-id="${p.id}"><div class="im"><img${/^img\//.test(p.img||'img/')?'':' class="photo"'} loading="lazy" src="${esc(p.img)}" alt=""></div><span class="st ${out?'out':isLow(p)?'low':''}">${fmtStock(p)}</span>${inT[p.id]?`<span class="inc">${inT[p.id]}</span>`:''}<div class="tx"><div class="nm">${esc(pn(p))}</div><div class="pr">${money(p.price)}${p.unit==='kg'?' <small>/ kg</small>':''}</div></div></button>`}).join('')+
     `<button class="tile custom" data-custom="1"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Custom item<span class="small muted" style="font-weight:500">Arrangement · tray · wrap</span></button>`;
   el.onclick=e=>{const b=e.target.closest('.tile,[data-custom]');if(!b)return;if(b.dataset.custom)customItem(posQ.trim());else tapProduct(b.dataset.id)}}
 function tapProduct(id){const p=prod(id);if(!p)return;if(p.stock<=0)toast('⚠️ '+esc(p.name)+' shows 0 in stock — added anyway');if(p.unit==='kg')weighModal(p);else addLine(p,1,0)}
@@ -1197,7 +1199,7 @@ async function invoiceCanvas(o){
     rrect(P,y-38,pw+56,58,29,p.paid?'#eaf3ec':'#fbf0df');spaced(pt.toUpperCase(),P+28,y-2,2.5,'left',p.paid?IV.ok:IV.warn);y+=58;
     if(o.gift&&o.gift.msg){font('italic 500',30,SER);const gl=wrap('“'+o.gift.msg+'”',W-2*P-80);const gh=86+gl.length*40;rrect(P,y,W-2*P,gh,18,IV.cream);let gy=y+50;label('Gift message'+(o.gift.to?' for '+o.gift.to:''),P+40,gy);gy+=46;font('italic 500',30,SER);gl.forEach(t=>{txt(t,P+40,gy,'left',IV.bur);gy+=40});y+=gh+46}
     y+=20;rule(y,W/2-40,W/2+40,IV.gold,2);y+=64;font('italic 500',34,SER);wrap(S.receiptFooter,W-2*P-60).forEach(t=>{txt(t,W/2,y,'center',IV.bur);y+=44});
-    y+=8;font(400,20);txt(['@'+S.instagram,'thetouch.ae'].join('   ·   '),W/2,y,'center',IV.mute);y+=70;
+    y+=8;font(400,20);txt(['@'+S.instagram,'thetouchchocolate.com'].join('   ·   '),W/2,y,'center',IV.mute);y+=70;
     if(draw){x.fillStyle=IV.gold;x.fillRect(0,y,W,3);x.fillStyle=IV.bur;x.fillRect(0,y+3,W,12)}return y+15};
   H=Math.ceil(run(false));c.width=W;c.height=H;run(true);return c}
 function invoiceA4(o){const p=o.payment||{};
@@ -1209,7 +1211,7 @@ function invoiceA4(o){const p=o.payment||{};
    <div class="tw"><div class="pay ${p.paid?'ok':''}">${p.paid?'Paid':'Awaiting payment'} · ${esc(payName(o))}${p.ref?' · Ref '+esc(p.ref):''}</div>
     <div class="tot">${invTotals(o).map(([k,v])=>`<div><span>${k}</span><span>${v}</span></div>`).join('')}<div class="grand"><span>Total</span><span>${money(o.total)}</span></div><div class="vi">VAT inclusive</div></div></div>
    ${o.gift&&o.gift.msg?`<div class="gift"><div class="lb">Gift message${o.gift.to?' for '+esc(o.gift.to):''}</div>“${esc(o.gift.msg)}”</div>`:''}
-   <div class="foot"><i>${esc(S.receiptFooter)}</i><br>@${esc(S.instagram)} · thetouch.ae</div></div>`}
+   <div class="foot"><i>${esc(S.receiptFooter)}</i><br>@${esc(S.instagram)} · thetouchchocolate.com</div></div>`}
 function invShareText(o){return `${invTitle()} ${o.no} — The Touch\nTotal ${money(o.total)} (VAT incl.)\n${S.receiptFooter}`}
 function invoiceModal(o){
   const m=modal(`<div class="mh"><h3>${invTitle()} · ${esc(o.no)}</h3><button class="x" data-close aria-label="Close">×</button></div>

@@ -105,6 +105,6 @@ checkout. Dates/cut-offs use Dubai time via `dxbNow()`.
 1. Domain → Cloudflare nameservers (do first; DNS can take hours)
 2. Neon project (Frankfurt) → pooled connection string
 3. R2 bucket `the-touch-photos` → `wrangler pages deploy` → secrets DATABASE_URL, STAFF_LOGINS, RESEND_API_KEY → custom domains
-4. Resend domain verify + Email Routing `hello@thetouch.ae` → Gmail
+4. Resend domain verify + Email Routing `hello@thetouchchocolate.com` → Gmail
 5. Real prices, TRN, stock in Admin; shop laptop install + printer; run the launch test
 6. Website online payments: Stripe — waiting for the client's account

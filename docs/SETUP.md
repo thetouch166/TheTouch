@@ -6,8 +6,8 @@
 | Website + admin + API, worldwide CDN | **Cloudflare Pages** (+ Pages Functions in `functions/`) | Free |
 | Orders, products, shifts, stock, clients | **Neon** Postgres (region Frankfurt) | Free plan, or Launch ≈ USD 5–10 a month |
 | Product photos uploaded in the admin | **Cloudflare R2** bucket `the-touch-photos` | Free up to 10 GB (card needed to activate) |
-| Order and enquiry emails | **Resend**, from `orders@thetouch.ae` | Free up to 3,000 a month |
-| Receiving mail at `hello@thetouch.ae` | **Cloudflare Email Routing** → Gmail | Free |
+| Order and enquiry emails | **Resend**, from `orders@thetouchchocolate.com` | Free up to 3,000 a month |
+| Receiving mail at `hello@thetouchchocolate.com` | **Cloudflare Email Routing** → Gmail | Free |
 
 The browser never talks to the database directly. `functions/api/[[path]].js` checks every request.
 - The public can only read products and settings (the PIN is hidden). It can only create a web order (unpaid, status *new*), an event enquiry or a newsletter sign-up.
@@ -19,7 +19,7 @@ The browser never talks to the database directly. `functions/api/[[path]].js` ch
 |---|---|
 | `DATABASE_URL` | Neon → project → **Connect** → *Connection pooling ON* → the `postgresql://…` string |
 | `STAFF_LOGINS` | Who can open the admin. Format: `owner@thetouch.ae:LongPassword1; shop@thetouch.ae:LongPassword2`. Use a `;` between people and no `;` inside passwords. Removing someone signs them out everywhere. |
-| `RESEND_API_KEY` | Resend → API Keys → Create (Sending access, domain thetouch.ae) |
+| `RESEND_API_KEY` | Resend → API Keys → Create (Sending access, domain thetouchchocolate.com) |
 
 `MAIL_FROM` and `SHOP_EMAIL` are plain settings in `wrangler.toml`. After changing a secret, deploy again (or Deployments → ⋯ → Retry deployment).
 
@@ -35,15 +35,15 @@ npx wrangler pages deploy              # uploads public/ + functions/ (settings 
 - Prices, products, stock and settings are changed in the admin. They don't need a re-deploy.
 
 ## Custom domain
-Workers & Pages → the-touch → **Custom domains** → Set up a domain → `thetouch.ae`, then again for `www.thetouch.ae`. The domain must already be on Cloudflare. The padlock (HTTPS) appears by itself within minutes.
+Workers & Pages → the-touch → **Custom domains** → Set up a domain → `thetouchchocolate.com`, then again for `www.thetouchchocolate.com`. The domain must already be on Cloudflare. The padlock (HTTPS) appears by itself within minutes.
 
 ## Email
 - **Sending (Resend):**
-  1. resend.com → Domains → Add domain → `thetouch.ae` (region Ireland).
+  1. resend.com → Domains → Add domain → `thetouchchocolate.com` (region Ireland).
   2. Add the DNS records it shows in Cloudflare → DNS. Use *DNS only* (grey cloud). If Resend offers to configure Cloudflare automatically, use that instead.
   3. Wait for "Verified", then create the API key (above).
   4. Also add a TXT record `_dmarc` = `v=DMARC1; p=none;` so Gmail trusts the emails.
-- **Receiving (hello@):** Cloudflare → thetouch.ae → **Email → Email Routing** → Get started → create address `hello` → destination = the client's Gmail → verify the Gmail link.
+- **Receiving (hello@):** Cloudflare → thetouchchocolate.com → **Email → Email Routing** → Get started → create address `hello` → destination = the client's Gmail → verify the Gmail link.
 - What gets sent:
   - A new web order emails `SHOP_EMAIL` with all details and an "Open the admin" button, and emails the customer (if they gave an email) a thank-you with the order summary and a WhatsApp button.
   - A new event enquiry emails `SHOP_EMAIL`.

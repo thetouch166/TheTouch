@@ -119,14 +119,15 @@ section.s{padding:96px 0}
 .shead{text-align:center;margin-bottom:54px}
 .shead .eyebrow{display:block;margin-bottom:14px}
 .shead p{color:var(--mute);max-width:560px;margin:16px auto 0}
-.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.cats{--n:5;display:grid;grid-template-columns:repeat(var(--n),1fr);gap:18px}
+@media(min-width:901px){.cats.few{max-width:calc(var(--n) * 340px);margin-inline:auto}}
 .cat{position:relative;text-align:center}
 .cat .ph{aspect-ratio:3/4;background:var(--cream);overflow:hidden;display:grid;place-items:center;margin-bottom:18px}
 .cat .ph img{width:88%;mix-blend-mode:multiply;transition:transform 1.2s var(--ease)}
 .cat:hover .ph img{transform:scale(1.07)}
 .cat .n{font-family:var(--serif);font-size:21px}
 .cat .a{font-size:12px;color:var(--mute)}
-@media(max-width:900px){.cats{grid-template-columns:repeat(5,64%);overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -24px;padding:0 24px;scrollbar-width:none}.cats::-webkit-scrollbar{display:none}.cat{scroll-snap-align:start}section.s{padding:64px 0}}
+@media(max-width:900px){.cats{grid-template-columns:repeat(var(--n),64%);overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -24px;padding:0 24px;scrollbar-width:none}.cats::-webkit-scrollbar{display:none}.cat{scroll-snap-align:start}section.s{padding:64px 0}}
 
 /* product cards */
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:34px 22px}
@@ -392,7 +393,11 @@ body.sbar-on .toast{bottom:96px}
   .slots button{font-size:13px}
 }
 @media(max-width:900px){.cats,.rail{scroll-padding-inline:24px}}
-@media(min-width:701px) and (max-width:900px){.cats{grid-template-columns:repeat(5,38%)}}
+@media(min-width:701px) and (max-width:900px){.cats{grid-template-columns:repeat(var(--n),38%)}}
+@media(max-width:900px){.cats.duo{grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;margin:0;padding:0;gap:12px}.cats.duo .cat .n{font-size:18px}}
+/* real boutique photos (anything that is not a studio cut-out in img/) fill their frame in true colour */
+.card .ph img.photo,.pdp .gal img.photo{mix-blend-mode:normal}
+.cat .ph img.photo{width:100%;height:100%;object-fit:cover;mix-blend-mode:normal}
 /* ambient background: soft boutique light that glides with scroll (JS: "ambient background") */
 .amb{position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;overflow:hidden;contain:strict}
 .amb i{position:absolute;border-radius:50%;will-change:transform}
@@ -436,7 +441,7 @@ body.sbar-on .toast{bottom:96px}
         <p style="max-width:330px;margin-bottom:18px">Premium handcrafted chocolates, bespoke arrangements and luxury gifting from Abu Dhabi — delivered with care across all seven Emirates.</p>
         <div class="eyebrow" style="color:var(--gold)">Where Luxury Finds Its Flavor</div>
       </div>
-      <div><h5>Shop</h5><ul>
+      <div><h5>Shop</h5><ul id="fCats">
         <li><a href="#/shop/pralines">Pralines &amp; Bonbons</a></li><li><a href="#/shop/oriental">Oriental Collection</a></li>
         <li><a href="#/shop/bars">Bars &amp; Slims</a></li><li><a href="#/shop/dipped">Dipped Fruits &amp; Nuts</a></li><li><a href="#/shop/gifts">Gifts &amp; Arrangements</a></li></ul></div>
       <div><h5>The House</h5><ul>
@@ -455,11 +460,13 @@ body.sbar-on .toast{bottom:96px}
   <div class="dhead"><img src="img/logo-burgundy.png" alt="" style="height:30px"><button class="ib" aria-label="Close" onclick="closeDrawers()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="mlinks" onclick="closeDrawers()">
     <a href="#/shop/all">Shop All <span>›</span></a>
+    <div id="mCats" style="display:contents">
     <a href="#/shop/pralines">Pralines <span>برالين</span></a>
     <a href="#/shop/oriental">Oriental <span>شرقي</span></a>
     <a href="#/shop/bars">Bars &amp; Slims <span>ألواح</span></a>
     <a href="#/shop/dipped">Fruits &amp; Nuts <span>مكسرات</span></a>
     <a href="#/shop/gifts">Gifting <span>هدايا</span></a>
+    </div>
     <a href="#/events">Weddings &amp; Events <span>›</span></a>
     <a href="#/story">Our Story <span>›</span></a>
     <a href="#/delivery">Delivery &amp; Care <span>›</span></a>
@@ -519,6 +526,19 @@ function openSearch(){$('#search').classList.add('on');document.body.style.overf
 function closeSearch(){$('#search').classList.remove('on');document.body.style.overflow='';document.body.classList.remove('lock')}
 function visible(){return PRODUCTS.filter(p=>p.active!==false)}
 function byId(id){return PRODUCTS.find(p=>p.id===id)}
+/* only categories with something on sale appear in menus, tabs and the home page */
+function catsOnSale(){const v=visible();return TT.CATS.filter(c=>v.some(p=>p.cat===c.id))}
+const isPhoto=src=>!!src&&!/^img\//.test(src); // in-store photos fill their frame; studio cut-outs in img/ blend into the cream
+const imgCls=src=>isPhoto(src)?' class="photo"':'';
+const MENU_AR={national:'اليوم الوطني',pralines:'برالين',oriental:'شرقي',bars:'ألواح',dipped:'مكسرات',gifts:'هدايا'};
+function renderNav(){
+  const cats=catsOnSale(),has=id=>cats.some(c=>c.id===id);
+  const top=['national','pralines','oriental','gifts'].filter(has).slice(0,3).map(id=>TT.CATS.find(c=>c.id===id));
+  const set=(el,html)=>{if(el&&el.innerHTML!==html)el.innerHTML=html};
+  set($('#nav'),top.map(c=>`<a href="#/shop/${c.id}" data-n="${c.id}">${U.esc(c.nav||c.name)}</a>`).join('')+'<a href="#/events" data-n="events">Events</a><a href="#/story" data-n="story">Our Story</a>');
+  set($('#mCats'),cats.map(c=>`<a href="#/shop/${c.id}">${U.esc(c.nav||c.name)} <span>${MENU_AR[c.id]||U.esc(c.ar)}</span></a>`).join(''));
+  set($('#fCats'),cats.map(c=>`<li><a href="#/shop/${c.id}">${U.esc(c.name)}</a></li>`).join(''));
+}
 function observe(){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll('.fade').forEach(el=>io.observe(el))}
 const icon={
   leaf:'<svg viewBox="0 0 40 40"><path d="M8 32C8 16 18 8 33 7c0 15-8 25-24 25z"/><path d="M8 32L24 16"/></svg>',
@@ -531,7 +551,7 @@ const icon={
 function card(p){
   const out=(p.stock!=null&&p.stock<=0);
   return `<div class="card ${out?'out':''}">
-    <div class="pw"><a href="#/p/${p.id}" class="ph"><img loading="lazy" src="${U.esc(p.img)}" alt="${U.esc(p.name)}">${p.featured?'<span class="tag">Signature</span>':''}${out?'<span class="tag">Sold out</span>':''}</a>
+    <div class="pw"><a href="#/p/${p.id}" class="ph"><img${imgCls(p.img)} loading="lazy" src="${U.esc(p.img)}" alt="${U.esc(p.name)}">${p.featured?'<span class="tag">Signature</span>':''}${out?'<span class="tag">Sold out</span>':''}</a>
     ${out?'':`<button class="quick" onclick="quickAdd('${p.id}')">Add to bag</button>`}</div>
     <a href="#/p/${p.id}"><div class="n">${U.esc(p.name)}</div><div class="a">${U.esc(p.ar||'')}</div><div class="pr">${priceLabel(p)}</div></a>
   </div>`}
@@ -540,8 +560,13 @@ function bump(){const b=$('#cartCount');b.animate([{transform:'scale(1)'},{trans
 
 /* ---------- Pages ---------- */
 function pageHome(){
-  const feat=visible().filter(p=>p.featured);const orient=visible().filter(p=>p.cat==='oriental');
-  const catImg={pralines:'img/salted-caramel.jpg',oriental:'img/kunafah.jpg',bars:'img/slim-almond.jpg',dipped:'img/orange-slices.jpg',gifts:'img/gift-bag.jpg'};
+  const vis=visible();const feat=vis.some(p=>p.featured)?vis.filter(p=>p.featured):vis;
+  // each collection's cover = the first of these photos still on sale, else one of its products
+  const catImg={national:['POS_products/nd-flag-box.jpg'],pralines:['img/salted-caramel.jpg'],oriental:['img/kunafah.jpg'],bars:['img/slim-almond.jpg'],dipped:['img/orange-slices.jpg'],gifts:['img/gift-bag.jpg','POS_products/designer-bag.jpg']};
+  const cats=catsOnSale();const cover=c=>{const l=vis.filter(p=>p.cat===c.id);return ((catImg[c.id]||[]).map(s=>l.find(p=>p.img===s)).find(Boolean)||l.find(p=>p.featured)||l[0]).img};
+  // second rail: the National Day collection while it is on sale, otherwise the Oriental collection
+  const r2=[{id:'national',eb:'National Day Collection',h:'In the colours <span class="it">of the Union</span>'},{id:'oriental',eb:'Oriental Collection',h:'Heritage, <span class="it">reimagined</span>'}]
+    .map(x=>Object.assign(x,{list:vis.filter(p=>p.cat===x.id)})).find(x=>x.list.length);
   const stWords=STATEMENT.split(' ').map(w=>`<span>${U.esc(w)}</span>`).join(' ');
   app.innerHTML=`
   <section class="hero">
@@ -567,15 +592,15 @@ function pageHome(){
 
   <section class="s"><div class="wrap">
     <div class="shead fade"><span class="eyebrow">The Collections</span><h2 class="h2">Crafted for every <span class="it">meaningful</span> moment</h2></div>
-    <div class="cats">${TT.CATS.map(c=>`<a class="cat fade" href="#/shop/${c.id}"><div class="ph"><img loading="lazy" src="${catImg[c.id]}" alt=""></div><div class="n">${c.name}</div><div class="a">${c.ar}</div></a>`).join('')}</div>
+    <div class="cats${cats.length<5?' few':''}${cats.length<3?' duo':''}" style="--n:${cats.length||1}">${cats.map(c=>{const src=cover(c);return `<a class="cat fade" href="#/shop/${c.id}"><div class="ph"><img${imgCls(src)} loading="lazy" src="${U.esc(src)}" alt=""></div><div class="n">${c.name}</div><div class="a">${c.ar}</div></a>`}).join('')}</div>
   </div></section>
 
-  <section class="s" style="padding-top:0"><div class="wrap">
+  ${feat.length?`<section class="s" style="padding-top:0"><div class="wrap">
     <div class="railnav fade"><div><span class="eyebrow">Signature Selection</span><h2 class="h2" style="margin-top:12px">Our most loved</h2></div>
       <div class="arr"><button onclick="rail('r1',-1)" aria-label="Previous">‹</button><button onclick="rail('r1',1)" aria-label="Next">›</button></div></div>
     <div class="rail" id="r1">${feat.map(card).join('')}</div>
     <div style="text-align:center;margin-top:46px"><a class="btn btn-line" href="#/shop/all">View all chocolates</a></div>
-  </div></section>
+  </div></section>`:''}
 
   <section class="split">
     <div class="im gbx" aria-hidden="true"><div class="lid"><img src="img/monogram-gold.png" alt=""></div>
@@ -585,11 +610,11 @@ function pageHome(){
       <div><a class="btn btn-dark" href="#/shop/gifts">Shop gifting</a></div></div>
   </section>
 
-  <section class="s"><div class="wrap">
-    <div class="railnav fade"><div><span class="eyebrow">Oriental Collection</span><h2 class="h2" style="margin-top:12px">Heritage, <span class="it">reimagined</span></h2></div>
+  ${r2?`<section class="s"><div class="wrap">
+    <div class="railnav fade"><div><span class="eyebrow">${r2.eb}</span><h2 class="h2" style="margin-top:12px">${r2.h}</h2></div>
       <div class="arr"><button onclick="rail('r2',-1)" aria-label="Previous">‹</button><button onclick="rail('r2',1)" aria-label="Next">›</button></div></div>
-    <div class="rail" id="r2">${orient.map(card).join('')}</div>
-  </div></section>
+    <div class="rail" id="r2">${r2.list.map(card).join('')}</div>
+  </div></section>`:''}
 
   <section class="events"><div class="wrap">
     <div class="shead fade" style="margin-bottom:0"><span class="eyebrow">Events &amp; Bespoke Arrangements</span><h2 class="h2">Unforgettable chocolate<br><span class="it">experiences</span></h2>
@@ -632,9 +657,9 @@ function pageShop(cat){
   let list=visible().filter(p=>cat==='all'||p.cat===cat);
   if(sort==='low')list.sort((a,b)=>a.price-b.price);else if(sort==='high')list.sort((a,b)=>b.price-a.price);else if(sort==='az')list.sort((a,b)=>a.name.localeCompare(b.name));else list.sort((a,b)=>(b.featured?1:0)-(a.featured?1:0));
   app.innerHTML=`
-  <div class="phead"><span class="eyebrow">${c?c.ar:'The Touch'}</span><h1 class="h2">${c?c.name:'All Chocolates'}</h1><p>${({all:'Handcrafted in Abu Dhabi with the finest ingredients — pralines by weight, bars and gifts by the piece, all in our signature box.',pralines:'Filled and enrobed by hand, sold by weight and packed in our signature box — choose 250 g, 500 g or 1 kg.',oriental:'Arabic sweets reimagined in fine chocolate — kunafah, halawa, pistachio and orange blossom, sold by weight.',bars:'Slim bars and chocolate discs for everyday indulgence and thoughtful small gifts.',dipped:'Candied fruits and roasted nuts dipped in fine chocolate, sold by weight.',gifts:'Arranged by hand, finished with our signature ribbon — for every meaningful moment.'})[cat]||''}</p></div>
+  <div class="phead"><span class="eyebrow">${c?c.ar:'The Touch'}</span><h1 class="h2">${c?c.name:'All Chocolates'}</h1><p>${({all:'Handcrafted in Abu Dhabi with the finest ingredients and finished by hand in our signature packaging.',national:'Hand-wrapped chocolates in red, green, white and black, arranged in boxes, bowls and trays to celebrate the UAE.',pralines:'Filled and enrobed by hand, sold by weight and packed in our signature box — choose 250 g, 500 g or 1 kg.',oriental:'Arabic sweets reimagined in fine chocolate — kunafah, halawa, pistachio and orange blossom, sold by weight.',bars:'Slim bars and chocolate discs for everyday indulgence and thoughtful small gifts.',dipped:'Candied fruits and roasted nuts dipped in fine chocolate, sold by weight.',gifts:'Arranged by hand, finished with our signature ribbon — for every meaningful moment.'})[cat]||''}</p></div>
   <div class="wrap">
-    <div class="tabs"><a class="tab ${cat==='all'?'on':''}" href="#/shop/all">All</a>${TT.CATS.map(x=>`<a class="tab ${cat===x.id?'on':''}" href="#/shop/${x.id}">${x.name}</a>`).join('')}</div>
+    <div class="tabs"><a class="tab ${cat==='all'?'on':''}" href="#/shop/all">All</a>${TT.CATS.filter(x=>x.id===cat||catsOnSale().includes(x)).map(x=>`<a class="tab ${cat===x.id?'on':''}" href="#/shop/${x.id}">${x.name}</a>`).join('')}</div>
     <div class="toolbar"><span>${list.length} ${list.length===1?'creation':'creations'}</span>
       <label><span class="hidden">Sort by</span><select aria-label="Sort by" onchange="sessionStorage.setItem('tt_sort',this.value);route()"><option value="feat">Featured</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="az">Name A–Z</option></select></label></div>
     <div class="grid" style="margin-bottom:90px">${list.map(card).join('')||'<div class="nores"><div class="h3">Coming soon</div><p style="margin-bottom:22px">New creations are being prepared for this collection.</p><a class="btn btn-line" href="#/shop/all">View all chocolates</a></div>'}</div>
@@ -650,7 +675,7 @@ function pageProduct(id){
   app.innerHTML=`<div class="wrap">
     <div class="crumbs"><a href="#/">Home</a> / <a href="#/shop/${p.cat}">${TT.catName(p.cat)}</a> / ${U.esc(p.name)}</div>
     <div class="pdp">
-      <div class="gal"><img src="${U.esc(p.img)}" alt="${U.esc(p.name)}"></div>
+      <div class="gal"><img${imgCls(p.img)} src="${U.esc(p.img)}" alt="${U.esc(p.name)}"></div>
       <div class="info">
         <span class="eyebrow">${TT.catName(p.cat)}</span>
         <h1 class="h2">${U.esc(p.name)}</h1><div class="ar">${U.esc(p.ar||'')}</div>
@@ -846,6 +871,7 @@ function pageDelivery(){
 /* ---------- Router ---------- */
 function route(){
   const h=location.hash.replace(/^#\/?/,'');const [pg,arg]=h.split('?')[0].split('/');
+  renderNav();
   document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(pg==='shop'?arg:pg)));
   closeSearch();closeDrawers();document.body.classList.remove('sbar-on');{const t=$('#toast');if(t&&!t._keep)t.classList.remove('on')}
   if(pg==='shop')pageShop(arg);else if(pg==='p')pageProduct(arg);else if(pg==='checkout')pageCheckout();else if(pg==='order')pageOrder(arg);
