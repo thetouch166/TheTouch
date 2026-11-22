@@ -10,6 +10,13 @@ SITE_URL = "https://thetouchchocolate.com"   # the one address Google should kno
 MAIL_FROM = "The Touch <orders@thetouchchocolate.com>"   # must be on the domain verified in Resend
 SHOP_EMAIL = "hello@thetouchchocolate.com"              # gets new-order + event-enquiry emails
 
-[[r2_buckets]]
-binding = "PHOTOS"
-bucket_name = "the-touch-photos"
+# Product photos uploaded from the admin (Cloudflare KV — included in the free plan, no card needed)
+[[kv_namespaces]]
+binding = "PHOTOS_KV"
+id = "0bd3bfdc67154023b4b060176f728807"
+
+# Optional later: R2 for a very large photo library. Switch R2 on in the Cloudflare dashboard, run
+# `npx wrangler r2 bucket create the-touch-photos`, then uncomment. New uploads then go to R2; old photos stay readable.
+# [[r2_buckets]]
+# binding = "PHOTOS"
+# bucket_name = "the-touch-photos"

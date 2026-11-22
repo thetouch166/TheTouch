@@ -535,7 +535,7 @@ function openDrawer(id){closeDrawers();$('#'+id).classList.add('open');document.
 function closeDrawers(){document.querySelectorAll('.drawer').forEach(d=>d.classList.remove('open'));document.body.style.overflow='';document.body.classList.remove('lock')}
 function openSearch(){$('#search').classList.add('on');document.body.style.overflow='hidden';document.body.classList.add('lock');setTimeout(()=>$('#q').focus(),50);doSearch()}
 function closeSearch(){$('#search').classList.remove('on');document.body.style.overflow='';document.body.classList.remove('lock')}
-function visible(){return PRODUCTS.filter(p=>p.active!==false)}
+function visible(){return PRODUCTS.filter(p=>p.active!==false&&p.web!==false)} // web:false = sold in the boutique only
 function byId(id){return PRODUCTS.find(p=>p.id===id)}
 /* only categories with something on sale appear in menus, tabs and the home page */
 function catsOnSale(){const v=visible();return TT.CATS.filter(c=>v.some(p=>p.cat===c.id))}
@@ -680,7 +680,7 @@ function pageShop(cat){
 }
 
 function pageProduct(id){
-  const p0=byId(id);const p=p0&&p0.active!==false?p0:null;if(!p){pageNotFound();return}
+  const p0=byId(id);const p=p0&&p0.active!==false&&p0.web!==false?p0:null;if(!p){pageNotFound();return}
   const kg=p.unit==='kg';let grams=kg?500:0,qty=1;const out=p.stock!=null&&p.stock<=0;
   const rel=visible().filter(x=>x.cat===p.cat&&x.id!==p.id).slice(0,4);
   app.innerHTML=`<div class="wrap">
@@ -741,7 +741,7 @@ const payName=(k,mode)=>mode==='pickup'&&k==='cod'?'Cash at pick-up':mode==='pic
 const PAYDESC={delivery:{cod:'Pay in cash when your order arrives.',card_on_delivery:'Our driver brings a card machine.',link:'We send you a secure card payment link on WhatsApp to confirm.'},
   pickup:{cod:'Pay in cash when you collect at the boutique.',card_on_delivery:'Pay by card when you collect at the boutique.',link:'We send you a secure card payment link on WhatsApp to confirm.'}};
 const dxbNow=()=>{try{return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Dubai'}))}catch(e){return new Date()}};
-function syncCart(){let changed=false,removed=[];Cart.items=Cart.items.filter(it=>{const p=byId(it.pid);if(!p||p.active===false){removed.push(it.name);return false}if(it.price!==p.price||it.name!==p.name||it.img!==p.img){it.price=p.price;it.name=p.name;it.img=p.img;changed=true}return true});if(removed.length||changed){localStorage.setItem('tt_cart',JSON.stringify(Cart.items));renderCartBadge()}if(removed.length)toast(U.esc(removed.join(', '))+' is no longer available and was removed from your bag');return changed||removed.length}
+function syncCart(){let changed=false,removed=[];Cart.items=Cart.items.filter(it=>{const p=byId(it.pid);if(!p||p.active===false||p.web===false){removed.push(it.name);return false}if(it.price!==p.price||it.name!==p.name||it.img!==p.img){it.price=p.price;it.name=p.name;it.img=p.img;changed=true}return true});if(removed.length||changed){localStorage.setItem('tt_cart',JSON.stringify(Cart.items));renderCartBadge()}if(removed.length)toast(U.esc(removed.join(', '))+' is no longer available and was removed from your bag');return changed||removed.length}
 function pageCheckout(){syncCart();
   if(!Cart.items.length){go('/shop/all',true);return}
   const em=Object.keys(S.delivery||{});const st=JSON.parse(localStorage.getItem('tt_cust')||'{}');
@@ -972,7 +972,7 @@ const PAGE_META={ // title, description (the product and collection pages build 
   checkout:['Checkout',''],order:['Your order','']};
 function setMeta(pg,arg){
   let t,d,path='/'+[pg,arg].filter(Boolean).join('/');const base=PAGE_META[''];
-  if(pg==='p'){const p=byId(arg);if(p&&p.active!==false){t=p.name;d=p.desc}}
+  if(pg==='p'){const p=byId(arg);if(p&&p.active!==false&&p.web!==false){t=p.name;d=p.desc}}
   else if(pg==='shop'){const c=TT.CATS.find(x=>x.id===arg);t=c?c.name:'All Chocolates & Gifts';d=c?'':base[1];path='/shop/'+(c?c.id:'all')}
   else if(PAGE_META[pg]){t=PAGE_META[pg][0];d=PAGE_META[pg][1]}
   if(!pg){document.title=base[0];path='/'}else document.title=(t||'Page not found')+' | The Touch Chocolates Abu Dhabi';

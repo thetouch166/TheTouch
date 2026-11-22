@@ -32,11 +32,10 @@ const PRIVATE = { checkout: 'Checkout', order: 'Your order' };   // real pages, 
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const clip = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1).replace(/[\s,;:.]+\S*$/, '') + '…' : s; };
-const onSale = p => p && p.active !== false && p.name;
+const onSale = p => p && p.active !== false && p.web !== false && p.name;   // web:false = sold in the boutique (POS) only
 const aed = n => 'AED ' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 });
 
 /* ---------- shop data: the same edge cache the API fills (purged when staff save), else the database ---------- */
-let memo = { at: 0, origin: '', data: null };
 async function readCol(ctx, origin, col) {
   const key = new Request(origin + '/api/db/' + col + '?edge=1');
   try { const hit = await caches.default.match(key); if (hit) return (await hit.json()).rows || []; } catch (e) { }
@@ -52,10 +51,8 @@ async function readCol(ctx, origin, col) {
   return rows;
 }
 async function shopData(ctx, origin) {
-  if (memo.data && memo.origin === origin && Date.now() - memo.at < 30000) return memo.data;
   const [products, settings] = await Promise.all([readCol(ctx, origin, 'products'), readCol(ctx, origin, 'settings')]);
-  const data = { products: products.filter(onSale), s: settings.find(x => x.id === 'main') || settings[0] || {} };
-  memo = { at: Date.now(), origin, data }; return data;
+  return { products: products.filter(onSale), s: settings.find(x => x.id === 'main') || settings[0] || {} };
 }
 
 /* ---------- what each address is ---------- */

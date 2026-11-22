@@ -1,7 +1,8 @@
 /* THE TOUCH — API on Cloudflare Pages Functions  →  https://<site>/api/*
    Database : Neon Postgres. One table of JSON documents, so orders / products / shifts keep exactly the
               same field names as before (see CLAUDE.md "Shapes"). Talks to Neon over HTTPS — no npm packages.
-   Photos   : Cloudflare R2 (binding PHOTOS) — uploaded from Admin → Products, served at /media/…
+   Photos   : Cloudflare KV (binding PHOTOS_KV), or R2 (binding PHOTOS) when it is switched on — uploaded from
+              Admin → Products, served at /media/…
    Email    : Resend — new web order → boutique + customer, new event enquiry → boutique.
 
    Secrets (Cloudflare → Workers & Pages → the-touch → Settings → Variables and secrets):
@@ -137,12 +138,13 @@ export async function onRequest(ctx) {
 
     if (a === 'upload' && M === 'POST') {   // admin: product photo → R2
       if (!staff) return err(401, 'Sign in');
-      if (!env.PHOTOS) return err(503, 'Photo storage (R2) is not connected');
+      if (!env.PHOTOS && !env.PHOTOS_KV) return err(503, 'Photo storage is not connected');
       const type = (req.headers.get('Content-Type') || '').split(';')[0];
       const ext = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[type]; if (!ext) return err(415, 'JPEG, PNG or WebP only');
       const buf = await req.arrayBuffer(); if (!buf.byteLength || buf.byteLength > 5e6) return err(413, 'Photo must be under 5 MB');
       const key = 'p/' + NOW().toString(36) + '-' + crypto.randomUUID().slice(0, 8) + '.' + ext;
-      await env.PHOTOS.put(key, buf, { httpMetadata: { contentType: type, cacheControl: 'public, max-age=31536000, immutable' } });
+      if (env.PHOTOS) await env.PHOTOS.put(key, buf, { httpMetadata: { contentType: type, cacheControl: 'public, max-age=31536000, immutable' } });
+      else await env.PHOTOS_KV.put(key, buf, { metadata: { type } });
       return json({ url: '/media/' + key });
     }
 
