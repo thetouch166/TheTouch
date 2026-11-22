@@ -3,12 +3,14 @@
               same field names as before (see CLAUDE.md "Shapes"). Talks to Neon over HTTPS — no npm packages.
    Photos   : Cloudflare KV (binding PHOTOS_KV), or R2 (binding PHOTOS) when it is switched on — uploaded from
               Admin → Products, served at /media/…
-   Email    : Resend — new web order → boutique + customer, new event enquiry → boutique.
+   Email    : new web order / event enquiry → the boutique inbox through the mail worker (mail-worker/, service
+              binding MAIL — Cloudflare Email, no outside account). Customer confirmation emails go through Resend
+              when RESEND_API_KEY is set.
 
    Secrets (Cloudflare → Workers & Pages → the-touch → Settings → Variables and secrets):
      DATABASE_URL    Neon connection string (pooled)                                         required
      STAFF_LOGINS    who can open the admin:  owner@thetouch.ae:Password1; shop@thetouch.ae:Password2  required
-     RESEND_API_KEY  Resend API key                                             optional (no key = no emails)
+     RESEND_API_KEY  Resend API key                              optional (no key = no emails to customers)
    Plain vars (wrangler.toml): MAIL_FROM, SHOP_EMAIL
 */
 
@@ -127,6 +129,15 @@ export async function onRequest(ctx) {
     }
     if (a === 'me') return staff ? json({ email: staff }) : err(401, 'Sign in');
 
+    if (a === 'mailtest' && M === 'POST') {   // admin: check that the boutique inbox receives mail (?summary=1 → yesterday's sales summary)
+      if (!staff) return err(401, 'Sign in');
+      if (url.searchParams.get('summary')) {
+        if (!env.MAIL) return json({ ok: false, error: 'The mail worker is not connected' });
+        const r = await env.MAIL.fetch('https://mail/summary', { method: 'POST' }); return json(await r.text());
+      }
+      return json(await sendShop(env, { to: [env.SHOP_EMAIL], subject: 'Test email from The Touch admin', html: frame(`<div style="font-family:Georgia,serif;font-size:22px;margin-bottom:10px">It works</div><p style="font-size:14px;line-height:1.7;margin:0;color:#5a4a3f">This inbox receives an email for every new website order and event enquiry. Sent by ${H(staff)}.</p>`, {}) }));
+    }
+
     if (a === 'sync' && M === 'GET') {   // admin: everything that changed since a moment
       if (!staff) return err(401, 'Sign in');
       const cols = String(url.searchParams.get('cols') || '').split(',').filter(c => COLS.includes(c));
@@ -214,7 +225,7 @@ export async function onRequest(ctx) {
   }
 }
 
-/* ---------- emails (Resend) ---------- */
+/* ---------- emails ---------- */
 const H = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const AED = n => 'AED ' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const lineTotal = l => Math.max(0, Math.round(((l.unit === 'kg' ? l.price * l.grams / 1000 : l.price) * l.qty - (l.disc || 0)) * 100) / 100);
@@ -231,6 +242,18 @@ async function send(env, msg) {
     body: JSON.stringify(Object.assign({ from: env.MAIL_FROM || 'The Touch <orders@thetouchchocolate.com>' }, msg))
   });
   if (!r.ok) console.error('resend', r.status, (await r.text()).slice(0, 300));
+}
+/* boutique inbox: the mail worker when it is connected, otherwise Resend */
+async function sendShop(env, msg) {
+  try {
+    if (env.MAIL) {
+      const r = await env.MAIL.fetch('https://mail/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subject: msg.subject, html: msg.html, replyTo: msg.reply_to }) });
+      const t = await r.text(); if (!r.ok) console.error('mail worker', r.status, t.slice(0, 300));
+      let j = {}; try { j = JSON.parse(t); } catch (e) { } return { ok: r.ok && j.ok !== false, error: j.error, via: 'cloudflare' };
+    }
+    if (env.RESEND_API_KEY) { await send(env, msg); return { ok: true, via: 'resend' }; }
+    return { ok: false, error: 'No mail service is connected' };
+  } catch (e) { console.error('sendShop', e && e.message); return { ok: false, error: String((e && e.message) || e).slice(0, 200) }; }
 }
 function frame(inner, s) {
   return `<!doctype html><html><body style="margin:0;background:#f4ede4;padding:28px 12px;font-family:Helvetica,Arial,sans-serif;color:#39261f">
@@ -258,14 +281,14 @@ ${f('Date', H([nice(o.date), o.slot].filter(Boolean).join(' · ')))}${f('Payment
 ${f('Gift', H([g.to && 'To ' + g.to, g.phone, g.msg && '“' + g.msg + '”'].filter(Boolean).join(' · ')))}${f('Notes', H(o.notes))}</table>`;
 }
 async function notify(env, db, col, d, origin) {
-  if (!env.RESEND_API_KEY) return;
+  if (!env.RESEND_API_KEY && !env.MAIL) return;
   let s = {}; try { const r = await db.q("select data::text from docs where col='settings' and id='main'"); if (r.rows.length) s = JSON.parse(r.rows[0][0]); } catch (e) { }
   const shop = env.SHOP_EMAIL || s.email; const reply = okEmail(s.email) ? s.email : undefined;
   const btn = (href, label) => `<p style="margin:26px 0 0;text-align:center"><a href="${H(href)}" style="display:inline-block;background:#1a1412;color:#d9b77e;text-decoration:none;padding:13px 26px;font-size:13px;letter-spacing:2px">${label}</a></p>`;
   const jobs = [];
   if (col === 'orders') {
     const c = d.customer || {};
-    if (okEmail(shop)) jobs.push(send(env, {
+    if (okEmail(shop)) jobs.push(sendShop(env, {
       to: [shop], subject: `New web order ${d.no} · ${c.name || ''} · ${AED(d.total)}`, reply_to: okEmail(c.email) ? c.email.trim() : undefined,
       html: frame(`<div style="font-family:Georgia,serif;font-size:22px;margin-bottom:6px">New website order</div><div style="color:#8a7766;font-size:13px;margin-bottom:18px">Confirm it with the client on WhatsApp, then move it on the Orders board.</div>${orderTable(d)}${orderFacts(d)}${btn(origin + '/admin.html', 'OPEN THE ADMIN')}`, s)
     }));
@@ -280,7 +303,7 @@ async function notify(env, db, col, d, origin) {
   }
   if (col === 'enquiries' && okEmail(shop)) {
     const f = (k, v) => v ? `<tr><td style="padding:4px 14px 4px 0;color:#8a7766;white-space:nowrap;vertical-align:top">${k}</td><td style="padding:4px 0">${H(v)}</td></tr>` : '';
-    jobs.push(send(env, {
+    jobs.push(sendShop(env, {
       to: [shop], subject: `New event enquiry · ${d.name || ''} · ${d.type || ''}`,
       html: frame(`<div style="font-family:Georgia,serif;font-size:22px;margin-bottom:16px">New event enquiry</div><table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px">${f('Name', d.name)}${f('Mobile', d.phone)}${f('Event', d.type)}${f('Date', d.date && nice(d.date))}${f('Guests', d.guests)}${f('Budget', d.budget)}${f('Message', d.msg)}</table>${btn(origin + '/admin.html', 'OPEN THE ADMIN')}`, s)
     }));

@@ -7,8 +7,13 @@ compatibility_date = "2025-09-01"
 
 [vars]
 SITE_URL = "https://thetouchchocolate.com"   # the one address Google should know (canonical links, sitemap, share previews)
-MAIL_FROM = "The Touch <orders@thetouchchocolate.com>"   # must be on the domain verified in Resend
-SHOP_EMAIL = "hello@thetouchchocolate.com"              # gets new-order + event-enquiry emails
+MAIL_FROM = "The Touch <orders@thetouchchocolate.com>"   # customer emails (Resend): must be on the domain verified in Resend
+SHOP_EMAIL = "hello@thetouchchocolate.com"              # boutique address (forwarded to the shop Gmail by Cloudflare Email Routing)
+
+# Boutique notifications + morning sales summary: the mail worker in mail-worker/ (deploy it first: cd mail-worker && npx wrangler deploy)
+[[services]]
+binding = "MAIL"
+service = "the-touch-mail"
 
 # Product photos uploaded from the admin (Cloudflare KV — included in the free plan, no card needed)
 [[kv_namespaces]]

@@ -1,0 +1,20 @@
+# THE TOUCH — mail worker: boutique notifications + the morning sales summary (see worker.js)
+# Deploy from this folder:   npx wrangler deploy
+# Secret (once):             npx wrangler secret put DATABASE_URL      (the same Neon string as the website)
+name = "the-touch-mail"
+main = "worker.js"
+compatibility_date = "2025-09-01"
+workers_dev = false          # no public address — only the website's API calls it (service binding MAIL)
+preview_urls = false
+
+[vars]
+SHOP_INBOX = "thetouch166@gmail.com"              # where the boutique reads its mail (verified in Cloudflare Email Routing)
+MAIL_FROM = "orders@thetouchchocolate.com"
+SITE_URL = "https://thetouchchocolate.com"
+
+[[send_email]]
+name = "EMAIL"
+destination_address = "thetouch166@gmail.com"     # this worker can only ever write to the boutique inbox
+
+[triggers]
+crons = ["0 5 * * *"]        # 05:00 UTC = 09:00 in Abu Dhabi: yesterday's sales summary
