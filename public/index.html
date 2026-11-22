@@ -3,10 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Touch — Luxury Chocolates · Abu Dhabi</title>
-<meta name="description" content="The Touch — premium handcrafted chocolates, pralines and luxury gift arrangements from Abu Dhabi, delivered across all seven Emirates.">
+<base href="/"><script>if(location.protocol==='file:')document.querySelector('base').remove()</script>
+<title>The Touch | Luxury Chocolates &amp; Chocolate Gifts in Abu Dhabi</title>
+<meta name="description" content="The Touch is a luxury chocolate boutique in Abu Dhabi: handcrafted chocolates, gift boxes, trays and bespoke arrangements, delivered across all seven Emirates.">
+<!-- canonical, share preview (Open Graph) and Google data (JSON-LD) are filled in per page by functions/[[path]].js -->
+<link rel="canonical" href="https://thetouchchocolate.com/">
 <meta name="theme-color" content="#40050e">
 <link rel="icon" href="img/monogram-flat.png">
+<link rel="apple-touch-icon" href="img/monogram-flat.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -404,6 +408,13 @@ body.sbar-on .toast{bottom:96px}
 .amb .g1{width:76vmax;height:76vmax;left:44%;top:-34%;background:radial-gradient(closest-side,rgba(205,151,84,.17),rgba(205,151,84,.07) 48%,rgba(205,151,84,0))}
 .amb .g2{width:66vmax;height:66vmax;left:-30%;top:36%;background:radial-gradient(closest-side,rgba(156,96,54,.11),rgba(156,96,54,.04) 50%,rgba(156,96,54,0))}
 .amb .g3{width:52vmax;height:52vmax;left:34%;top:68%;background:radial-gradient(closest-side,rgba(110,18,32,.06),rgba(110,18,32,0))}
+/* policy pages */
+.legal{max-width:760px;margin:0 auto;padding:0 0 30px}
+.legal h2{font-family:var(--serif);font-size:26px;font-weight:500;color:var(--bur);margin:40px 0 12px}
+.legal p,.legal li{color:var(--slate);font-size:14.5px;line-height:1.8}
+.legal p{margin-bottom:12px}.legal ul{padding-left:20px;margin-bottom:12px}.legal li{margin-bottom:6px}
+.legal a{text-decoration:underline;text-decoration-color:#a7773a;text-underline-offset:4px}
+.legal .upd{font-size:12px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.fade{opacity:1;transform:none}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -415,14 +426,14 @@ body.sbar-on .toast{bottom:96px}
     <div style="display:flex;align-items:center;gap:6px">
       <button class="ib burger" aria-label="Menu" onclick="openDrawer('menu')"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></button>
       <nav class="nav" id="nav">
-        <a href="#/shop/pralines" data-n="pralines">Pralines</a>
-        <a href="#/shop/oriental" data-n="oriental">Oriental</a>
-        <a href="#/shop/gifts" data-n="gifts">Gifting</a>
-        <a href="#/events" data-n="events">Events</a>
-        <a href="#/story" data-n="story">Our Story</a>
+        <a href="/shop/pralines" data-n="pralines">Pralines</a>
+        <a href="/shop/oriental" data-n="oriental">Oriental</a>
+        <a href="/shop/gifts" data-n="gifts">Gifting</a>
+        <a href="/events" data-n="events">Events</a>
+        <a href="/story" data-n="story">Our Story</a>
       </nav>
     </div>
-    <a href="#/" class="logo" aria-label="The Touch home"><img src="img/logo-burgundy.png" alt="The Touch"></a>
+    <a href="/" class="logo" aria-label="The Touch home"><img src="img/logo-burgundy.png" alt="The Touch"></a>
     <div class="hicons">
       <button class="ib" aria-label="Search" onclick="openSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
       <a class="ib" aria-label="WhatsApp" id="hdrWa" target="_blank" rel="noopener" style="display:none"></a>
@@ -442,16 +453,16 @@ body.sbar-on .toast{bottom:96px}
         <div class="eyebrow" style="color:var(--gold)">Where Luxury Finds Its Flavor</div>
       </div>
       <div><h5>Shop</h5><ul id="fCats">
-        <li><a href="#/shop/pralines">Pralines &amp; Bonbons</a></li><li><a href="#/shop/oriental">Oriental Collection</a></li>
-        <li><a href="#/shop/bars">Bars &amp; Slims</a></li><li><a href="#/shop/dipped">Dipped Fruits &amp; Nuts</a></li><li><a href="#/shop/gifts">Gifts &amp; Arrangements</a></li></ul></div>
+        <li><a href="/shop/pralines">Pralines &amp; Bonbons</a></li><li><a href="/shop/oriental">Oriental Collection</a></li>
+        <li><a href="/shop/bars">Bars &amp; Slims</a></li><li><a href="/shop/dipped">Dipped Fruits &amp; Nuts</a></li><li><a href="/shop/gifts">Gifts &amp; Arrangements</a></li></ul></div>
       <div><h5>The House</h5><ul>
-        <li><a href="#/story">Our Story</a></li><li><a href="#/events">Weddings &amp; Events</a></li><li><a href="#/events">Corporate Gifting</a></li><li><a href="#/delivery">Delivery &amp; Care</a></li></ul></div>
+        <li><a href="/story">Our Story</a></li><li><a href="/events">Weddings &amp; Events</a></li><li><a href="/events">Corporate Gifting</a></li><li><a href="/delivery">Delivery &amp; Care</a></li></ul></div>
       <div><h5>Boutique</h5><ul id="fContact"></ul>
         <h5 style="margin-top:26px">Newsletter</h5>
         <form class="news" onsubmit="event.preventDefault();subscribe(this)"><input type="email" required maxlength="120" placeholder="Your email" aria-label="Your email for the newsletter"><button>Join</button></form>
       </div>
     </div>
-    <div class="fbot"><span>© <span id="yr"></span> The Touch Chocolates · Abu Dhabi, UAE</span><span>Prices in AED, inclusive of 5% VAT · <a href="admin.html" style="opacity:.6">Staff</a></span></div>
+    <div class="fbot"><span>© <span id="yr"></span> The Touch Chocolates · Abu Dhabi, UAE · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/refunds">Refunds &amp; Returns</a></span><span>Prices in AED, inclusive of 5% VAT · <a href="/admin.html" style="opacity:.6">Staff</a></span></div>
   </div>
 </footer>
 
@@ -459,17 +470,17 @@ body.sbar-on .toast{bottom:96px}
 <div class="drawer left" id="menu"><div class="scrim" onclick="closeDrawers()"></div><div class="panel">
   <div class="dhead"><img src="img/logo-burgundy.png" alt="" style="height:30px"><button class="ib" aria-label="Close" onclick="closeDrawers()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="mlinks" onclick="closeDrawers()">
-    <a href="#/shop/all">Shop All <span>›</span></a>
+    <a href="/shop/all">Shop All <span>›</span></a>
     <div id="mCats" style="display:contents">
-    <a href="#/shop/pralines">Pralines <span>برالين</span></a>
-    <a href="#/shop/oriental">Oriental <span>شرقي</span></a>
-    <a href="#/shop/bars">Bars &amp; Slims <span>ألواح</span></a>
-    <a href="#/shop/dipped">Fruits &amp; Nuts <span>مكسرات</span></a>
-    <a href="#/shop/gifts">Gifting <span>هدايا</span></a>
+    <a href="/shop/pralines">Pralines <span>برالين</span></a>
+    <a href="/shop/oriental">Oriental <span>شرقي</span></a>
+    <a href="/shop/bars">Bars &amp; Slims <span>ألواح</span></a>
+    <a href="/shop/dipped">Fruits &amp; Nuts <span>مكسرات</span></a>
+    <a href="/shop/gifts">Gifting <span>هدايا</span></a>
     </div>
-    <a href="#/events">Weddings &amp; Events <span>›</span></a>
-    <a href="#/story">Our Story <span>›</span></a>
-    <a href="#/delivery">Delivery &amp; Care <span>›</span></a>
+    <a href="/events">Weddings &amp; Events <span>›</span></a>
+    <a href="/story">Our Story <span>›</span></a>
+    <a href="/delivery">Delivery &amp; Care <span>›</span></a>
   </div>
   <div style="margin-top:auto;padding:24px;font-size:12px;color:var(--mute)" id="menuContact"></div>
 </div></div>
@@ -535,9 +546,9 @@ function renderNav(){
   const cats=catsOnSale(),has=id=>cats.some(c=>c.id===id);
   const top=['national','pralines','oriental','gifts'].filter(has).slice(0,3).map(id=>TT.CATS.find(c=>c.id===id));
   const set=(el,html)=>{if(el&&el.innerHTML!==html)el.innerHTML=html};
-  set($('#nav'),top.map(c=>`<a href="#/shop/${c.id}" data-n="${c.id}">${U.esc(c.nav||c.name)}</a>`).join('')+'<a href="#/events" data-n="events">Events</a><a href="#/story" data-n="story">Our Story</a>');
-  set($('#mCats'),cats.map(c=>`<a href="#/shop/${c.id}">${U.esc(c.nav||c.name)} <span>${MENU_AR[c.id]||U.esc(c.ar)}</span></a>`).join(''));
-  set($('#fCats'),cats.map(c=>`<li><a href="#/shop/${c.id}">${U.esc(c.name)}</a></li>`).join(''));
+  set($('#nav'),top.map(c=>`<a href="/shop/${c.id}" data-n="${c.id}">${U.esc(c.nav||c.name)}</a>`).join('')+'<a href="/events" data-n="events">Events</a><a href="/story" data-n="story">Our Story</a>');
+  set($('#mCats'),cats.map(c=>`<a href="/shop/${c.id}">${U.esc(c.nav||c.name)} <span>${MENU_AR[c.id]||U.esc(c.ar)}</span></a>`).join(''));
+  set($('#fCats'),cats.map(c=>`<li><a href="/shop/${c.id}">${U.esc(c.name)}</a></li>`).join(''));
 }
 function observe(){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll('.fade').forEach(el=>io.observe(el))}
 const icon={
@@ -551,9 +562,9 @@ const icon={
 function card(p){
   const out=(p.stock!=null&&p.stock<=0);
   return `<div class="card ${out?'out':''}">
-    <div class="pw"><a href="#/p/${p.id}" class="ph"><img${imgCls(p.img)} loading="lazy" src="${U.esc(p.img)}" alt="${U.esc(p.name)}">${p.featured?'<span class="tag">Signature</span>':''}${out?'<span class="tag">Sold out</span>':''}</a>
+    <div class="pw"><a href="/p/${p.id}" class="ph"><img${imgCls(p.img)} loading="lazy" src="${U.esc(p.img)}" alt="${U.esc(p.name)}">${p.featured?'<span class="tag">Signature</span>':''}${out?'<span class="tag">Sold out</span>':''}</a>
     ${out?'':`<button class="quick" onclick="quickAdd('${p.id}')">Add to bag</button>`}</div>
-    <a href="#/p/${p.id}"><div class="n">${U.esc(p.name)}</div><div class="a">${U.esc(p.ar||'')}</div><div class="pr">${priceLabel(p)}</div></a>
+    <a href="/p/${p.id}"><div class="n">${U.esc(p.name)}</div><div class="a">${U.esc(p.ar||'')}</div><div class="pr">${priceLabel(p)}</div></a>
   </div>`}
 function quickAdd(id){const p=byId(id);Cart.add(p,1,p.unit==='kg'?250:0);toast(`<b>${U.esc(p.name)}</b>&nbsp;added to your bag`);bump()}
 function bump(){const b=$('#cartCount');b.animate([{transform:'scale(1)'},{transform:'scale(1.5)'},{transform:'scale(1)'}],{duration:400})}
@@ -580,26 +591,26 @@ function pageHome(){
       <img class="mono fade" src="img/monogram-gold.png" alt="">
       <div class="eyebrow fade">Abu Dhabi · Handcrafted Chocolates</div>
       <h1 class="h1 fade">Where Luxury <em>Finds Its Flavor</em></h1>
-      <p class="fade">Premium pralines, oriental creations and bespoke arrangements — crafted to say what words sometimes can't.</p>
-      <div class="row fade"><a class="btn btn-dark" href="#/shop/all">Discover the collection</a><a class="tlink" href="#/shop/gifts">Explore gifting</a></div>
+      <p class="fade">Handcrafted chocolates, signature gift boxes and bespoke arrangements — crafted to say what words sometimes can't.</p>
+      <div class="row fade"><a class="btn btn-dark" href="/shop/all">Discover the collection</a><a class="tlink" href="/shop/gifts">Explore gifting</a></div>
     </div>
   </section>
   <section class="stmt"><div class="wrap">
     <span class="rule" aria-hidden="true"></span>
     <p class="st">${stWords}</p>
-    <a class="link" href="#/story">Discover our story</a>
+    <a class="link" href="/story">Discover our story</a>
   </div></section>
 
   <section class="s"><div class="wrap">
     <div class="shead fade"><span class="eyebrow">The Collections</span><h2 class="h2">Crafted for every <span class="it">meaningful</span> moment</h2></div>
-    <div class="cats${cats.length<5?' few':''}${cats.length<3?' duo':''}" style="--n:${cats.length||1}">${cats.map(c=>{const src=cover(c);return `<a class="cat fade" href="#/shop/${c.id}"><div class="ph"><img${imgCls(src)} loading="lazy" src="${U.esc(src)}" alt=""></div><div class="n">${c.name}</div><div class="a">${c.ar}</div></a>`}).join('')}</div>
+    <div class="cats${cats.length<5?' few':''}${cats.length<3?' duo':''}" style="--n:${cats.length||1}">${cats.map(c=>{const src=cover(c);return `<a class="cat fade" href="/shop/${c.id}"><div class="ph"><img${imgCls(src)} loading="lazy" src="${U.esc(src)}" alt=""></div><div class="n">${c.name}</div><div class="a">${c.ar}</div></a>`}).join('')}</div>
   </div></section>
 
   ${feat.length?`<section class="s" style="padding-top:0"><div class="wrap">
     <div class="railnav fade"><div><span class="eyebrow">Signature Selection</span><h2 class="h2" style="margin-top:12px">Our most loved</h2></div>
       <div class="arr"><button onclick="rail('r1',-1)" aria-label="Previous">‹</button><button onclick="rail('r1',1)" aria-label="Next">›</button></div></div>
     <div class="rail" id="r1">${feat.map(card).join('')}</div>
-    <div style="text-align:center;margin-top:46px"><a class="btn btn-line" href="#/shop/all">View all chocolates</a></div>
+    <div style="text-align:center;margin-top:46px"><a class="btn btn-line" href="/shop/all">View all chocolates</a></div>
   </div></section>`:''}
 
   <section class="split">
@@ -607,7 +618,7 @@ function pageHome(){
       <div class="box"><div class="cells">${['salted-caramel','pistachio-orange','truffle-rocher','kunafah','coconut-pistachio','florentine-pistachio','macadamia','tiramisu','madlouka'].map((n,i)=>`<i class="fade" style="transition-delay:${(Math.floor(i/3)*.14+(i%3)*.07).toFixed(2)}s"><img src="img/${n}.jpg" alt="" loading="lazy"></i>`).join('')}</div></div></div>
     <div class="tx fade"><span class="eyebrow">The Art of Gifting</span><h2 class="h2">A gesture,<br>a feeling, <span class="it">a touch</span> of care</h2>
       <p>Signature gift bags, crystal trays and reusable keepsake boxes — each arranged by hand and finished with our signature ribbon. Personalise colours and messages for every occasion.</p>
-      <div><a class="btn btn-dark" href="#/shop/gifts">Shop gifting</a></div></div>
+      <div><a class="btn btn-dark" href="/shop/gifts">Shop gifting</a></div></div>
   </section>
 
   ${r2?`<section class="s"><div class="wrap">
@@ -625,7 +636,7 @@ function pageHome(){
       <div class="ev fade"><h4>Family Celebrations</h4><p>Arrangements for baby receptions, Eid, anniversaries and private gatherings.</p></div>
       <div class="ev fade"><h4>Personalised</h4><p>Custom colour themes, luxury acrylic and crystal trays, signature ribbons.</p></div>
     </div>
-    <div style="text-align:center;margin-top:50px"><a class="btn btn-gold" href="#/events">Plan your event</a></div>
+    <div style="text-align:center;margin-top:50px"><a class="btn btn-gold" href="/events">Plan your event</a></div>
   </div></section>
 
   <section class="s"><div class="wrap">
@@ -641,7 +652,7 @@ function pageHome(){
     <div class="im" style="background-image:url(img/banner-nuts.jpg)"></div>
     <div class="tx fade"><span class="eyebrow">Visit the Boutique</span><h2 class="h2">An opulent<br><span class="it">sensory</span> journey</h2>
       <p>Deep cocoa tones, warm brass and soft light. Sample fresh pralines, consult our packaging designers and assemble your arrangement live in-store in Abu Dhabi.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn btn-dark" href="${waLink('Hello The Touch, I would like to visit the boutique.')}" target="_blank" rel="noopener">Book a visit</a><a class="btn btn-line" href="#/story">Our story</a></div></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn btn-dark" href="${waLink('Hello The Touch, I would like to visit the boutique.')}" target="_blank" rel="noopener">Book a visit</a><a class="btn btn-line" href="/story">Our story</a></div></div>
   </section>
 
   <section class="s"><div class="wrap"><div class="stats fade">
@@ -652,28 +663,28 @@ function pageHome(){
 function rail(id,d){const r=document.getElementById(id);r.scrollBy({left:d*r.clientWidth*.8,behavior:'smooth'})}
 
 function pageShop(cat){
-  cat=cat||'all';const c=TT.CATS.find(x=>x.id===cat);if(cat!=='all'&&!c){location.replace('#/shop/all');return}
+  cat=cat||'all';const c=TT.CATS.find(x=>x.id===cat);if(cat!=='all'&&!c){go('/shop/all',true);return}
   const sort=sessionStorage.getItem('tt_sort')||'feat';
   let list=visible().filter(p=>cat==='all'||p.cat===cat);
   if(sort==='low')list.sort((a,b)=>a.price-b.price);else if(sort==='high')list.sort((a,b)=>b.price-a.price);else if(sort==='az')list.sort((a,b)=>a.name.localeCompare(b.name));else list.sort((a,b)=>(b.featured?1:0)-(a.featured?1:0));
   app.innerHTML=`
   <div class="phead"><span class="eyebrow">${c?c.ar:'The Touch'}</span><h1 class="h2">${c?c.name:'All Chocolates'}</h1><p>${({all:'Handcrafted in Abu Dhabi with the finest ingredients and finished by hand in our signature packaging.',national:'Hand-wrapped chocolates in red, green, white and black, arranged in boxes, bowls and trays to celebrate the UAE.',pralines:'Filled and enrobed by hand, sold by weight and packed in our signature box — choose 250 g, 500 g or 1 kg.',oriental:'Arabic sweets reimagined in fine chocolate — kunafah, halawa, pistachio and orange blossom, sold by weight.',bars:'Slim bars and chocolate discs for everyday indulgence and thoughtful small gifts.',dipped:'Candied fruits and roasted nuts dipped in fine chocolate, sold by weight.',gifts:'Arranged by hand, finished with our signature ribbon — for every meaningful moment.'})[cat]||''}</p></div>
   <div class="wrap">
-    <div class="tabs"><a class="tab ${cat==='all'?'on':''}" href="#/shop/all">All</a>${TT.CATS.filter(x=>x.id===cat||catsOnSale().includes(x)).map(x=>`<a class="tab ${cat===x.id?'on':''}" href="#/shop/${x.id}">${x.name}</a>`).join('')}</div>
+    <div class="tabs"><a class="tab ${cat==='all'?'on':''}" href="/shop/all">All</a>${TT.CATS.filter(x=>x.id===cat||catsOnSale().includes(x)).map(x=>`<a class="tab ${cat===x.id?'on':''}" href="/shop/${x.id}">${x.name}</a>`).join('')}</div>
     <div class="toolbar"><span>${list.length} ${list.length===1?'creation':'creations'}</span>
       <label><span class="hidden">Sort by</span><select aria-label="Sort by" onchange="sessionStorage.setItem('tt_sort',this.value);route()"><option value="feat">Featured</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="az">Name A–Z</option></select></label></div>
-    <div class="grid" style="margin-bottom:90px">${list.map(card).join('')||'<div class="nores"><div class="h3">Coming soon</div><p style="margin-bottom:22px">New creations are being prepared for this collection.</p><a class="btn btn-line" href="#/shop/all">View all chocolates</a></div>'}</div>
+    <div class="grid" style="margin-bottom:90px">${list.map(card).join('')||'<div class="nores"><div class="h3">Coming soon</div><p style="margin-bottom:22px">New creations are being prepared for this collection.</p><a class="btn btn-line" href="/shop/all">View all chocolates</a></div>'}</div>
   </div>`;
   app.querySelector('select').value=sort;
   const on=app.querySelector('.tab.on'),tb=app.querySelector('.tabs');if(on&&tb.scrollWidth>tb.clientWidth)tb.scrollLeft=on.offsetLeft-tb.offsetLeft-24;
 }
 
 function pageProduct(id){
-  const p0=byId(id);const p=p0&&p0.active!==false?p0:null;if(!p){app.innerHTML='<div class="empty" style="padding:120px 20px"><div class="h3">Not found</div><a class="link" href="#/shop/all">Back to shop</a></div>';return}
+  const p0=byId(id);const p=p0&&p0.active!==false?p0:null;if(!p){pageNotFound();return}
   const kg=p.unit==='kg';let grams=kg?500:0,qty=1;const out=p.stock!=null&&p.stock<=0;
   const rel=visible().filter(x=>x.cat===p.cat&&x.id!==p.id).slice(0,4);
   app.innerHTML=`<div class="wrap">
-    <div class="crumbs"><a href="#/">Home</a> / <a href="#/shop/${p.cat}">${TT.catName(p.cat)}</a> / ${U.esc(p.name)}</div>
+    <div class="crumbs"><a href="/">Home</a> / <a href="/shop/${p.cat}">${TT.catName(p.cat)}</a> / ${U.esc(p.name)}</div>
     <div class="pdp">
       <div class="gal"><img${imgCls(p.img)} src="${U.esc(p.img)}" alt="${U.esc(p.name)}"></div>
       <div class="info">
@@ -714,7 +725,7 @@ function pageProduct(id){
 function renderCartBadge(){const n=Cart.count();const b=$('#cartCount');b.textContent=n;b.classList.toggle('hidden',!n)}
 function renderCart(){if(typeof PRODUCTS!=='undefined'&&PRODUCTS.length)syncCart();
   const body=$('#cartBody');if(!body)return;
-  if(!Cart.items.length){body.innerHTML=`<div class="empty"><div class="h3">Your bag is empty</div><p style="margin-bottom:26px">Discover our handcrafted collections.</p><a class="btn btn-dark" href="#/shop/all" onclick="closeDrawers()">Shop now</a></div>`;return}
+  if(!Cart.items.length){body.innerHTML=`<div class="empty"><div class="h3">Your bag is empty</div><p style="margin-bottom:26px">Discover our handcrafted collections.</p><a class="btn btn-dark" href="/shop/all" onclick="closeDrawers()">Shop now</a></div>`;return}
   const sub=Cart.subtotal();const left=S.freeDeliveryOver-sub;
   body.innerHTML=`
    <div class="prog">${left>0?`Add <b>${money(left)}</b> for complimentary Abu Dhabi delivery`:'You qualify for complimentary Abu Dhabi delivery ✦'}<i><b style="width:${Math.min(100,sub/S.freeDeliveryOver*100)}%"></b></i></div>
@@ -722,7 +733,7 @@ function renderCart(){if(typeof PRODUCTS!=='undefined'&&PRODUCTS.length)syncCart
      <div class="q"><button aria-label="${i.qty>1?'Decrease quantity':'Remove item'}" onclick="Cart.set('${i.k}',${i.qty-1})">−</button><span>${i.qty}</span><button aria-label="Increase quantity" onclick="Cart.set('${i.k}',${i.qty+1})">+</button></div></div>
      <div><div class="p">${money(U.lineTotal(i))}</div><button class="rm" onclick="Cart.set('${i.k}',0)">Remove</button></div></div>`).join('')}</div>
    <div class="cart-foot"><div class="r t"><span>Subtotal <small style="font-weight:400;color:var(--mute);font-size:12px">(${Cart.count()} ${Cart.count()===1?'item':'items'})</small></span><span>${money(sub)}</span></div>
-     <a class="btn btn-dark btn-block" href="#/checkout" onclick="closeDrawers()">Secure checkout</a><button class="cont" onclick="closeDrawers()">Continue shopping</button>
+     <a class="btn btn-dark btn-block" href="/checkout" onclick="closeDrawers()">Secure checkout</a><button class="cont" onclick="closeDrawers()">Continue shopping</button>
      <p style="font-size:11px;color:var(--mute);text-align:center;margin-top:10px">Delivery &amp; gift message at checkout · Prices incl. VAT</p></div>`;
 }
 
@@ -732,13 +743,13 @@ const PAYDESC={delivery:{cod:'Pay in cash when your order arrives.',card_on_deli
 const dxbNow=()=>{try{return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Dubai'}))}catch(e){return new Date()}};
 function syncCart(){let changed=false,removed=[];Cart.items=Cart.items.filter(it=>{const p=byId(it.pid);if(!p||p.active===false){removed.push(it.name);return false}if(it.price!==p.price||it.name!==p.name||it.img!==p.img){it.price=p.price;it.name=p.name;it.img=p.img;changed=true}return true});if(removed.length||changed){localStorage.setItem('tt_cart',JSON.stringify(Cart.items));renderCartBadge()}if(removed.length)toast(U.esc(removed.join(', '))+' is no longer available and was removed from your bag');return changed||removed.length}
 function pageCheckout(){syncCart();
-  if(!Cart.items.length){location.hash='#/shop/all';return}
+  if(!Cart.items.length){go('/shop/all',true);return}
   const em=Object.keys(S.delivery||{});const st=JSON.parse(localStorage.getItem('tt_cust')||'{}');
   const today=dxbNow();const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   const now=dxbNow();const minDay=now.getHours()>=S.sameDayCutoff?new Date(+today+864e5):today;
   let mode='delivery',pay=(S.onlinePayments||['cod'])[0],slot='';
   const slots=['10:00 – 13:00','13:00 – 16:00','16:00 – 19:00','19:00 – 22:00'];
-  app.innerHTML=`<div class="wrap"><div class="crumbs"><a href="#/">Home</a> / Checkout</div>
+  app.innerHTML=`<div class="wrap"><div class="crumbs"><a href="/">Home</a> / Checkout</div>
   <div class="co">
     <form id="cof" novalidate>
       <h3><i>1</i>Your details</h3>
@@ -800,7 +811,7 @@ function pageCheckout(){syncCart();
     localStorage.setItem('tt_cust',JSON.stringify({name:order.customer.name,phone:order.customer.phone,email:order.customer.email,emirate:f.emirate.value,area:order.area,address:f.address.value}));
     let saved=true;try{await DB.put('orders',order)}catch(err){console.error(err);saved=false}
     sessionStorage.setItem('tt_last',JSON.stringify(order));Cart.clear();
-    location.hash='#/order/'+order.no+(saved?'':'?wa=1');
+    go('/order/'+order.no+(saved?'':'?wa=1'));
   };
 }
 function waOrderText(o){
@@ -814,7 +825,7 @@ function pageOrder(no){
    ${o?`<div class="meta"><div><span>Total</span><b style="font-weight:600">${money(o.total)}</b></div><div><span>Payment</span>${payName(o.payment.method,o.fulfil)}</div><div><span>${o.fulfil==='pickup'?'Boutique pick-up':'Delivery'}</span>${o.fulfil==='pickup'?'':U.esc([o.area,o.emirate].filter(Boolean).join(', '))}</div><div><span>Date</span>${U.esc(fmtDay(o.date))}</div>${o.slot?`<div><span>Time</span>${U.esc(o.slot)}</div>`:''}</div>`:''}
    <p style="margin:20px 0 30px">Our concierge will confirm your order shortly on WhatsApp. For a faster confirmation, send us your order now:</p>
    <a class="btn btn-gold" href="${wa}" target="_blank" rel="noopener" id="waBtn">Send order on WhatsApp</a>
-   <div style="margin-top:22px"><a class="link" href="#/">Continue shopping</a></div></div>`;
+   <div style="margin-top:22px"><a class="link" href="/">Continue shopping</a></div></div>`;
 }
 
 function pageStory(){
@@ -827,7 +838,7 @@ function pageStory(){
       <div class="fade"><h4>Our Values</h4><p>Serenity, passion, artisanal purity and perfection in presentation define every chocolate piece and every client interaction.</p></div>
     </div></div></section>
   <section class="split"><div class="im" style="background-image:url(img/gift-bag-sign.jpg)"></div><div class="tx fade"><span class="eyebrow">Artisanal Sourcing</span><h2 class="h2">From bean<br>to <span class="it">boutique</span></h2>
-    <p>Single-origin cocoa selected for depth and smoothness. Small batches prepared by master chocolatiers with precise temperature control. Daily replenishment in our Abu Dhabi boutique, and cold-chain delivery across all seven Emirates.</p><div><a class="btn btn-dark" href="#/shop/all">Explore the collection</a></div></div></section>`;
+    <p>Single-origin cocoa selected for depth and smoothness. Small batches prepared by master chocolatiers with precise temperature control. Daily replenishment in our Abu Dhabi boutique, and cold-chain delivery across all seven Emirates.</p><div><a class="btn btn-dark" href="/shop/all">Explore the collection</a></div></div></section>`;
   observe();
 }
 function pageEvents(){
@@ -868,21 +879,125 @@ function pageDelivery(){
    <p style="color:var(--mute);margin-top:24px">Complimentary delivery within Abu Dhabi on orders above ${money(S.freeDeliveryOver)}. Orders placed before ${S.sameDayCutoff}:00 in Abu Dhabi are delivered the same day. All deliveries use temperature-controlled vehicles.</p>
    <p style="color:var(--mute);margin-top:14px">Store chocolates in a cool, dry place (16–18 °C), away from direct sunlight. Best enjoyed within three weeks.</p></div></section>`}
 
-/* ---------- Router ---------- */
+/* ---------- Policy pages (/privacy, /terms, /refunds) ----------
+   Plain-language policies. Contact details come from Admin → Settings. Have the owner read them before changing a rule. */
+function pageLegal(kind){
+  const tel=S.phone.replace(/\s/g,'');
+  const contact=`<h2>Contact us</h2><p>The Touch Chocolates<br>${U.esc(S.address)}<br>Phone: <a href="tel:${tel}">${U.esc(S.phone)}</a> · <a target="_blank" rel="noopener" href="${waLink('Hello The Touch')}">WhatsApp</a>${S.email?`<br>Email: <a href="mailto:${U.esc(S.email)}">${U.esc(S.email)}</a>`:''}</p>`;
+  const DOC={
+   privacy:['Privacy Policy',`
+    <p>The Touch (“we”, “us”) is a chocolate boutique in Abu Dhabi, United Arab Emirates. This policy explains what personal information we collect when you visit thetouchchocolate.com, order from us or contact us, and what we do with it.</p>
+    <h2>What we collect</h2>
+    <ul><li><b>Orders:</b> your name, mobile number, email address if you give one, delivery address, the date and time you choose, the items you order, and any gift recipient's name, mobile number and message.</li>
+    <li><b>Enquiries:</b> what you send us through the events form, by phone or on WhatsApp.</li>
+    <li><b>Newsletter:</b> your email address, if you subscribe.</li>
+    <li><b>On your device:</b> your shopping bag and your checkout details are saved in your own browser so you do not have to type them again. You can clear them at any time by clearing your browser data.</li>
+    <li><b>Technical data:</b> the basic information any website receives in order to be delivered securely, such as your IP address and browser type.</li></ul>
+    <p>We do not store card numbers. Card payments are handled by licensed payment providers.</p>
+    <h2>How we use it</h2>
+    <ul><li>To prepare, deliver and confirm your order, including contacting you by phone or WhatsApp.</li><li>To answer your enquiries and prepare event proposals.</li><li>To keep the business and tax records the law requires.</li><li>To send our newsletter, only if you subscribed. You can unsubscribe at any time.</li><li>To protect our website and customers from fraud and misuse.</li></ul>
+    <h2>Who we share it with</h2>
+    <p>We share only what is needed with the delivery partners who bring your order, the payment providers who process your payment, and the technology providers who host our website and database. We may disclose information when the law requires it. We never sell your personal information.</p>
+    <h2>How long we keep it</h2>
+    <p>Order records are kept for as long as UAE tax and commercial law requires. Enquiries and newsletter subscriptions are kept until you ask us to remove them.</p>
+    <h2>Cookies</h2>
+    <p>We do not use advertising cookies. The website uses your browser's storage for the shopping bag and checkout details described above, and our hosting provider may set cookies that are strictly necessary for security.</p>
+    <h2>Your rights</h2>
+    <p>In line with UAE Federal Decree-Law No. 45 of 2021 on the Protection of Personal Data, you can ask us for a copy of your information, ask us to correct or delete it, or ask us to stop contacting you for marketing. Contact us using the details below and we will respond as soon as we can.</p>
+    <h2>Changes to this policy</h2>
+    <p>If we change this policy we will publish the new version on this page with a new date.</p>`],
+   terms:['Terms & Conditions',`
+    <p>These terms apply to every order placed with The Touch through thetouchchocolate.com, by WhatsApp, by phone or in our boutique for delivery. By placing an order you agree to them.</p>
+    <h2>Our products</h2>
+    <p>Our chocolates and arrangements are made and finished by hand, so colours, decoration and packaging can vary slightly from the photographs. Stated weights are net and approximate. If an item or its packaging is not available, we will contact you to offer an equivalent before we go ahead.</p>
+    <h2>Allergens</h2>
+    <p>Our products contain milk and nuts and may contain traces of gluten and soy. They are prepared where nuts are handled. If you or the recipient have an allergy, please tell us before you order.</p>
+    <h2>Prices</h2>
+    <p>Prices are in UAE dirhams (AED) and include 5% VAT. Delivery fees are shown at checkout before you confirm. Prices may change, but never for an order we have already confirmed. If a price is shown incorrectly by obvious mistake, we will contact you and you may cancel for a full refund.</p>
+    <h2>Placing an order</h2>
+    <p>Your order is a request to buy. It becomes a confirmed order when we confirm it with you by WhatsApp, phone or email. We may decline an order, for example if an item is out of stock, we cannot deliver to the address, or details are missing or incorrect.</p>
+    <h2>Payment</h2>
+    <p>You can pay by the methods shown at checkout, such as cash or card on delivery or at pick-up, or by secure card payment. Bespoke and event orders may require a deposit or full payment in advance.</p>
+    <h2>Delivery and pick-up</h2>
+    <p>We deliver across the United Arab Emirates. Delivery times are estimates and can be affected by traffic, weather and events outside our control. Someone must be available to receive the order. Chocolate is sensitive to heat, so please bring it indoors and store it as advised straight away. Fees and timings are on our <a href="/delivery">Delivery &amp; Care</a> page.</p>
+    <h2>Cancellations, returns and refunds</h2>
+    <p>These are covered by our <a href="/refunds">Refunds &amp; Returns</a> policy, which forms part of these terms.</p>
+    <h2>Events and bespoke orders</h2>
+    <p>Arrangements designed for an event are governed by the quotation we send you, including the deposit, timings and what is included.</p>
+    <h2>Our name and content</h2>
+    <p>The Touch name, logo, designs, photographs and text belong to us and may not be used without our written permission.</p>
+    <h2>Liability</h2>
+    <p>Nothing in these terms limits any right you have that cannot be limited under UAE law. Otherwise, our responsibility for an order is limited to the amount you paid for it, and we are not responsible for delays or failures caused by events outside our reasonable control.</p>
+    <h2>Governing law</h2>
+    <p>These terms are governed by the laws of the United Arab Emirates as applied in the Emirate of Abu Dhabi, and the courts of Abu Dhabi have jurisdiction.</p>`],
+   refunds:['Refunds & Returns',`
+    <p>Chocolate is a perishable food, and many of our pieces are arranged to order. For hygiene and food-safety reasons we cannot accept returns or exchanges once an order has been delivered or collected, unless there is a problem with it.</p>
+    <h2>If something is not right</h2>
+    <p>If your order arrives damaged, is incorrect, or is not of the quality you expect from us, please tell us within 24 hours of receiving it. Send us your order number and a photograph on WhatsApp and keep the item and its packaging. We will replace it or refund you, in full or in part, depending on the problem.</p>
+    <h2>Cancelling an order</h2>
+    <ul><li>You can cancel free of charge until we start preparing your order. For orders placed in advance, that is up to 24 hours before the delivery or pick-up time.</li>
+    <li>Bespoke, personalised and event orders cannot be cancelled or refunded once preparation has started. Deposits follow the terms of your quotation.</li></ul>
+    <h2>If we cannot deliver</h2>
+    <p>If nobody is available to receive the order or the address is incorrect, we will contact you to arrange another time. A second delivery fee may apply. Because our products are perishable, we cannot refund an order that could not be delivered after reasonable attempts.</p>
+    <h2>How refunds are paid</h2>
+    <p>Approved refunds are made to the original payment method. Card refunds can take up to 14 working days to appear, depending on your bank. Orders paid in cash are refunded by bank transfer or in our boutique.</p>
+    <h2>What is not covered</h2>
+    <p>We cannot refund or replace chocolates that were affected by heat or storage after delivery, small variations in colour or decoration, or a change of mind.</p>`]};
+  const d=DOC[kind];
+  app.innerHTML=`<div class="phead"><span class="eyebrow">The Touch</span><h1 class="h2">${d[0]}</h1></div>
+  <section class="s" style="padding-top:54px"><div class="wrap"><div class="legal"><p class="upd">Last updated 22 November 2026</p>${d[1]}${contact}</div></div></section>`;
+}
+
+/* ---------- Router ----------
+   Real addresses (/p/<id>, /shop/<cat>, /story …) so every page can be found on Google and shared with its own preview.
+   Old #/… links still open the right page. functions/[[path]].js serves the same routes — keep the two lists in step. */
+const FILE=location.protocol==='file:'; // opened straight from disk: no server, so addresses stay behind the #
+function curPath(){return FILE?location.hash.replace(/^#\/?/,''):location.pathname.replace(/^\/(index\.html)?/,'')+location.search}
+function go(to,replace){
+  if(FILE){if(replace)location.replace('#'+to);else location.hash='#'+to;return}
+  history[replace?'replaceState':'pushState'](null,'',to);route()}
+document.addEventListener('click',e=>{ // in-site links change the page without a reload
+  if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+  const a=e.target.closest('a[href]');if(!a||a.target||a.hasAttribute('download'))return;
+  const h=a.getAttribute('href');if(!/^\/(?!\/)/.test(h)||/^\/(admin|api|media)(\/|\.|$)|\.[a-z0-9]{2,5}$/i.test(h.split('?')[0]))return;
+  e.preventDefault();go(h)});
+const PAGE_META={ // title, description (the product and collection pages build their own)
+  '':['The Touch | Luxury Chocolates & Chocolate Gifts in Abu Dhabi','The Touch is a luxury chocolate boutique in Abu Dhabi: handcrafted chocolates, gift boxes, trays and bespoke arrangements, delivered across all seven Emirates.'],
+  story:['Our Story','The Touch was born from a simple idea: chocolate can say what words sometimes cannot. Meet the Abu Dhabi boutique behind the box.'],
+  events:['Weddings, Corporate Gifting & Events','Bespoke chocolate arrangements for weddings, corporate gifting, baby receptions and Eid. Tell us about your occasion and receive a proposal within 24 hours.'],
+  delivery:['Delivery & Care','Chocolate delivery across all seven Emirates, same day in Abu Dhabi. Delivery fees, timings and how to store your chocolates.'],
+  privacy:['Privacy Policy','How The Touch collects, uses and protects your personal information.'],
+  terms:['Terms & Conditions','The terms that apply when you order from The Touch.'],
+  refunds:['Refunds & Returns','Our policy on cancellations, returns, replacements and refunds.'],
+  checkout:['Checkout',''],order:['Your order','']};
+function setMeta(pg,arg){
+  let t,d,path='/'+[pg,arg].filter(Boolean).join('/');const base=PAGE_META[''];
+  if(pg==='p'){const p=byId(arg);if(p&&p.active!==false){t=p.name;d=p.desc}}
+  else if(pg==='shop'){const c=TT.CATS.find(x=>x.id===arg);t=c?c.name:'All Chocolates & Gifts';d=c?'':base[1];path='/shop/'+(c?c.id:'all')}
+  else if(PAGE_META[pg]){t=PAGE_META[pg][0];d=PAGE_META[pg][1]}
+  if(!pg){document.title=base[0];path='/'}else document.title=(t||'Page not found')+' | The Touch Chocolates Abu Dhabi';
+  const m=document.querySelector('meta[name="description"]');if(m)m.setAttribute('content',d||base[1]);
+  const c=document.querySelector('link[rel="canonical"]');if(c)c.setAttribute('href','https://thetouchchocolate.com'+path);
+}
+function pageNotFound(){
+  app.innerHTML='<div class="empty" style="padding:120px 20px"><span class="eyebrow">Page not found</span><div class="h2" style="margin:14px 0 12px;color:var(--ink)">This page has moved or no longer exists</div><p style="margin-bottom:26px">The creation you are looking for may have sold out, or the address may be mistyped.</p><a class="btn btn-dark" href="/shop/all">View the collection</a></div>';
+}
 function route(){
-  const h=location.hash.replace(/^#\/?/,'');const [pg,arg]=h.split('?')[0].split('/');
-  renderNav();
+  if(!FILE&&/^#\//.test(location.hash))history.replaceState(null,'',location.hash.slice(1)); // old #/ link
+  const h=curPath();const [pg,arg]=h.split('?')[0].split('/');
+  renderNav();setMeta(pg,arg);
   document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(pg==='shop'?arg:pg)));
   closeSearch();closeDrawers();document.body.classList.remove('sbar-on');{const t=$('#toast');if(t&&!t._keep)t.classList.remove('on')}
   if(pg==='shop')pageShop(arg);else if(pg==='p')pageProduct(arg);else if(pg==='checkout')pageCheckout();else if(pg==='order')pageOrder(arg);
-  else if(pg==='story')pageStory();else if(pg==='events')pageEvents();else if(pg==='delivery')pageDelivery();else pageHome();
+  else if(pg==='story')pageStory();else if(pg==='events')pageEvents();else if(pg==='delivery')pageDelivery();
+  else if(pg==='privacy'||pg==='terms'||pg==='refunds')pageLegal(pg);else if(!pg)pageHome();else pageNotFound();
   window.scrollTo(0,0);
 }
 function doSearch(){const q=$('#q').value.trim().toLowerCase();const list=visible().filter(p=>!q||(p.name+' '+(p.ar||'')+' '+p.desc+' '+TT.catName(p.cat)).toLowerCase().includes(q));$('#qres').innerHTML=list.map(card).join('')||`<div class="nores"><div class="h3">No matches for “${U.esc(q)}”</div><p>Try “pistachio”, “hazelnut” or “gift”.</p></div>`}
 $('#q').addEventListener('input',doSearch);$('#qres').addEventListener('click',e=>{if(e.target.closest('a'))closeSearch()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawers();closeSearch()}});
 addEventListener('scroll',()=>$('#top').classList.toggle('sc',scrollY>20),{passive:true});
-addEventListener('hashchange',route);
+addEventListener('popstate',route);addEventListener('hashchange',()=>{if(FILE||/^#\//.test(location.hash))route()});
 
 /* ambient background: three soft pools of boutique light glide as you scroll.
    Native scrolling is untouched (no scroll-jacking); each frame eases toward the scroll position, then stops.
@@ -936,7 +1051,7 @@ addEventListener('hashchange',route);
   // live product/price updates from admin
   let sig=JSON.stringify(PRODUCTS.map(p=>[p.id,p.price,p.stock,p.active,p.name,p.img&&p.img.length]));
   DB.watch('products',ps=>{if(!ps||!ps.length)return;const ns=JSON.stringify(ps.map(p=>[p.id,p.price,p.stock,p.active,p.name,p.img&&p.img.length]));if(ns===sig)return;sig=ns;PRODUCTS=ps;
-    const pg=(location.hash.split('/')[1]||'');if(pg==='checkout'||pg==='order'||pg==='events')return;const y=scrollY;route();window.scrollTo(0,y)});
+    const pg=curPath().split(/[/?]/)[0];if(pg==='checkout'||pg==='order'||pg==='events')return;const y=scrollY;route();window.scrollTo(0,y)});
 })();
 </script>
 </body>

@@ -6,6 +6,7 @@ pages_build_output_dir = "public"
 compatibility_date = "2025-09-01"
 
 [vars]
+SITE_URL = "https://thetouchchocolate.com"   # the one address Google should know (canonical links, sitemap, share previews)
 MAIL_FROM = "The Touch <orders@thetouchchocolate.com>"   # must be on the domain verified in Resend
 SHOP_EMAIL = "hello@thetouchchocolate.com"              # gets new-order + event-enquiry emails
 

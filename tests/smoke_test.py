@@ -76,7 +76,7 @@ with sync_playwright() as p:
     w.fill('[name=name]', 'Smoke Test'); w.fill('[name=phone]', '0501234567')
     w.fill('[name=area]', 'Al Reem Island'); w.fill('[name=address]', 'Tower 1'); w.fill('[name=giftMsg]', 'Congratulations')
     w.click('#place'); w.wait_for_timeout(2500 if LIVE else 1200)
-    check('order confirmation page', '#/order/' in w.url, w.url.split('#')[-1])
+    check('order confirmation page', '/order/' in w.url, w.url.split('/order/')[-1])
     web = [o for o in orders(w) if o.get('channel') == 'web']
     check('web order saved', len(web) >= 1)
 

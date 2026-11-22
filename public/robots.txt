@@ -1,0 +1,9 @@
+# The Touch — thetouchchocolate.com
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /checkout
+Disallow: /order/
+
+Sitemap: https://thetouchchocolate.com/sitemap.xml
