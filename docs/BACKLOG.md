@@ -17,6 +17,20 @@ roughly in priority order. Each is small and independent — good one-at-a-time 
 7. ~~**Newsletter form**~~ — DONE 20 Nov: saved to `subscribers` (create-only rule); Admin → Clients → Newsletter CSV.
 8. ~~**Board on 820px tablets**~~ — DONE 20 Nov: 2×2 board from 761 to 1100 px.
 
+## Open after 22 Nov 2026 (handover list)
+- **Customer confirmation emails**: need a Resend account (API key as secret `RESEND_API_KEY` + its DNS records), or
+  Cloudflare Email Sending onboarded for the domain in the dashboard. Boutique notifications already work.
+- **Morning sales summary schedule**: Cloudflare needs the account's Workers page opened once (creates the workers.dev
+  name); then `cd mail-worker && npx wrangler deploy` registers the 09:00 cron. On demand it already works
+  (`POST /api/mailtest?summary=1` as staff).
+- **Google**: add the site in Search Console (HTML-file or meta-tag verification) and submit `/sitemap.xml`; create the
+  Google Business Profile (address, hours, phone, photos).
+- **Shop facts in Admin → Settings**: full address, TRN. Opening hours and a Google Maps link can be stored as
+  `settings.hours` / `settings.mapUrl` (read by `functions/[[path]].js` for Google) — no form fields yet.
+- **Stock**: real counts for the 9 opening pieces (they went in with a placeholder of 10; the dragée jar is negative).
+- **Photos** for the 18 chocolates added from the 22 Nov stock count (they show the monogram and are POS-only).
+- **Staff logins**: new passwords chosen by the owner (secret `STAFF_LOGINS`, then redeploy).
+
 ## Later upgrades
 - **Stripe checkout on the website** (waiting for the client's Stripe account) — add an `/api/checkout` route that
   creates a Stripe Checkout Session from server-side prices + a webhook that marks the order paid.

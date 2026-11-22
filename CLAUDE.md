@@ -9,21 +9,31 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
 - Plain static files: **vanilla HTML + CSS + JavaScript, no framework, no build step, no npm dependencies.**
 - Hosting: Cloudflare Pages, deployed with `npx wrangler pages deploy` (wrangler.toml → `public/` + `functions/`).
 - API: `functions/api/[[path]].js` (Pages Functions) → **Neon Postgres over HTTPS (no driver package)**, photos in
-  **R2** (binding `PHOTOS`, served by `functions/media/`), emails via **Resend**. Staff auth = `STAFF_LOGINS` secret
-  (email:password; …) → HMAC token in localStorage `tt_tok`. Public access rules live in the API (`publicCreateOk`).
+  **Cloudflare KV** (binding `PHOTOS_KV`, served by `functions/media/`; R2 binding `PHOTOS` is optional and used when
+  switched on). Staff auth = `STAFF_LOGINS` secret (email:password; …) → HMAC token in localStorage `tt_tok`.
+  Public access rules live in the API (`publicCreateOk`).
+- Email: boutique notifications (new web order, event enquiry, morning sales summary) go to the shop inbox through
+  the **mail worker** (`mail-worker/`, Worker `the-touch-mail`, service binding `MAIL`, Cloudflare Email — no outside
+  account). Customer confirmation emails go through **Resend** once `RESEND_API_KEY` is set. Cloudflare Email Routing
+  forwards `hello@` and `orders@thetouchchocolate.com` to the shop Gmail.
 - `public/js/config.js` sets `window.TT_API='/api'` (live) except on port 5500 → **offline mode** (localStorage) for dev/tests.
 
 ## Layout
 ```
 public/                 ← the static site (wrangler deploys it together with functions/)
-  index.html            customer website (single-page app, hash routes)
+  index.html            customer website (single-page app, real paths: /p/<id>, /shop/<cat> …)
+  robots.txt _headers _routes.json   search rules · headers for static files · admin + static folders bypass functions
   admin.html            admin panel + POS (single file)
   js/config.js          TT_API: '/api' live · null offline (port 5500)
   js/store.js           shared data layer + catalogue seed + utils  → window.TT
   img/                  product photos (square, near-white bg) + logos
-functions/api/[[path]].js   API: Neon (table docs(col,id,data jsonb,updated,deleted)), auth, rules, R2 upload, Resend
-functions/media/[[path]].js R2 photos at /media/p/… (immutable cache)
-wrangler.toml           Cloudflare Pages project, R2 binding, MAIL_FROM / SHOP_EMAIL
+functions/api/[[path]].js   API: Neon (table docs(col,id,data jsonb,updated,deleted)), auth, rules, photo upload, emails
+functions/media/[[path]].js uploaded photos at /media/p/… (KV, immutable cache)
+functions/[[path]].js       website pages: per-page title/description/canonical, share preview (Open Graph), Google data
+                            (JSON-LD), no-script summary, /sitemap.xml, real 404s
+functions/_middleware.js    www → main domain, the-touch.pages.dev kept out of search, security headers
+mail-worker/            Worker the-touch-mail: boutique emails + 09:00 sales summary (deploy: cd mail-worker && npx wrangler deploy)
+wrangler.toml           Cloudflare Pages project: SITE_URL, KV photos, MAIL service binding, MAIL_FROM / SHOP_EMAIL
 docs/SETUP.md           go-live guide (Cloudflare, Neon, R2, Resend, printer, daily routine)
 docs/LAUNCH-CHECKLIST.md  tomorrow's checklist (tick as you go)
 docs/BACKLOG.md         known issues + later upgrades
@@ -50,7 +60,8 @@ tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live agains
 - Prices are **AED, VAT-inclusive (5%)**: `vat = total − total/1.05` (`U.vatPart`). Use `U.r2` for money math.
 
 ### Shapes (do not rename fields — stored data and the API's checks depend on them)
-- **product**: `{id, sku, name, ar, cat, unit:'kg'|'pc', price, stock, min, img, desc, active, featured, updated}`
+- **product**: `{id, sku, name, ar, cat, unit:'kg'|'pc', price, stock, min, img, desc, active, web, featured, updated}`
+  — `web:false` = sold in the boutique (POS) only: hidden from the website, its sitemap and saved bags
   — `min` = low-stock alert level (optional; default 2 kg / 5 pcs, see `lowLevel()`)
   — `unit:'kg'` → price per kg, stock in kg, sold by grams.
 - **order**: `{id, no, channel:'web'|'pos', status:'new'|'confirmed'|'preparing'|'ready'|'completed'|'cancelled',
@@ -81,8 +92,12 @@ never use window.confirm/alert), chime, waLink, applyStock, shift functions (ope
   Use tokens, not hex, for new UI. Product photo wells stay cream; print stays light.
 
 ## index.html map
-Router `route()` on `location.hash`: `#/` pageHome · `#/shop/<cat>` pageShop · `#/p/<id>` pageProduct ·
-`#/checkout` pageCheckout · `#/order/<no>` pageOrder · `#/story` · `#/events` · `#/delivery`.
+Router `route()` on real paths (History API; `go(path)` to navigate from code, old `#/…` links are converted):
+`/` pageHome · `/shop/<cat>` pageShop · `/p/<id>` pageProduct · `/checkout` pageCheckout · `/order/<no>` pageOrder ·
+`/story` · `/events` · `/delivery` · `/privacy` `/terms` `/refunds` pageLegal · anything else pageNotFound.
+**A new page or category must be added in three places:** `route()` + `PAGE_META` here, `PAGES`/`CATS` in
+`functions/[[path]].js` (server titles, sitemap), and `CATS` in `js/store.js`. Links are written as real paths
+(`href="/shop/all"`); `<base href="/">` keeps relative assets working on deep addresses.
 Cart = `Cart` object in localStorage `tt_cart`; `syncCart()` re-prices lines from the live catalogue before
 checkout. Dates/cut-offs use Dubai time via `dxbNow()`.
 
@@ -104,7 +119,8 @@ checkout. Dates/cut-offs use Dubai time via `dxbNow()`.
 ## Go-live (see docs/LAUNCH-CHECKLIST.md)
 1. Domain → Cloudflare nameservers (do first; DNS can take hours)
 2. Neon project (Frankfurt) → pooled connection string
-3. R2 bucket `the-touch-photos` → `wrangler pages deploy` → secrets DATABASE_URL, STAFF_LOGINS, RESEND_API_KEY → custom domains
-4. Resend domain verify + Email Routing `hello@thetouchchocolate.com` → Gmail
+3. `cd mail-worker && npx wrangler deploy` (+ secret DATABASE_URL) → `npx wrangler pages deploy --branch main` →
+   secrets DATABASE_URL, STAFF_LOGINS (+ RESEND_API_KEY for customer emails) → custom domains
+4. Email Routing `hello@` / `orders@thetouchchocolate.com` → shop Gmail (done); Resend domain verify for customer emails
 5. Real prices, TRN, stock in Admin; shop laptop install + printer; run the launch test
 6. Website online payments: Stripe — waiting for the client's account
