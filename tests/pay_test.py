@@ -1,7 +1,7 @@
 # Local end-to-end test of card payment. Needs: `node tests/mock_stripe.js` (stands in for Stripe), `npx wrangler pages dev --port 8788`
 # with STRIPE_SECRET_KEY="sk_test_mock", STRIPE_API="http://127.0.0.1:8799", STRIPE_WEBHOOK_SECRET="whsec_mock_local" in .dev.vars (test database).
 # Run: python tests/pay_test.py <folder for screenshots>
-import sys, json, urllib.request
+import sys, json, time, urllib.request
 from playwright.sync_api import sync_playwright
 B, MOCK, out = 'http://127.0.0.1:8788', 'http://127.0.0.1:8799', sys.argv[1]
 ok = True
@@ -66,9 +66,10 @@ with sync_playwright() as pw:
     check('"Pay by card now" on an already-paid order shows it as paid (no second charge)', 'Payment received' in pg2.inner_text('#payBox'), pg2.inner_text('#payBox'))
 
     # C. the amount cannot be changed from the browser
-    tam = dict(last2); tam.update({'id': 'o_tamper1', 'no': 'W-TAMPER1', 'total': 1.0, 'subtotal': 1.0, 'delivery': 0, 'payment': {'method': 'card_online', 'paid': False}})
-    check('tampered order can be saved (as today) …', api('PUT', '/api/db/orders/o_tamper1', tam)[0] in (200, 409))
-    check('… but cannot be paid for 1 dirham', api('POST', '/api/pay/checkout', {'id': 'o_tamper1'})[0] == 409)
+    tid = 'o_tamper' + str(int(time.time()))   # a fresh id each run (a deleted order keeps its id)
+    tam = dict(last2); tam.update({'id': tid, 'no': 'W-TAMPER1', 'total': 1.0, 'subtotal': 1.0, 'delivery': 0, 'payment': {'method': 'card_online', 'paid': False}})
+    check('tampered order can be saved (as today) …', api('PUT', '/api/db/orders/' + tid, tam)[0] == 200)
+    check('… but cannot be paid for 1 dirham', api('POST', '/api/pay/checkout', {'id': tid})[0] == 409)
     check('cash-on-delivery order cannot open a card payment', api('POST', '/api/pay/checkout', {'id': 'o_none'})[0] == 404)
     check('public cannot mark an order paid by writing it', api('PATCH', '/api/db/orders/' + last2['id'], {'payment': {'paid': True}})[0] == 401)
 
@@ -81,6 +82,6 @@ with sync_playwright() as pw:
     check('settings has the "Card online" switch', a.locator('#pmeth .chip[data-p=card_online]').count() == 1 and 'on' in a.get_attribute('#pmeth .chip[data-p=card_online]', 'class'))
     check('no JS errors', not errs, '; '.join(errs)[:300])
     b.close()
-for oid in ('o_tamper1',): api('DELETE', '/api/db/orders/' + oid, token=tok)
+api('DELETE', '/api/db/orders/' + tid, token=tok)
 api('PATCH', '/api/db/settings/main', {'onlinePayments': before or ['cod', 'card_on_delivery', 'link']}, tok)
 print('ALL PASS' if ok else 'SOME FAILED')

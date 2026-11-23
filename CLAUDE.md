@@ -10,8 +10,14 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
 - Hosting: Cloudflare Pages, deployed with `npx wrangler pages deploy` (wrangler.toml → `public/` + `functions/`).
 - API: `functions/api/[[path]].js` (Pages Functions) → **Neon Postgres over HTTPS (no driver package)**, photos in
   **Cloudflare KV** (binding `PHOTOS_KV`, served by `functions/media/`; R2 binding `PHOTOS` is optional and used when
-  switched on). Staff auth = `STAFF_LOGINS` secret (email:password; …) → HMAC token in localStorage `tt_tok`.
-  Public access rules live in the API (`publicCreateOk`).
+  switched on). Public access rules live in the API (`publicCreateOk`).
+- Staff sign-in: accounts are made in **Admin → Settings → Security** (database, col `staff`, hashed passwords; not
+  reachable through /api/db) with a role: **owner** (everything) or **cashier** (sales, orders, shifts, stock counts —
+  enforced in the API by `cashierCan`, the admin only hides the screens: `body.cashier`, `CASHIER()`). The `STAFF_LOGINS`
+  secret (email:password; …) holds the developer owner login(s) that always work. Sessions = HMAC token in localStorage
+  `tt_tok` (30 days; a password change or removal signs the person out). Endpoints: `/api/login`, `/api/me`, `/api/staff`,
+  `/api/password`. Changing DATABASE_URL invalidates the admin-made passwords (the hash is keyed with it) — set
+  `PASSWORD_PEPPER` first if the database ever moves.
 - Email: boutique notifications (new web order, event enquiry, morning sales summary) go to the shop inbox through
   the **mail worker** (`mail-worker/`, Worker `the-touch-mail`, service binding `MAIL`, Cloudflare Email — no outside
   account). Customer confirmation emails go through **Resend** once `RESEND_API_KEY` is set. Cloudflare Email Routing

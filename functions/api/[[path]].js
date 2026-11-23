@@ -9,7 +9,8 @@
 
    Secrets (Cloudflare → Workers & Pages → the-touch → Settings → Variables and secrets):
      DATABASE_URL    Neon connection string (pooled)                                         required
-     STAFF_LOGINS    who can open the admin:  owner@thetouch.ae:Password1; shop@thetouch.ae:Password2  required
+     STAFF_LOGINS    the developer's owner login(s), always able to sign in:  email:Password1; email2:Password2   required
+                     Everyone else is created in Admin → Settings → Security (stored hashed in the database).
      RESEND_API_KEY  Resend API key                              optional (no key = no emails to customers)
      STRIPE_SECRET_KEY      Stripe secret key (sk_live_… / sk_test_…)   optional (no key = no card payment online)
      STRIPE_WEBHOOK_SECRET  signing secret of the Stripe webhook → https://<site>/api/pay/webhook  (whsec_…)
@@ -68,17 +69,95 @@ async function hmacKey(env) {
   return crypto.subtle.importKey('raw', te.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
 }
 async function makeToken(env, email) {
-  const body = b64u(te.encode(JSON.stringify({ e: email, x: NOW() + 30 * DAY })));
+  const body = b64u(te.encode(JSON.stringify({ e: email, t: NOW(), x: NOW() + 30 * DAY })));
   return body + '.' + b64u(await crypto.subtle.sign('HMAC', await hmacKey(env), te.encode(body)));
 }
-async function whoIs(req, env) {
+/* → { email, role: 'owner' | 'cashier', name, id, source } or null. Removed / switched-off accounts and sessions from
+   before a password change are refused (accounts are re-read from the database at most every 30 seconds). */
+async function whoIs(req, env, db) {
   const m = /^Bearer\s+([\w-]+)\.([\w-]+)$/.exec(req.headers.get('Authorization') || ''); if (!m) return null;
   try {
     if (!await crypto.subtle.verify('HMAC', await hmacKey(env), unb64u(m[2]), te.encode(m[1]))) return null;
     const p = JSON.parse(new TextDecoder().decode(unb64u(m[1])));
     if (!(p.x > NOW())) return null;
-    return staffList(env).some(s => s.email === p.e) ? p.e : null;   // removed from STAFF_LOGINS = signed out
+    if (staffList(env).some(s => s.email === p.e)) return { email: p.e, role: 'owner', name: '', source: 'config' };
+    const u = (await staffDb(db)).find(s => s.email === p.e && s.active !== false);
+    if (u && (p.t || 0) >= (u.pwAt || 0)) return { email: p.e, role: u.role === 'owner' ? 'owner' : 'cashier', name: u.name || '', id: u.id, source: 'admin' };
+    return null;
   } catch (e) { return null; }
+}
+
+/* ---------- staff accounts (Admin → Settings → Security) ----------
+   Kept in the database (docs, col 'staff' — not reachable through /api/db). Passwords are never stored: only a salted
+   PBKDF2 hash that is also keyed with a secret kept outside the database, so a copy of the database alone cannot be
+   used to guess them. Owner = everything. Cashier = sales, orders, shifts and stock counts only (cashierCan). */
+const PW_ITER = 15000;
+let staffMemo = { at: 0, list: null };
+async function staffDb(db, fresh) {
+  if (!fresh && staffMemo.list && NOW() - staffMemo.at < 30000) return staffMemo.list;
+  const r = await db.q("select data::text from docs where col='staff' and not deleted");
+  staffMemo = { at: NOW(), list: r.rows.map(([d]) => JSON.parse(d)) }; return staffMemo.list;
+}
+const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+async function passHash(env, pass, salt, iter) {
+  const k = await crypto.subtle.importKey('raw', te.encode(String(pass)), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: te.encode(String(salt)), iterations: iter || PW_ITER }, k, 256);
+  const pepper = await crypto.subtle.importKey('raw', te.encode('ttpw|' + (env.PASSWORD_PEPPER || env.DATABASE_URL || '')), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  return hex(await crypto.subtle.sign('HMAC', pepper, bits));
+}
+function weakPass(pass, email) {
+  if (pass.length < 8) return 'Use at least 8 characters';
+  if (pass.length > 200) return 'This password is too long';
+  if (!/[A-Za-z]/.test(pass) || !/\d/.test(pass)) return 'Use letters and numbers';
+  const low = pass.toLowerCase(), name = String(email || '').split('@')[0].toLowerCase();
+  if ((name.length > 2 && low.includes(name)) || /^(password|passw0rd|qwerty|abc123|letmein|welcome|thetouch|chocolate|admin)[\d!@#$]*$/.test(low) || /^(\d)\1+$|^1234567/.test(low)) return 'Choose a password that is harder to guess';
+  return '';
+}
+const OWNER_ONLY = 'Only the owner can do this';
+const cashierCan = (op, col, body) =>
+  op === 'put' ? ['orders', 'shifts', 'stock'].includes(col) :
+  op === 'patch' ? (['orders', 'shifts', 'enquiries'].includes(col) || (col === 'products' && Object.keys(body || {}).every(k => k === 'stock' || k === 'min' || k === 'updated'))) :
+  op === 'inc' ? (col === 'products' && body && body.field === 'stock') : false;
+async function staffApi(ctx, db, who, id) {
+  const { request: req, env } = ctx; const M = req.method;
+  if (!who) return err(401, 'Sign in'); if (who.role !== 'owner') return err(403, OWNER_ONLY);
+  const list = await staffDb(db, true);
+  if (M === 'GET') return json({ rows: staffList(env).map(s => ({ email: s.email, role: 'owner', name: 'Developer login', fixed: true }))
+    .concat(list.map(u => ({ id: u.id, email: u.email, name: u.name || '', role: u.role === 'owner' ? 'owner' : 'cashier', active: u.active !== false, lastLogin: u.lastLogin || 0, created: u.created || 0 }))) });
+  if (M === 'POST') {   // create (no id) or change (id); a password is needed for a new person and optional afterwards
+    const b = await readJSON(req, 2000); const email = String(b.email || '').trim().toLowerCase(); const pass = String(b.pass || '');
+    if (!okEmail(email)) return err(400, 'Please enter a valid email');
+    if (staffList(env).some(s => s.email === email)) return err(409, 'This email is already a developer login');
+    const u = b.id ? list.find(x => x.id === b.id) : null; if (b.id && !u) return err(404, 'Not found');
+    if (list.some(x => x.email === email && (!u || x.id !== u.id))) return err(409, 'This email already has an account');
+    if (!u && !pass) return err(400, 'Please set a password');
+    if (pass) { const bad = weakPass(pass, email); if (bad) return err(400, bad); }
+    const role = b.role === 'owner' ? 'owner' : 'cashier';
+    if (u && u.email === who.email && role !== 'owner') return err(400, 'You cannot remove your own owner access');
+    const doc = Object.assign({}, u || { id: 'u_' + crypto.randomUUID().replace(/-/g, '').slice(0, 20), created: NOW() }, { email, name: String(b.name || '').trim().slice(0, 60), role, active: true, updated: NOW() });
+    if (pass) { doc.salt = crypto.randomUUID(); doc.iter = PW_ITER; doc.hash = await passHash(env, pass, doc.salt, doc.iter); doc.pwAt = NOW(); }
+    await db.q(`insert into docs (col,id,data,updated,deleted) values ('staff',$1,$2::jsonb,$3,false)
+      on conflict (col,id) do update set data=excluded.data, updated=excluded.updated, deleted=false`, [doc.id, JSON.stringify(doc), NOW()]);
+    staffMemo.at = 0; return json({ ok: true, id: doc.id });
+  }
+  if (M === 'DELETE') {
+    const u = list.find(x => x.id === id); if (!u) return err(404, 'Not found');
+    if (u.email === who.email) return err(400, 'You cannot remove your own account');
+    await db.q("update docs set deleted=true, data='{}'::jsonb, updated=$2 where col='staff' and id=$1", [u.id, NOW()]);
+    staffMemo.at = 0; return json({ ok: true });
+  }
+  return err(405, 'Method not allowed');
+}
+async function changePassword(ctx, db, who) {
+  const { request: req, env } = ctx;
+  if (!who) return err(401, 'Sign in');
+  if (who.source === 'config') return err(400, 'This is a developer login — it cannot be changed here');
+  const b = await readJSON(req, 1000); const u = (await staffDb(db, true)).find(x => x.id === who.id); if (!u) return err(404, 'Not found');
+  if (!await sameText(u.hash, await passHash(env, b.old || '', u.salt, u.iter))) return err(400, 'The current password is not right');
+  const pass = String(b.pass || ''); const bad = weakPass(pass, u.email); if (bad) return err(400, bad);
+  const salt = crypto.randomUUID(); const hash = await passHash(env, pass, salt, PW_ITER); const t = NOW();
+  await db.q("update docs set data = data || $2::jsonb, updated=$3 where col='staff' and id=$1", [u.id, JSON.stringify({ salt, hash, iter: PW_ITER, pwAt: t }), t]);
+  staffMemo.at = 0; return json({ ok: true, token: await makeToken(env, u.email) });   // other devices are signed out; this one stays in
 }
 async function sameText(a, b) {   // constant-time compare (via hashes)
   const [x, y] = await Promise.all([a, b].map(s => crypto.subtle.digest('SHA-256', te.encode(String(s)))));
@@ -117,22 +196,29 @@ export async function onRequest(ctx) {
   try {
     if (!env.DATABASE_URL) return err(503, 'DATABASE_URL is not set');
     const db = neon(env);
-    const staff = await whoIs(req, env);
+    const who = await whoIs(req, env, db); const staff = who ? who.email : null; const owner = !!who && who.role === 'owner';
 
     if (a === 'login' && M === 'POST') {
       const ip = req.headers.get('CF-Connecting-IP') || 'local';
-      const [n] = (await db.q('select count(*) from login_fail where ip=$1 and at>$2', [ip, NOW() - 15 * 6e4])).rows[0];
-      if (+n >= 10) return err(429, 'Too many attempts — try again in 15 minutes');
-      const b = await readJSON(req, 2000); const email = String(b.email || '').trim().toLowerCase();
+      const b = await readJSON(req, 2000); const email = String(b.email || '').trim().toLowerCase().slice(0, 200); const ekey = 'e:' + email;
+      const [n, ne] = (await db.q('select count(*) filter (where ip=$1), count(*) filter (where ip=$3) from login_fail where at>$2 and ip in ($1,$3)', [ip, NOW() - 15 * 6e4, ekey])).rows[0];
+      if (+n >= 10 || +ne >= 20) return err(429, 'Too many attempts — try again in 15 minutes');
       const user = staffList(env).find(s => s.email === email);
-      if (user && await sameText(user.pass, b.pass || '')) return json({ token: await makeToken(env, email), email });
-      await db.tx([['insert into login_fail (ip, at) values ($1,$2)', [ip, NOW()]], ['delete from login_fail where at<$1', [NOW() - DAY]]]);
+      if (user && await sameText(user.pass, b.pass || '')) return json({ token: await makeToken(env, email), email, role: 'owner' });
+      const acc = user ? null : (await staffDb(db, true)).find(s => s.email === email && s.active !== false && s.hash);
+      if (acc && await sameText(acc.hash, await passHash(env, b.pass || '', acc.salt, acc.iter))) {
+        ctx.waitUntil(db.q("update docs set data = jsonb_set(data, '{lastLogin}', to_jsonb($2::bigint)) where col='staff' and id=$1", [acc.id, NOW()]).catch(() => { }));
+        return json({ token: await makeToken(env, email), email, role: acc.role === 'owner' ? 'owner' : 'cashier' });
+      }
+      await db.tx([['insert into login_fail (ip, at) values ($1,$2)', [ip, NOW()]], ['insert into login_fail (ip, at) values ($1,$2)', [ekey, NOW()]], ['delete from login_fail where at<$1', [NOW() - DAY]]]);
       return err(401, 'Wrong email or password');
     }
-    if (a === 'me') return staff ? json({ email: staff }) : err(401, 'Sign in');
+    if (a === 'me') return who ? json({ email: who.email, role: who.role, name: who.name, source: who.source }) : err(401, 'Sign in');
+    if (a === 'staff') return await staffApi(ctx, db, who, col);
+    if (a === 'password' && M === 'POST') return await changePassword(ctx, db, who);
 
     if (a === 'mailtest' && M === 'POST') {   // admin: check that the boutique inbox receives mail (?summary=1 → yesterday's sales summary)
-      if (!staff) return err(401, 'Sign in');
+      if (!staff) return err(401, 'Sign in'); if (!owner) return err(403, OWNER_ONLY);
       if (url.searchParams.get('summary')) {
         if (!env.MAIL) return json({ ok: false, error: 'The mail worker is not connected' });
         const r = await env.MAIL.fetch('https://mail/summary', { method: 'POST' }); return json(await r.text());
@@ -142,7 +228,7 @@ export async function onRequest(ctx) {
 
     if (a === 'sync' && M === 'GET') {   // admin: everything that changed since a moment
       if (!staff) return err(401, 'Sign in');
-      const cols = String(url.searchParams.get('cols') || '').split(',').filter(c => COLS.includes(c));
+      const cols = String(url.searchParams.get('cols') || '').split(',').filter(c => COLS.includes(c) && (owner || c !== 'subscribers'));
       const since = Math.max(0, +url.searchParams.get('since') || 0); const t = NOW();
       if (!cols.length) return json({ t, rows: [] });
       const r = await db.q('select col, id, deleted, data::text from docs where col = any($1::text[]) and updated > $2', ['{' + cols.join(',') + '}', since]);
@@ -150,7 +236,7 @@ export async function onRequest(ctx) {
     }
 
     if (a === 'upload' && M === 'POST') {   // admin: product photo → R2
-      if (!staff) return err(401, 'Sign in');
+      if (!staff) return err(401, 'Sign in'); if (!owner) return err(403, OWNER_ONLY);
       if (!env.PHOTOS && !env.PHOTOS_KV) return err(503, 'Photo storage is not connected');
       const type = (req.headers.get('Content-Type') || '').split(';')[0];
       const ext = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[type]; if (!ext) return err(415, 'JPEG, PNG or WebP only');
@@ -168,6 +254,7 @@ export async function onRequest(ctx) {
     /* read */
     if (M === 'GET' && !id) {
       if (!staff && !PUBLIC_READ.includes(col)) return err(401, 'Sign in');
+      if (staff && !owner && col === 'subscribers') return err(403, OWNER_ONLY);
       const t = NOW(); const edge = !staff;
       if (edge) { try { const hit = await caches.default.match(cacheKey(url.origin, col)); if (hit) return json(await hit.text()); } catch (e) { } }
       const r = await db.q('select data::text from docs where col=$1 and not deleted', [col]);
@@ -187,6 +274,7 @@ export async function onRequest(ctx) {
     /* write */
     if (M === 'PUT') {
       const d = await readJSON(req, staff ? 1.5e6 : 3.2e4); d.id = id;
+      if (staff && !owner && !cashierCan('put', col, d) && !(PUBLIC_CREATE.includes(col) && publicCreateOk(col, d))) return err(403, OWNER_ONLY);
       if (staff) {
         await db.q(`insert into docs (col,id,data,updated,deleted) values ($1,$2,$3::jsonb,$4,false)
           on conflict (col,id) do update set data=excluded.data, updated=excluded.updated, deleted=false`, [col, id, JSON.stringify(d), NOW()]);
@@ -202,6 +290,7 @@ export async function onRequest(ctx) {
     if (!staff) return err(401, 'Sign in');
     if (M === 'PATCH') {   // shallow merge (same as the offline mode); creates the doc if missing
       const part = await readJSON(req, 1.5e6); delete part.id;
+      if (!owner && !cashierCan('patch', col, part)) return err(403, OWNER_ONLY);
       await db.q(`insert into docs (col,id,data,updated,deleted) values ($1,$2,$3::jsonb,$4,false)
         on conflict (col,id) do update set data = case when docs.deleted then excluded.data else docs.data || excluded.data end, updated=excluded.updated, deleted=false`,
         [col, id, JSON.stringify(Object.assign({ id }, part)), NOW()]);
@@ -210,6 +299,7 @@ export async function onRequest(ctx) {
     }
     if (M === 'POST' && op === 'inc') {   // atomic +/− (stock)
       const b = await readJSON(req, 500); const f = String(b.field || ''); const delta = Number(b.delta);
+      if (!owner && !cashierCan('inc', col, b)) return err(403, OWNER_ONLY);
       if (!/^[A-Za-z0-9_]{1,40}$/.test(f) || !isFinite(delta)) return err(400, 'Bad increment');
       await db.q(`update docs set data = jsonb_set(data, array[$3::text], to_jsonb(round(coalesce(nullif(data->>$3::text,'')::numeric,0) + $4::numeric, 2))), updated=$5
         where col=$1 and id=$2 and not deleted`, [col, id, f, delta, NOW()]);
@@ -217,6 +307,7 @@ export async function onRequest(ctx) {
       return json({ ok: true });
     }
     if (M === 'DELETE') {   // soft delete so other screens see it disappear; the content itself is wiped
+      if (!owner) return err(403, OWNER_ONLY);
       await db.q(`update docs set deleted=true, data='{}'::jsonb, updated=$3 where col=$1 and id=$2`, [col, id, NOW()]);
       if (PUBLIC_READ.includes(col)) await purge(url.origin, col);
       return json({ ok: true });

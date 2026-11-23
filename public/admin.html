@@ -103,6 +103,9 @@ a{color:inherit}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--bg);border-radius:11px;padding:4px;gap:4px}
 .seg button{height:36px;border-radius:8px;font-size:12px;font-weight:600;color:var(--slate);transition:all .15s}
 .seg button.on{background:var(--card);color:var(--hd);box-shadow:0 1px 4px rgba(57,38,31,.12)}
+body.cashier .rail button[data-v=reports],body.cashier .rail button[data-v=customers],body.cashier .own,body.cashier [data-ed],body.cashier #padd,body.cashier #ptable .switch,body.cashier .qa .ownb{display:none!important}
+.lshow{display:flex;align-items:center;gap:8px;justify-content:center;margin:2px 0 12px;font-size:12px;color:#c9b29a;cursor:pointer}.lshow input{width:16px;height:16px;accent-color:#cd9754}
+.pwrow{display:flex;gap:8px}.pwrow input{flex:1;min-width:0}
 .tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;color:#fff;white-space:nowrap}
 .muted{color:var(--mute)}.small{font-size:12px}
 table.t{width:100%;border-collapse:collapse;font-size:13px}
@@ -513,7 +516,7 @@ table.t tr:hover td{background:var(--soft2)}
     <img class="logo" src="img/logo-white.png" alt="The Touch">
     <div class="sub">Boutique · Admin · Point of Sale</div>
     <div id="pinUI"><div class="pin-dots" id="dots"><i></i><i></i><i></i><i></i></div><div class="pad" id="pad"></div></div>
-    <form id="emailUI" class="hidden"><input type="email" id="lemail" placeholder="Email" autocomplete="username"><input type="password" id="lpass" placeholder="Password" autocomplete="current-password"><button class="btn b-gold" style="width:100%;height:50px">Sign in</button></form>
+    <form id="emailUI" class="hidden"><input type="email" id="lemail" placeholder="Email" autocomplete="username"><input type="password" id="lpass" placeholder="Password" autocomplete="current-password"><label class="lshow"><input type="checkbox" id="lshow" onchange="document.getElementById('lpass').type=this.checked?'text':'password'"><span>Show password</span></label><button class="btn b-gold" style="width:100%;height:50px">Sign in</button></form>
     <div class="err" id="lerr"></div>
     <button class="lgl" id="loginLang" type="button" data-en></button>
   </div>
@@ -615,6 +618,10 @@ const AR={
  // products & stock
  'Search products…':'ابحث عن منتج…','History':'السجل','Stock list':'قائمة المخزون','Count sheet':'ورقة الجرد','Products':'المنتجات','on sale':'معروض للبيع','Restock soon':'أعد التخزين قريباً','All above alert level':'الكل فوق حد التنبيه',
  'Out of stock':'نفد من المخزون','View':'عرض','Everything available':'كل المنتجات متوفرة','Stock value':'قيمة المخزون','At selling price':'بسعر البيع','Product':'المنتج','Category':'الفئة','Price':'السعر','Stock':'المخزون','On sale':'معروض للبيع',
+ 'Show password':'إظهار كلمة المرور','Signed in as':'تم تسجيل الدخول باسم','Owner':'المالك','Cashier':'كاشير','Access':'الصلاحية','Last sign-in':'آخر دخول','Never':'لم يدخل بعد','Add a person':'إضافة شخص','Change my password':'تغيير كلمة المرور','New person':'شخص جديد','Edit person':'تعديل الشخص','New password':'كلمة مرور جديدة','Generate':'توليد','Remove':'حذف','Current password':'كلمة المرور الحالية','Repeat the new password':'أعد كلمة المرور الجديدة','Change password':'تغيير كلمة المرور','Password changed ✓':'تم تغيير كلمة المرور ✓','The two passwords are not the same':'كلمتا المرور غير متطابقتين','Remove this person?':'حذف هذا الشخص؟','Removed':'تم الحذف','Developer login':'دخول المطوّر','Could not load the staff list.':'تعذّر تحميل قائمة الموظفين.','Leave empty to keep the current password':'اتركه فارغاً للإبقاء على كلمة المرور الحالية',
+ 'Owner: everything. Cashier: sales, orders, shifts and stock counts — not prices, products, reports, clients or settings.':'المالك: كل شيء. الكاشير: المبيعات والطلبات والورديات وجرد المخزون فقط — دون الأسعار والمنتجات والتقارير والعملاء والإعدادات.',
+ 'At least 8 characters, with letters and numbers. Write it down for this person — it is not shown again.':'8 أحرف على الأقل، بحروف وأرقام. دوّنها لهذا الشخص — لن تظهر مرة أخرى.',
+ 'At least 8 characters, with letters and numbers. Other devices using this login will be signed out.':'8 أحرف على الأقل، بحروف وأرقام. سيتم تسجيل الخروج من الأجهزة الأخرى.',
  'Card online':'بطاقة أونلاين','POS only':'نقطة البيع فقط','Show on the website':'عرض في الموقع الإلكتروني',
  'Signature':'مميز','by weight':'بالوزن','per piece':'بالقطعة','Website · POS':'الموقع · نقطة البيع','Hidden':'مخفي','On sale (website & POS)':'معروض للبيع (الموقع ونقطة البيع)','Receive, count or remove stock':'استلام أو جرد أو سحب المخزون',
  'No products match — try another search or filter':'لا توجد منتجات مطابقة — جرّب بحثاً أو فلتراً آخر','No products yet — tap “Add product”':'لا توجد منتجات بعد — اضغط «إضافة منتج»','New product':'منتج جديد','Edit product':'تعديل المنتج','Change photo':'تغيير الصورة','Upload photo':'رفع صورة',
@@ -781,7 +788,8 @@ $('#emailUI').onsubmit=async e=>{e.preventDefault();$('#lerr').textContent='';co
 async function lock(){if(DB.mode!=='local'){saveT();await DB.signOut();location.reload();return}sessionStorage.removeItem('tt_admin');pin='';drawDots();$('#lerr').textContent='';$('#login').classList.remove('hidden')}
 $('#lockBtn').onclick=lock;
 let started=false;
-async function unlock(){$('#login').classList.add('hidden');if(started)return;started=true;await startData();go(VIEW);if(!SHIFT)setTimeout(()=>openShiftModal(),300)}
+const CASHIER=()=>DB.role==='cashier';const NOCASH=['reports','customers'];   // screens a cashier cannot open
+async function unlock(){$('#login').classList.add('hidden');document.body.classList.toggle('cashier',CASHIER());if(started)return;started=true;await startData();go(VIEW);if(!SHIFT)setTimeout(()=>openShiftModal(),300)}
 
 /* =================== data =================== */
 let seenOrders=null;const freshIds=new Set();
@@ -816,14 +824,14 @@ function syncMoreDot(){const n=+$('#evDot').textContent||0;$('#moreDot').textCon
 $('#moreBtn').onclick=()=>{if($('#moreSheet')){closeMore();return}
   const ic=v=>$(`#rail button[data-v="${v}"] svg`).outerHTML;
   const s=document.createElement('div');s.className='msheet';s.id='moreSheet';
-  s.innerHTML=`<div class="in">${MORE.map(v=>`<button data-mv="${v}" class="${VIEW===v?'on':''}">${ic(v)}${$(`#rail button[data-v="${v}"]`).childNodes[1].textContent}${v==='events'&&!$('#evDot').classList.contains('hidden')?`<span class="dot">${$('#evDot').textContent}</span>`:''}</button>`).join('')}
+  s.innerHTML=`<div class="in">${MORE.filter(v=>!(CASHIER()&&NOCASH.includes(v))).map(v=>`<button data-mv="${v}" class="${VIEW===v?'on':''}">${ic(v)}${$(`#rail button[data-v="${v}"]`).childNodes[1].textContent}${v==='events'&&!$('#evDot').classList.contains('hidden')?`<span class="dot">${$('#evDot').textContent}</span>`:''}</button>`).join('')}
    <a href="index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14 0 18M12 3c-3 3.5-3 14 0 18"/></svg>View site</a>
    <button data-lang="1" data-en><span class="lgi">${LANG==='ar'?'EN':'ع'}</span>${LANG==='ar'?'English':'العربية'}</button>
    <button data-theme="1">${isDark()?ICON_SUN:ICON_MOON}${isDark()?'Light mode':'Dark mode'}</button>
    <button data-lock="1">${$('#lockBtn svg').outerHTML}Lock</button></div>`;
   s.onclick=e=>{const b=e.target.closest('[data-mv]');if(b){closeMore();go(b.dataset.mv);return}if(e.target.closest('[data-lock]')){closeMore();lock();return}if(e.target.closest('[data-lang]')){closeMore();setLang(LANG==='ar'?'en':'ar');return}if(e.target.closest('[data-theme]')){closeMore();setTheme(isDark()?'light':'dark');return}if(e.target.closest('a'))closeMore();else if(e.target===s)closeMore()};
   document.body.appendChild(s)};
-function go(v){VIEW=v;closeMore();$$('#rail button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('#moreBtn').classList.toggle('on',MORE.includes(v));$('#vtitle').textContent=TITLES[v];const view=$('#view');view.className='view'+(v==='pos'?' pos':'');view.scrollTop=0;view.onclick=null;view.onchange=null;
+function go(v){if(CASHIER()&&NOCASH.includes(v))v='pos';VIEW=v;closeMore();$$('#rail button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('#moreBtn').classList.toggle('on',MORE.includes(v));$('#vtitle').textContent=TITLES[v];const view=$('#view');view.className='view'+(v==='pos'?' pos':'');view.scrollTop=0;view.onclick=null;view.onchange=null;
   ({home:renderHome,pos:renderPOS,orders:renderOrders,products:renderProducts,reports:renderReports,customers:renderCustomers,events:renderEvents,settings:renderSettings})[v]()}
 
 /* =================== HOME / DASHBOARD =================== */
@@ -840,7 +848,7 @@ function renderHome(){
   const st=SHIFT?shiftTotals(SHIFT):null;
   $('#view').innerHTML=`
    <div class="hello"><div><h2>Welcome to The Touch</h2><p>${SHIFT?`${esc(SHIFT.cashier)} · shift since ${new Date(SHIFT.openedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`:'No shift open on this device'}</p></div>
-    <div class="qa"><button class="btn b-dark" onclick="go('pos')">＋ New sale</button><button class="btn b-line" onclick="go('orders')">Orders board</button><button class="btn b-line" onclick="go('products');setTimeout(()=>productModal(),50)">Add product</button></div></div>
+    <div class="qa"><button class="btn b-dark" onclick="go('pos')">＋ New sale</button><button class="btn b-line" onclick="go('orders')">Orders board</button><button class="btn b-line ownb" onclick="go('products');setTimeout(()=>productModal(),50)">Add product</button></div></div>
    <div class="kpis">
     <div class="card kpi hero"><div class="l">Today's sales</div><div class="v">${money(tot)}</div><div class="s">${plural(today.length,'order')}${diff!=null?` · ${diff>=0?'▲':'▼'} ${Math.abs(diff)}% vs yesterday`:''}</div></div>
     <div class="card kpi"><div class="l">Average ticket</div><div class="v">${money(today.length?U.r2(tot/today.length):0)}</div><div class="s">In-store ${today.filter(o=>o.channel==='pos').length} · Web ${today.filter(o=>o.channel==='web').length}</div></div>
@@ -1442,6 +1450,56 @@ function productModal(p){
     try{const was=isNew?0:U.r2(+((prod(p.id)||p).stock)||0);await DB.put('products',o);if(U.r2(o.stock)!==was)logStock(o,isNew?'receive':'count',o.stock,was,o.stock,isNew?'New product':'Edited in product form');m.close();toast('Saved ✓')}catch(e){toast('Could not save (image too large?)')}};
 }
 
+/* =================== STAFF & SIGN-IN (live mode, Settings → Security) ===================
+   Owner: everything. Cashier: sales, orders, shifts and stock counts. The API enforces it (functions/api → cashierCan);
+   this screen only manages the accounts. Developer logins (STAFF_LOGINS secret) are listed but cannot be changed here. */
+const genPass=()=>{const a='ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789',r=n=>Array.from(crypto.getRandomValues(new Uint32Array(n)),x=>a[x%a.length]).join('');return 'Touch-'+r(5)+'-'+r(5)+(Math.floor(Math.random()*90)+10)};
+async function drawStaff(){
+  const box=$('#staffBox');if(!box)return;const me=DB.me||{},own=!CASHIER();let rows=[];
+  if(own){try{rows=(await DB.api('GET','/staff')).rows}catch(e){box.innerHTML='<p class="muted small">Could not load the staff list.</p>';return}}
+  if(!$('#staffBox'))return;
+  const when=t=>t?new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' · '+U.fmtTime(t):'Never';
+  box.innerHTML=`<p class="small muted" style="margin-bottom:14px;line-height:1.6"><span>Signed in as</span> <b data-en style="color:var(--ink)">${esc(me.email||'')}</b> · <span>${own?'Owner':'Cashier'}</span></p>
+   ${own?`<div style="overflow-x:auto"><table class="t" style="margin-bottom:14px"><thead><tr><th>Name</th><th>Email</th><th>Access</th><th>Last sign-in</th><th></th></tr></thead><tbody>${rows.map(u=>`<tr><td><b>${esc(u.name||'—')}</b></td><td class="small" data-en>${esc(u.email)}</td><td><span class="tag" style="background:${u.role==='owner'?'var(--gold)':'var(--slate)'}">${u.role==='owner'?'Owner':'Cashier'}</span></td><td class="small muted">${u.fixed?'—':when(u.lastLogin)}</td><td style="text-align:end">${u.fixed?'':`<button class="btn b-line b-sm" data-su="${esc(u.id)}">Edit</button>`}</td></tr>`).join('')}</tbody></table></div>`:''}
+   <div style="display:flex;gap:10px;flex-wrap:wrap">${own?'<button class="btn b-dark" id="sadd">Add a person</button>':''}${me.source==='config'?'':'<button class="btn b-line" id="spw">Change my password</button>'}</div>
+   ${own?'<p class="small muted" style="margin-top:14px;line-height:1.6">Owner: everything. Cashier: sales, orders, shifts and stock counts — not prices, products, reports, clients or settings.</p>':''}`;
+  if($('#sadd'))$('#sadd').onclick=()=>staffModal(null);
+  if($('#spw'))$('#spw').onclick=pwModal;
+  box.onclick=e=>{const b=e.target.closest('[data-su]');if(b)staffModal(rows.find(u=>u.id===b.dataset.su))};
+}
+function staffModal(u){
+  const isNew=!u,me=DB.me||{},self=!!u&&u.email===me.email;u=u||{name:'',email:'',role:'cashier'};
+  const m=modal(`<div class="mh"><h3>${isNew?'New person':'Edit person'}</h3><button class="x" data-close>×</button></div>
+   <div class="mb"><div class="grid2">
+    <div class="fld"><label>Name</label><input id="s_name" value="${esc(u.name||'')}" autocomplete="off"></div>
+    <div class="fld"><label>Access</label><select id="s_role" ${self?'disabled':''}><option value="cashier" ${u.role!=='owner'?'selected':''}>Cashier</option><option value="owner" ${u.role==='owner'?'selected':''}>Owner</option></select></div>
+    <div class="fld full"><label>Email</label><input id="s_email" type="email" data-en value="${esc(u.email||'')}" autocomplete="off" placeholder="name@example.com"></div>
+    <div class="fld full"><label>${isNew?'Password':'New password'}</label><div class="pwrow"><input id="s_pass" data-en type="text" autocomplete="new-password" placeholder="${isNew?'':'Leave empty to keep the current password'}"><button type="button" class="btn b-line" id="s_gen">Generate</button></div><span class="small muted" style="text-transform:none;letter-spacing:0;font-weight:500;margin-top:6px">At least 8 characters, with letters and numbers. Write it down for this person — it is not shown again.</span></div>
+   </div></div>
+   <div class="mf" style="justify-content:space-between">${isNew||self?'<span></span>':'<button class="btn b-bad" id="s_del">Remove</button>'}<div style="display:flex;gap:10px"><button class="btn b-line" data-close>Cancel</button><button class="btn b-dark" id="s_save" style="min-width:120px">Save</button></div></div>`);
+  const g=id=>m.querySelector('#'+id);
+  g('s_gen').onclick=()=>{g('s_pass').value=genPass();g('s_pass').select()};
+  g('s_save').onclick=async()=>{const b=g('s_save');b.disabled=true;
+    try{await DB.api('POST','/staff',{id:u.id,name:g('s_name').value.trim(),email:g('s_email').value.trim(),role:g('s_role').value,pass:g('s_pass').value});m.close();toast('Saved ✓');drawStaff()}
+    catch(e){toast(esc(e.status?e.message:'Could not reach the server — check the internet'))}b.disabled=false};
+  if(g('s_del'))g('s_del').onclick=async()=>{if(!await ask('Remove this person?',esc(u.name||u.email)+' will be signed out on every device.','Remove',true))return;
+    try{await DB.api('DELETE','/staff/'+encodeURIComponent(u.id));m.close();toast('Removed');drawStaff()}catch(e){toast(esc(e.status?e.message:'Could not reach the server — check the internet'))}};
+}
+function pwModal(){
+  const m=modal(`<div class="mh"><h3>Change my password</h3><button class="x" data-close>×</button></div>
+   <div class="mb"><div class="grid2">
+    <div class="fld full"><label>Current password</label><input id="p_old" type="password" data-en autocomplete="current-password"></div>
+    <div class="fld full"><label>New password</label><input id="p_new" type="password" data-en autocomplete="new-password"></div>
+    <div class="fld full"><label>Repeat the new password</label><input id="p_rep" type="password" data-en autocomplete="new-password"><span class="small muted" style="text-transform:none;letter-spacing:0;font-weight:500;margin-top:6px">At least 8 characters, with letters and numbers. Other devices using this login will be signed out.</span></div>
+   </div></div>
+   <div class="mf"><button class="btn b-line" data-close>Cancel</button><button class="btn b-dark" id="p_save" style="min-width:160px">Change password</button></div>`);
+  const g=id=>m.querySelector('#'+id);
+  g('p_save').onclick=async()=>{if(g('p_new').value!==g('p_rep').value){toast('The two passwords are not the same');g('p_rep').focus();return}
+    const b=g('p_save');b.disabled=true;
+    try{const r=await DB.api('POST','/password',{old:g('p_old').value,pass:g('p_new').value});if(r.token)DB.setToken(r.token);m.close();toast('Password changed ✓')}
+    catch(e){toast(esc(e.status?e.message:'Could not reach the server — check the internet'))}b.disabled=false};
+}
+
 /* =================== REPORTS =================== */
 let rRange='today',rFrom='',rTo='';
 const DAY=864e5;
@@ -1555,19 +1613,20 @@ function renderSettings(){
      <div class="fld"><label>Language</label><div class="seg" id="lgseg" data-en><button type="button" data-l="en" class="${LANG==='en'?'on':''}">English</button><button type="button" data-l="ar" class="${LANG==='ar'?'on':''}">العربية</button></div></div>
      <div class="fld"><label>Theme</label><div class="seg" id="thseg">${[['light','Light'],['dark','Dark'],['auto','Automatic']].map(([k,n])=>`<button type="button" data-t="${k}" class="${themePref()===k?'on':''}">${n}</button>`).join('')}</div></div>
    </div></div>
-   <div class="card sec"><h4>Boutique</h4><div class="grid2">
+   <div class="card sec own"><h4>Boutique</h4><div class="grid2">
      ${[['storeName','Store name'],['phone','Phone'],['whatsapp','WhatsApp number for orders (e.g. 9715…)'],['instagram','Instagram'],['email','Email'],['trn','VAT TRN (printed on receipts)'],['address','Address'],['vatRate','VAT %'],['announcement','Website announcement bar'],['receiptFooter','Receipt footer']].map(([k,l])=>`<div class="fld ${['announcement','receiptFooter','address'].includes(k)?'full':''}"><label>${l}</label><input data-k="${k}" value="${esc(S[k]==null?'':S[k])}"></div>`).join('')}
    </div></div>
-   <div class="card sec"><h4>Delivery</h4><div class="grid3">${Object.keys(d).map(e=>`<div class="fld"><label>${e} (AED)</label><input type="number" data-d="${e}" value="${d[e]}"></div>`).join('')}
+   <div class="card sec own"><h4>Delivery</h4><div class="grid3">${Object.keys(d).map(e=>`<div class="fld"><label>${e} (AED)</label><input type="number" data-d="${e}" value="${d[e]}"></div>`).join('')}
      <div class="fld"><label>Free delivery over (AED)</label><input type="number" data-k="freeDeliveryOver" value="${S.freeDeliveryOver}"></div><div class="fld"><label>Same-day cut-off (hour)</label><input type="number" data-k="sameDayCutoff" value="${S.sameDayCutoff}"></div></div>
      <div class="fld" style="margin-top:14px"><label>Online payment options</label><div class="chips" id="pmeth">${['card_online','cod','card_on_delivery','link'].map(k=>`<button class="chip ${(S.onlinePayments||[]).includes(k)?'on':''}" data-p="${k}">${TT.payLabel(k)}</button>`).join('')}</div></div></div>
-   <div class="card sec"><h4>Security</h4>${DB.mode==='local'?`<div class="grid2"><div class="fld"><label>Admin PIN (4 digits)</label><input data-k="pin" inputmode="numeric" maxlength="4" value="${esc(S.pin)}"></div></div>`:'<p class="muted small">Live mode: staff sign in with their own email &amp; password (Cloudflare → the-touch → Settings → STAFF_LOGINS).</p>'}</div>
-   <div class="card sec"><h4>Data &amp; connection</h4>
+   <div class="card sec"><h4>Security</h4>${DB.mode==='local'?`<div class="grid2"><div class="fld"><label>Admin PIN (4 digits)</label><input data-k="pin" inputmode="numeric" maxlength="4" value="${esc(S.pin)}"></div></div>`:'<div id="staffBox"><p class="muted small">Loading…</p></div>'}</div>
+   <div class="card sec own"><h4>Data &amp; connection</h4>
      <p class="small muted" style="margin-bottom:12px;line-height:1.6">Mode: <b>${DB.mode==='live'?'LIVE — synced across all devices':'OFFLINE — data stays in this browser. Website orders from customers\' phones reach this screen only after Live mode is connected (see SETUP.md).'}</b></p>
      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn b-line" id="bexp">⬇ Backup</button><label class="btn b-line">⬆ Restore<input type="file" accept=".json" id="bimp" hidden></label>${DB.mode==='local'?'<button class="btn b-bad" id="breset">Reset demo data</button>':''}<button class="btn b-line" id="btest">🔔 Test order alert</button></div></div>
-   <div class="savebar" id="sbar"><span class="msg">All changes saved</span><button class="btn b-dark" id="ssave" style="min-width:180px">Save settings</button></div>
+   <div class="savebar own" id="sbar"><span class="msg">All changes saved</span><button class="btn b-dark" id="ssave" style="min-width:180px">Save settings</button></div>
   </div>`;
   $('#lgseg').onclick=e=>{const b=e.target.closest('[data-l]');if(b&&b.dataset.l!==LANG)setLang(b.dataset.l)};
+  if(DB.mode==='live')drawStaff();
   $('#thseg').onclick=e=>{const b=e.target.closest('[data-t]');if(b)setTheme(b.dataset.t)};
   const sbar=$('#sbar');$('#view .setw').oninput=e=>{if(e.target.closest('[data-k],[data-d]')){sbar.classList.add('dirty');sbar.querySelector('.msg').textContent='Unsaved changes'}};
   $('#pmeth').onclick=e=>{const b=e.target.closest('.chip');if(b){b.classList.toggle('on');sbar.classList.add('dirty');sbar.querySelector('.msg').textContent='Unsaved changes'}};

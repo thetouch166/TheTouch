@@ -167,9 +167,12 @@
   const enc = encodeURIComponent;
   const cloud = {
     mode: 'live',
+    role: 'owner', me: null,   // who is signed in: { email, role: 'owner' | 'cashier', name, source } — the API enforces the role
+    api: (method, path, body) => req(method, path, body),   // staff endpoints: /staff, /password, /mailtest
+    setToken(t) { try { localStorage.setItem(TOK, t); } catch (e) { } },
     _c: {}, _timer: 0, _busy: false,
     async init() {
-      if (tok()) { try { await req('GET', '/me'); } catch (e) { } }   // a stale/removed login is cleared here
+      if (tok()) { try { cloud.me = await req('GET', '/me'); cloud.role = cloud.me.role || 'owner'; } catch (e) { } }   // a stale/removed login is cleared here
       document.addEventListener('visibilitychange', () => { if (!document.hidden) cloud._poll(); });
     },
     async _list(col) { return req('GET', '/db/' + col); },
@@ -225,7 +228,7 @@
     async upload(dataUrl) { const blob = await (await fetch(dataUrl)).blob(); return (await req('POST', '/upload', undefined, blob)).url; },
     async signIn(email, pass) {
       cloud.lastError = '';
-      try { const r = await req('POST', '/login', { email, pass }); localStorage.setItem(TOK, r.token); return true; }
+      try { const r = await req('POST', '/login', { email, pass }); localStorage.setItem(TOK, r.token); cloud.role = r.role || 'owner'; cloud.me = { email: r.email, role: cloud.role }; try { cloud.me = await req('GET', '/me'); } catch (e) { } return true; }
       catch (e) { cloud.lastError = e.message; return false; }
     },
     async signOut() { try { localStorage.removeItem(TOK); } catch (e) { } },
