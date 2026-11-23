@@ -11,6 +11,8 @@
      DATABASE_URL    Neon connection string (pooled)                                         required
      STAFF_LOGINS    who can open the admin:  owner@thetouch.ae:Password1; shop@thetouch.ae:Password2  required
      RESEND_API_KEY  Resend API key                              optional (no key = no emails to customers)
+     STRIPE_SECRET_KEY      Stripe secret key (sk_live_… / sk_test_…)   optional (no key = no card payment online)
+     STRIPE_WEBHOOK_SECRET  signing secret of the Stripe webhook → https://<site>/api/pay/webhook  (whsec_…)
    Plain vars (wrangler.toml): MAIL_FROM, SHOP_EMAIL
 */
 
@@ -93,7 +95,7 @@ function publicCreateOk(col, d) {
   if (col === 'orders') {
     const p = d.payment || {};
     return d.channel === 'web' && d.status === 'new' && d.stockApplied === false && p.paid === false &&
-      ['cod', 'card_on_delivery', 'link'].includes(p.method) && Array.isArray(d.items) && d.items.length > 0 && d.items.length < 50 &&
+      ['cod', 'card_on_delivery', 'link', 'card_online'].includes(p.method) && Array.isArray(d.items) && d.items.length > 0 && d.items.length < 50 &&
       typeof d.total === 'number' && d.total > 0;
   }
   if (col === 'enquiries') return true;
@@ -158,6 +160,8 @@ export async function onRequest(ctx) {
       else await env.PHOTOS_KV.put(key, buf, { metadata: { type } });
       return json({ url: '/media/' + key });
     }
+
+    if (a === 'pay') return await pay(ctx, db, col, url);
 
     if (a !== 'db' || !COLS.includes(col) || (id && !ID.test(id))) return err(404, 'Not found');
 
@@ -225,13 +229,112 @@ export async function onRequest(ctx) {
   }
 }
 
+/* ---------- card payments (Stripe Checkout) ----------
+   The website saves the order first (unpaid), then asks POST /api/pay/checkout for a Stripe payment page.
+   The amount is rebuilt here from our own prices — what the browser sent is never charged.
+   The order is marked paid by Stripe's webhook (POST /api/pay/webhook) and, as a second path, when the customer
+   lands back on the confirmation page (GET /api/pay/confirm?sid=…). Both go through settle(), which acts once.
+   Money received online is stored in payment.other (the "Link / online" line of the reports), never as till cash.
+   Refunds are made in the Stripe dashboard. */
+const r2 = n => Math.round((Number(n) || 0) * 100) / 100;
+const fils = n => Math.round((Number(n) || 0) * 100);
+async function stripe(env, method, path, params) {
+  const init = { method, headers: { Authorization: 'Bearer ' + env.STRIPE_SECRET_KEY } };
+  if (params) { init.headers['Content-Type'] = 'application/x-www-form-urlencoded'; init.body = new URLSearchParams(params).toString(); }
+  const r = await fetch((env.STRIPE_API || 'https://api.stripe.com') + '/v1' + path, init);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { console.error('stripe', method, path, r.status, j.error && j.error.message); throw Object.assign(new Error('The payment service did not answer — please try again'), { status: 502 }); }
+  return j;
+}
+async function getDoc(db, col, id) { const r = await db.q('select data::text from docs where col=$1 and id=$2 and not deleted', [col, id]); return r.rows.length ? JSON.parse(r.rows[0][0]) : null; }
+/* the order's lines and total from the catalogue's own prices (same sums as the website: store.js lineTotal / deliveryFee) */
+async function priceOrder(db, o) {
+  const [pr, st] = await Promise.all([db.q("select data::text from docs where col='products' and not deleted"), db.q("select data::text from docs where col='settings' and id='main'")]);
+  const prods = {}; pr.rows.forEach(([d]) => { const p = JSON.parse(d); prods[p.id] = p; }); const s = st.rows.length ? JSON.parse(st.rows[0][0]) : {};
+  const lines = [];
+  for (const l of (Array.isArray(o.items) ? o.items : [])) {
+    const p = prods[l && l.pid]; const qty = Math.round(Number(l && l.qty)); const grams = Math.round(Number(l && l.grams) || 0);
+    if (!p || p.active === false || p.web === false || !(qty >= 1 && qty <= 200)) return null;
+    const kg = p.unit === 'kg'; if (kg && !(grams >= 50 && grams <= 20000)) return null;
+    const amount = r2((kg ? p.price * grams / 1000 : p.price) * qty); if (!(amount > 0)) return null;
+    lines.push({ name: String(p.name).slice(0, 120) + (kg ? ' · ' + (grams >= 1000 ? grams / 1000 + ' kg' : grams + ' g') : '') + (qty > 1 ? ' × ' + qty : ''), amount });
+  }
+  if (!lines.length) return null;
+  const subtotal = r2(lines.reduce((a, l) => a + l.amount, 0)); const free = Number(s.freeDeliveryOver) > 0 ? Number(s.freeDeliveryOver) : Infinity;
+  const delivery = o.fulfil === 'delivery' ? ((subtotal >= free && o.emirate === 'Abu Dhabi') ? 0 : Number((s.delivery || {})[o.emirate] || 0)) : 0;
+  return { lines, subtotal, delivery, total: r2(subtotal + delivery) };
+}
+/* mark the order paid — called by the webhook and by the confirmation page; the database update happens only once */
+async function settle(ctx, db, session, origin) {
+  const id = String((session && (session.client_reference_id || (session.metadata || {}).order_id)) || '');
+  if (!session || session.payment_status !== 'paid' || !ID.test(id)) return { paid: false };
+  const o = await getDoc(db, 'orders', id); if (!o) return { paid: false };
+  if (o.payment && o.payment.paid) return { paid: true, no: o.no };
+  if (String(session.currency).toLowerCase() !== 'aed' || Number(session.amount_total) !== fils(o.total)) { console.error('stripe amount mismatch', id, session.amount_total, o.total); return { paid: false, no: o.no }; }
+  const pay = Object.assign({}, o.payment, { method: 'card_online', paid: true, paidAt: NOW(), cash: 0, card: 0, other: r2(o.total), ref: String(session.payment_intent || session.id).slice(0, 80), session: String(session.id).slice(0, 120) });
+  const r = await db.q(`update docs set data = jsonb_set(data, '{payment}', $2::jsonb), updated=$3
+    where col='orders' and id=$1 and not deleted and coalesce(data->'payment'->>'paid','false') <> 'true'`, [id, JSON.stringify(pay), NOW()]);
+  if (r.rowCount) {
+    const c = o.customer || {};
+    ctx.waitUntil(sendShop(ctx.env, { to: [ctx.env.SHOP_EMAIL], reply_to: okEmail(c.email) ? c.email.trim() : undefined, subject: `Payment received · ${o.no} · ${AED(o.total)}`,
+      html: frame(`<div style="font-family:Georgia,serif;font-size:22px;margin-bottom:8px">Payment received</div><p style="font-size:14px;line-height:1.7;margin:0 0 6px;color:#5a4a3f">Order <b>${H(o.no)}</b> was paid online by card: <b>${AED(o.total)}</b>.</p><p style="font-size:14px;line-height:1.7;margin:0;color:#5a4a3f">${H(c.name || '')} · ${H(c.phone || '')}</p><p style="margin:26px 0 0;text-align:center"><a href="${H(origin)}/admin.html" style="display:inline-block;background:#1a1412;color:#d9b77e;text-decoration:none;padding:13px 26px;font-size:13px;letter-spacing:2px">OPEN THE ORDER</a></p>`, {}) }).catch(() => { }));
+  }
+  return { paid: true, no: o.no };
+}
+async function stripeSigOk(secret, header, body) {
+  const t = (/(?:^|,)\s*t=(\d+)/.exec(header || '') || [])[1]; const sigs = [...String(header || '').matchAll(/(?:^|,)\s*v1=([0-9a-f]+)/g)].map(m => m[1]);
+  if (!t || !sigs.length || Math.abs(NOW() / 1000 - Number(t)) > 600) return false;
+  const key = await crypto.subtle.importKey('raw', te.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const mac = [...new Uint8Array(await crypto.subtle.sign('HMAC', key, te.encode(t + '.' + body)))].map(b => b.toString(16).padStart(2, '0')).join('');
+  for (const s of sigs) if (await sameText(s, mac)) return true;
+  return false;
+}
+async function pay(ctx, db, op, url) {
+  const { request: req, env } = ctx; const M = req.method;
+  if (op === 'webhook' && M === 'POST') {
+    if (!env.STRIPE_WEBHOOK_SECRET) return err(503, 'The webhook secret is not set');
+    const body = await req.text();
+    if (!await stripeSigOk(env.STRIPE_WEBHOOK_SECRET, req.headers.get('Stripe-Signature'), body)) return err(400, 'Bad signature');
+    let ev; try { ev = JSON.parse(body); } catch (e) { return err(400, 'Bad json'); }
+    if (ev && (ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded')) await settle(ctx, db, ev.data && ev.data.object, url.origin);
+    return json({ received: true });
+  }
+  if (!env.STRIPE_SECRET_KEY) return err(503, 'Card payment is not available yet');
+  if (op === 'checkout' && M === 'POST') {
+    const b = await readJSON(req, 500); const id = String(b.id || ''); if (!ID.test(id)) return err(400, 'Bad order');
+    const o = await getDoc(db, 'orders', id);
+    if (!o || o.channel !== 'web' || o.status === 'cancelled' || !(o.payment && o.payment.method === 'card_online') || !(NOW() - Number(o.created) < 2 * DAY)) return err(404, 'Order not found');
+    if (o.payment.paid) return json({ paid: true, no: o.no });
+    const p = await priceOrder(db, o);
+    if (!p || Math.abs(p.total - Number(o.total)) > 0.01) return err(409, 'The prices have changed — please place your order again');
+    const q = {
+      mode: 'payment', client_reference_id: id, 'metadata[order_id]': id, 'metadata[order_no]': o.no,
+      success_url: url.origin + '/order/' + o.no + '?paid=1&sid={CHECKOUT_SESSION_ID}', cancel_url: url.origin + '/order/' + o.no + '?pay=cancelled',
+      'payment_intent_data[description]': 'The Touch order ' + o.no, 'payment_intent_data[metadata][order_no]': o.no, 'payment_intent_data[metadata][order_id]': id
+    };
+    const mail = (o.customer || {}).email; if (okEmail(mail)) q.customer_email = mail.trim();
+    p.lines.concat(p.delivery > 0 ? [{ name: 'Delivery' + (o.emirate ? ' · ' + o.emirate : ''), amount: p.delivery }] : []).forEach((l, i) => {
+      q[`line_items[${i}][quantity]`] = '1'; q[`line_items[${i}][price_data][currency]`] = 'aed';
+      q[`line_items[${i}][price_data][unit_amount]`] = String(fils(l.amount)); q[`line_items[${i}][price_data][product_data][name]`] = l.name;
+    });
+    const s = await stripe(env, 'POST', '/checkout/sessions', q);
+    if (!s.url) return err(502, 'The payment page could not be opened');
+    return json({ url: s.url });
+  }
+  if (op === 'confirm' && M === 'GET') {
+    const sid = String(url.searchParams.get('sid') || ''); if (!/^cs_[A-Za-z0-9_]{6,200}$/.test(sid)) return err(400, 'Bad session');
+    return json(await settle(ctx, db, await stripe(env, 'GET', '/checkout/sessions/' + sid), url.origin));
+  }
+  return err(404, 'Not found');
+}
+
 /* ---------- emails ---------- */
 const H = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const AED = n => 'AED ' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const lineTotal = l => Math.max(0, Math.round(((l.unit === 'kg' ? l.price * l.grams / 1000 : l.price) * l.qty - (l.disc || 0)) * 100) / 100);
 const qtyLabel = l => l.unit === 'kg' ? (l.grams >= 1000 ? l.grams / 1000 + ' kg' : l.grams + ' g') + (l.qty > 1 ? ' × ' + l.qty : '') : '× ' + l.qty;
-const PAY = { cod: 'Cash on delivery', card_on_delivery: 'Card on delivery', link: 'Payment link' };
-const payName = o => { const m = (o.payment || {}).method; const s = PAY[m] || m; return o.fulfil === 'pickup' ? s.replace('on delivery', 'at pick-up') : s; };
+const PAY = { cod: 'Cash on delivery', card_on_delivery: 'Card on delivery', link: 'Payment link', card_online: 'Card online' };
+const payName = o => { const p = o.payment || {}, m = p.method; const s = PAY[m] || m; return (o.fulfil === 'pickup' ? s.replace('on delivery', 'at pick-up') : s) + (m === 'card_online' ? (p.paid ? ' — paid' : ' — waiting for payment') : ''); };
 const nice = d => { const x = new Date(String(d || '') + 'T12:00:00'); return isNaN(x) ? (d || '') : x.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }); };
 const okEmail = e => typeof e === 'string' && /^[^\s@<>]{1,64}@[^\s@<>]{1,190}\.[a-z]{2,}$/i.test(e.trim());
 

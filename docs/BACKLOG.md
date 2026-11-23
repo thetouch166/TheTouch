@@ -32,8 +32,7 @@ roughly in priority order. Each is small and independent — good one-at-a-time 
 - **Staff logins**: new passwords chosen by the owner (secret `STAFF_LOGINS`, then redeploy).
 
 ## Later upgrades
-- **Stripe checkout on the website** (waiting for the client's Stripe account) — add an `/api/checkout` route that
-  creates a Stripe Checkout Session from server-side prices + a webhook that marks the order paid.
+- ~~Stripe checkout on the website~~ — BUILT 23 Nov (`/api/pay/*`); needs the client's Stripe keys to switch on.
 - ~~Automatic order emails~~ — DONE 20 Nov: Resend from the API (new order → shop + customer, enquiry → shop).
 - Admin loads every order at start; after ~5,000 orders load only the last 12 months (`/api/db/orders?since=`).
 - Arabic version of the website (RTL).

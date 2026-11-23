@@ -408,6 +408,10 @@ body.sbar-on .toast{bottom:96px}
 .amb .g1{width:76vmax;height:76vmax;left:44%;top:-34%;background:radial-gradient(closest-side,rgba(205,151,84,.17),rgba(205,151,84,.07) 48%,rgba(205,151,84,0))}
 .amb .g2{width:66vmax;height:66vmax;left:-30%;top:36%;background:radial-gradient(closest-side,rgba(156,96,54,.11),rgba(156,96,54,.04) 50%,rgba(156,96,54,0))}
 .amb .g3{width:52vmax;height:52vmax;left:34%;top:68%;background:radial-gradient(closest-side,rgba(110,18,32,.06),rgba(110,18,32,0))}
+/* card payment state on the confirmation page */
+.paybox{max-width:460px;margin:22px auto 4px;padding:18px 22px;border:1px solid var(--line);background:var(--cream);font-size:14px;line-height:1.7;color:var(--slate)}
+.paybox b{font-weight:600;color:var(--ink)}
+.paybox.done{border-color:#b9d3bd;background:#eef6ef;color:#2f6b3a;font-weight:500}
 /* policy pages */
 .legal{max-width:760px;margin:0 auto;padding:0 0 30px}
 .legal h2{font-family:var(--serif);font-size:26px;font-weight:500;color:var(--bur);margin:40px 0 12px}
@@ -738,8 +742,8 @@ function renderCart(){if(typeof PRODUCTS!=='undefined'&&PRODUCTS.length)syncCart
 }
 
 const payName=(k,mode)=>mode==='pickup'&&k==='cod'?'Cash at pick-up':mode==='pickup'&&k==='card_on_delivery'?'Card at pick-up':TT.payLabel(k);
-const PAYDESC={delivery:{cod:'Pay in cash when your order arrives.',card_on_delivery:'Our driver brings a card machine.',link:'We send you a secure card payment link on WhatsApp to confirm.'},
-  pickup:{cod:'Pay in cash when you collect at the boutique.',card_on_delivery:'Pay by card when you collect at the boutique.',link:'We send you a secure card payment link on WhatsApp to confirm.'}};
+const PAYDESC={delivery:{cod:'Pay in cash when your order arrives.',card_on_delivery:'Our driver brings a card machine.',link:'We send you a secure card payment link on WhatsApp to confirm.',card_online:'Pay securely by card now on our payment page.'},
+  pickup:{cod:'Pay in cash when you collect at the boutique.',card_on_delivery:'Pay by card when you collect at the boutique.',link:'We send you a secure card payment link on WhatsApp to confirm.',card_online:'Pay securely by card now on our payment page.'}};
 const dxbNow=()=>{try{return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Dubai'}))}catch(e){return new Date()}};
 function syncCart(){let changed=false,removed=[];Cart.items=Cart.items.filter(it=>{const p=byId(it.pid);if(!p||p.active===false||p.web===false){removed.push(it.name);return false}if(it.price!==p.price||it.name!==p.name||it.img!==p.img){it.price=p.price;it.name=p.name;it.img=p.img;changed=true}return true});if(removed.length||changed){localStorage.setItem('tt_cart',JSON.stringify(Cart.items));renderCartBadge()}if(removed.length)toast(U.esc(removed.join(', '))+' is no longer available and was removed from your bag');return changed||removed.length}
 function pageCheckout(){syncCart();
@@ -747,7 +751,8 @@ function pageCheckout(){syncCart();
   const em=Object.keys(S.delivery||{});const st=JSON.parse(localStorage.getItem('tt_cust')||'{}');
   const today=dxbNow();const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   const now=dxbNow();const minDay=now.getHours()>=S.sameDayCutoff?new Date(+today+864e5):today;
-  let mode='delivery',pay=(S.onlinePayments||['cod'])[0],slot='';
+  const pays=(S.onlinePayments&&S.onlinePayments.length?S.onlinePayments:['cod']).filter(k=>k!=='card_online'||window.TT_API);if(!pays.length)pays.push('cod');
+  let mode='delivery',pay=pays[0],slot='';const placeLabel=()=>pay==='card_online'?'Continue to payment':'Place order';
   const slots=['10:00 – 13:00','13:00 – 16:00','16:00 – 19:00','19:00 – 22:00'];
   app.innerHTML=`<div class="wrap"><div class="crumbs"><a href="/">Home</a> / Checkout</div>
   <div class="co">
@@ -775,8 +780,8 @@ function pageCheckout(){syncCart();
       <div class="fld full"><label>Your message (printed on our card)</label><textarea name="giftMsg" maxlength="300"></textarea></div>
       <div class="fld full"><label>Order notes</label><input name="notes" placeholder="Ribbon colour, allergies, delivery instructions…"></div></div>
       <h3><i>4</i>Payment</h3>
-      <div class="radio" id="pay">${(S.onlinePayments||[]).map((k,i)=>`<label class="${i?'':'on'}"><input type="radio" name="pay" value="${k}" ${i?'':'checked'}><div><b style="font-weight:500" data-l="${k}">${TT.payLabel(k)}</b><small data-k="${k}">${PAYDESC.delivery[k]||''}</small></div></label>`).join('')}</div>
-      <button class="btn btn-dark btn-block" style="margin-top:28px;height:58px" id="place">Place order</button>
+      <div class="radio" id="pay">${pays.map((k,i)=>`<label class="${i?'':'on'}"><input type="radio" name="pay" value="${k}" ${i?'':'checked'}><div><b style="font-weight:500" data-l="${k}">${TT.payLabel(k)}</b><small data-k="${k}">${PAYDESC.delivery[k]||''}</small></div></label>`).join('')}</div>
+      <button class="btn btn-dark btn-block" style="margin-top:28px;height:58px" id="place">${placeLabel()}</button>
       <p style="font-size:11.5px;color:var(--mute);text-align:center;margin-top:12px">Our concierge will confirm your order on WhatsApp.</p>
     </form>
     <aside class="sum"><h4>Order summary</h4><div id="sumItems"></div><div id="sumTot"></div></aside>
@@ -794,7 +799,7 @@ function pageCheckout(){syncCart();
   slotAvail();f.date.addEventListener('change',slotAvail);
   f.addEventListener('input',e=>{const fl=e.target.closest('.fld.err');if(fl&&e.target.value.trim())fl.classList.remove('err')});
   $('#slots').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;slot=b.dataset.s;$('#slots').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
-  $('#pay').onchange=e=>{pay=e.target.value;$('#pay').querySelectorAll('label').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked))};
+  $('#pay').onchange=e=>{pay=e.target.value;$('#place').textContent=placeLabel();$('#pay').querySelectorAll('label').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked))};
   f.onsubmit=async e=>{e.preventDefault();
     {const over=[];const m={};Cart.items.forEach(x=>{m[x.pid]=(m[x.pid]||0)+(x.unit==='kg'?x.grams/1000:1)*x.qty});Object.keys(m).forEach(id=>{const p=byId(id);if(p&&p.stock!=null&&m[id]>p.stock+1e-9)over.push(p.name+' (only '+(p.unit==='kg'?U.r2(p.stock)+' kg':p.stock+' pcs')+' available)')});if(over.length){toast('Please reduce: '+U.esc(over.join(', ')));return}}
     const need=['name','phone'].concat(mode==='delivery'?['area','address']:[]).concat(['date']);let bad=false;
@@ -811,21 +816,39 @@ function pageCheckout(){syncCart();
     localStorage.setItem('tt_cust',JSON.stringify({name:order.customer.name,phone:order.customer.phone,email:order.customer.email,emirate:f.emirate.value,area:order.area,address:f.address.value}));
     let saved=true;try{await DB.put('orders',order)}catch(err){console.error(err);saved=false}
     sessionStorage.setItem('tt_last',JSON.stringify(order));Cart.clear();
+    if(saved&&pay==='card_online'){btn.textContent='Opening the payment page…';const r=await startCardPayment(order.id);if(r===true)return;go('/order/'+order.no+(r==='paid'?'':'?pay=failed'));return}
     go('/order/'+order.no+(saved?'':'?wa=1'));
   };
 }
+/* card payment: the order is already saved; the API builds the amount from our own prices and returns the payment page */
+async function startCardPayment(id){ // → true: leaving for the payment page · 'paid': already paid · false: could not start
+  try{const r=await fetch(window.TT_API+'/pay/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});const j=await r.json().catch(()=>({}));
+    if(r.ok&&j.url){location.href=j.url;return true}
+    if(r.ok&&j.paid)return 'paid';toast(U.esc(j.error||'Card payment could not be started'))}
+  catch(e){toast('Card payment could not be started — please check your connection')}
+  return false}
 function waOrderText(o){
   return `✦ THE TOUCH — New order ${o.no}\n\n${o.items.map(i=>`• ${i.name}${i.unit==='kg'?' ('+U.qtyLabel(i)+')':''} × ${i.qty} — ${money(U.lineTotal(i))}`).join('\n')}\n\nSubtotal: ${money(o.subtotal)}\nDelivery: ${o.delivery?money(o.delivery):'Free'}\nTOTAL: ${money(o.total)}\nPayment: ${payName(o.payment.method,o.fulfil)}\n\nName: ${o.customer.name}\nMobile: ${o.customer.phone}\n${o.fulfil==='pickup'?'Boutique pick-up':'Delivery: '+[o.address,o.area,o.emirate].filter(Boolean).join(', ')}\nDate: ${o.date} ${o.slot||''}${o.gift.msg?'\nGift message: '+o.gift.msg+(o.gift.to?' (to '+o.gift.to+')':''):''}${o.notes?'\nNotes: '+o.notes:''}`}
 function fmtDay(d){if(!d)return'';const x=new Date(d+'T12:00:00');return isNaN(x)?d:x.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'})}
 function pageOrder(no){
-  const o=JSON.parse(sessionStorage.getItem('tt_last')||'null');
+  const o0=JSON.parse(sessionStorage.getItem('tt_last')||'null');const o=o0&&o0.no===no?o0:null;
   const wa=o&&o.no===no?waLink(waOrderText(o)):waLink('Hello, about my order '+no);
   app.innerHTML=`<div class="ok"><img class="mono" src="img/monogram-gold.png" alt=""><span class="eyebrow">Thank you${o?', '+U.esc(o.customer.name.split(' ')[0]):''}</span>
-   <h1 class="h2" style="margin-top:14px">Your order has been received</h1><div class="no">ORDER ${U.esc(no)}</div>
+   <h1 class="h2" id="okH" style="margin-top:14px">Your order has been received</h1><div class="no">ORDER ${U.esc(no)}</div><div id="payBox"></div>
    ${o?`<div class="meta"><div><span>Total</span><b style="font-weight:600">${money(o.total)}</b></div><div><span>Payment</span>${payName(o.payment.method,o.fulfil)}</div><div><span>${o.fulfil==='pickup'?'Boutique pick-up':'Delivery'}</span>${o.fulfil==='pickup'?'':U.esc([o.area,o.emirate].filter(Boolean).join(', '))}</div><div><span>Date</span>${U.esc(fmtDay(o.date))}</div>${o.slot?`<div><span>Time</span>${U.esc(o.slot)}</div>`:''}</div>`:''}
    <p style="margin:20px 0 30px">Our concierge will confirm your order shortly on WhatsApp. For a faster confirmation, send us your order now:</p>
    <a class="btn btn-gold" href="${wa}" target="_blank" rel="noopener" id="waBtn">Send order on WhatsApp</a>
    <div style="margin-top:22px"><a class="link" href="/">Continue shopping</a></div></div>`;
+  // card payment state: paid · waiting for payment (with a "pay now" button) · being confirmed after returning from the payment page
+  const q=new URLSearchParams(location.search),box=$('#payBox'),card=!!o&&o.payment.method==='card_online';
+  const paidUI=()=>{box.innerHTML='<div class="paybox done">✓ Payment received — thank you</div>';$('#okH').textContent='Your order is confirmed and paid';if(o){o.payment.paid=true;sessionStorage.setItem('tt_last',JSON.stringify(o))}};
+  const dueUI=msg=>{$('#okH').textContent='One more step: your payment';box.innerHTML=`<div class="paybox"><b>${msg}</b><br>Your order is saved. Pay by card now to confirm it.<br><button class="btn btn-dark" id="payNow" style="margin-top:14px">Pay by card now</button></div>`;
+    $('#payNow').onclick=async e=>{const b=e.currentTarget;b.disabled=true;b.textContent='Opening the payment page…';const r=await startCardPayment(o.id);if(r==='paid')paidUI();else if(!r){b.disabled=false;b.textContent='Pay by card now'}}};
+  if(q.get('sid')&&window.TT_API){box.innerHTML='<div class="paybox">Confirming your payment…</div>';
+    fetch(window.TT_API+'/pay/confirm?sid='+encodeURIComponent(q.get('sid'))).then(r=>r.json()).then(j=>{if(j&&j.paid)paidUI();else if(card)dueUI('We could not confirm your payment yet');else box.innerHTML=''})
+      .catch(()=>{box.innerHTML='<div class="paybox">We are confirming your payment and will message you on WhatsApp.</div>'})}
+  else if(card&&o.payment.paid)paidUI();
+  else if(card)dueUI(q.get('pay')==='cancelled'?'The payment was not completed':'Your payment is still needed');
 }
 
 function pageStory(){

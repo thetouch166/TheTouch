@@ -262,7 +262,7 @@
       if (subtotal >= free && emirate === 'Abu Dhabi') return 0;
       return Number((s.delivery || {})[emirate] || 0);
     },
-    payLabel(k) { return ({ cash: 'Cash', card: 'Card', split: 'Cash + Card', cod: 'Cash on delivery', card_on_delivery: 'Card on delivery', link: 'Payment link', paid: 'Paid' })[k] || k; },
+    payLabel(k) { return ({ cash: 'Cash', card: 'Card', split: 'Cash + Card', cod: 'Cash on delivery', card_on_delivery: 'Card on delivery', link: 'Payment link', card_online: 'Card online', paid: 'Paid' })[k] || k; },
     STATUSES: [
       { id: 'new', name: 'New', color: '#cd9754' },
       { id: 'confirmed', name: 'Confirmed', color: '#3b3d50' },
@@ -273,7 +273,7 @@
     ]
   };
   // Normalise/sanitise orders coming from the database (protects admin from malformed or malicious web orders)
-  const METHODS = ['cash', 'card', 'split', 'cod', 'card_on_delivery', 'link'];
+  const METHODS = ['cash', 'card', 'split', 'cod', 'card_on_delivery', 'link', 'card_online'];   // card_online = paid on the website (Stripe)
   const STATUS = ['new', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled'];
   const safeId = v => String(v == null ? '' : v).replace(/[^A-Za-z0-9_\-]/g, '').slice(0, 64);
   const num = v => { const n = Number(v); return isFinite(n) ? n : 0; };

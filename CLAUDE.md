@@ -16,6 +16,11 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
   the **mail worker** (`mail-worker/`, Worker `the-touch-mail`, service binding `MAIL`, Cloudflare Email — no outside
   account). Customer confirmation emails go through **Resend** once `RESEND_API_KEY` is set. Cloudflare Email Routing
   forwards `hello@` and `orders@thetouchchocolate.com` to the shop Gmail.
+- Card payment online: **Stripe Checkout** (no library — plain HTTPS calls). The website saves the order unpaid, `POST /api/pay/checkout`
+  rebuilds the amount from our own prices and returns Stripe's payment page; the order is marked paid by the webhook
+  `POST /api/pay/webhook` and by `GET /api/pay/confirm` on the confirmation page (`settle()`, runs once). Payment method id
+  `card_online`, money stored in `payment.other`. Secrets `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`; switched on for customers
+  in Admin → Settings → Online payment options → "Card online". Refunds are made in the Stripe dashboard.
 - `public/js/config.js` sets `window.TT_API='/api'` (live) except on port 5500 → **offline mode** (localStorage) for dev/tests.
 
 ## Layout

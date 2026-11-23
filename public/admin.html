@@ -615,7 +615,7 @@ const AR={
  // products & stock
  'Search products…':'ابحث عن منتج…','History':'السجل','Stock list':'قائمة المخزون','Count sheet':'ورقة الجرد','Products':'المنتجات','on sale':'معروض للبيع','Restock soon':'أعد التخزين قريباً','All above alert level':'الكل فوق حد التنبيه',
  'Out of stock':'نفد من المخزون','View':'عرض','Everything available':'كل المنتجات متوفرة','Stock value':'قيمة المخزون','At selling price':'بسعر البيع','Product':'المنتج','Category':'الفئة','Price':'السعر','Stock':'المخزون','On sale':'معروض للبيع',
- 'POS only':'نقطة البيع فقط','Show on the website':'عرض في الموقع الإلكتروني',
+ 'Card online':'بطاقة أونلاين','POS only':'نقطة البيع فقط','Show on the website':'عرض في الموقع الإلكتروني',
  'Signature':'مميز','by weight':'بالوزن','per piece':'بالقطعة','Website · POS':'الموقع · نقطة البيع','Hidden':'مخفي','On sale (website & POS)':'معروض للبيع (الموقع ونقطة البيع)','Receive, count or remove stock':'استلام أو جرد أو سحب المخزون',
  'No products match — try another search or filter':'لا توجد منتجات مطابقة — جرّب بحثاً أو فلتراً آخر','No products yet — tap “Add product”':'لا توجد منتجات بعد — اضغط «إضافة منتج»','New product':'منتج جديد','Edit product':'تعديل المنتج','Change photo':'تغيير الصورة','Upload photo':'رفع صورة',
  'Square photo on a light background looks best':'الصورة المربعة على خلفية فاتحة تبدو الأفضل','Name (English)':'الاسم (بالإنجليزية)','Name (Arabic)':'الاسم (بالعربية)','Sold by':'طريقة البيع','Piece / box':'قطعة / علبة','Weight (per kg)':'بالوزن (للكيلو)','Price AED':'السعر بالدرهم',
@@ -1560,7 +1560,7 @@ function renderSettings(){
    </div></div>
    <div class="card sec"><h4>Delivery</h4><div class="grid3">${Object.keys(d).map(e=>`<div class="fld"><label>${e} (AED)</label><input type="number" data-d="${e}" value="${d[e]}"></div>`).join('')}
      <div class="fld"><label>Free delivery over (AED)</label><input type="number" data-k="freeDeliveryOver" value="${S.freeDeliveryOver}"></div><div class="fld"><label>Same-day cut-off (hour)</label><input type="number" data-k="sameDayCutoff" value="${S.sameDayCutoff}"></div></div>
-     <div class="fld" style="margin-top:14px"><label>Online payment options</label><div class="chips" id="pmeth">${['cod','card_on_delivery','link'].map(k=>`<button class="chip ${(S.onlinePayments||[]).includes(k)?'on':''}" data-p="${k}">${TT.payLabel(k)}</button>`).join('')}</div></div></div>
+     <div class="fld" style="margin-top:14px"><label>Online payment options</label><div class="chips" id="pmeth">${['card_online','cod','card_on_delivery','link'].map(k=>`<button class="chip ${(S.onlinePayments||[]).includes(k)?'on':''}" data-p="${k}">${TT.payLabel(k)}</button>`).join('')}</div></div></div>
    <div class="card sec"><h4>Security</h4>${DB.mode==='local'?`<div class="grid2"><div class="fld"><label>Admin PIN (4 digits)</label><input data-k="pin" inputmode="numeric" maxlength="4" value="${esc(S.pin)}"></div></div>`:'<p class="muted small">Live mode: staff sign in with their own email &amp; password (Cloudflare → the-touch → Settings → STAFF_LOGINS).</p>'}</div>
    <div class="card sec"><h4>Data &amp; connection</h4>
      <p class="small muted" style="margin-bottom:12px;line-height:1.6">Mode: <b>${DB.mode==='live'?'LIVE — synced across all devices':'OFFLINE — data stays in this browser. Website orders from customers\' phones reach this screen only after Live mode is connected (see SETUP.md).'}</b></p>
