@@ -13,7 +13,9 @@
                      Everyone else is created in Admin → Settings → Security (stored hashed in the database).
      RESEND_API_KEY  Resend API key                              optional (no key = no emails to customers)
      STRIPE_SECRET_KEY      Stripe secret key (sk_live_… / sk_test_…)   optional (no key = no card payment online)
-     STRIPE_WEBHOOK_SECRET  signing secret of the Stripe webhook → https://<site>/api/pay/webhook  (whsec_…)
+                            After setting it: redeploy, then POST /api/pay/setup as the owner (checks the account, creates the webhook).
+     STRIPE_WEBHOOK_SECRET  optional: signing secret of the Stripe webhook (whsec_…). Without it every webhook message is
+                            checked by reading the payment again from Stripe, so it is not needed for safety.
    Plain vars (wrangler.toml): MAIL_FROM, SHOP_EMAIL
 */
 
@@ -383,13 +385,17 @@ export async function onRequest(ctx) {
    Refunds are made in the Stripe dashboard. */
 const r2 = n => Math.round((Number(n) || 0) * 100) / 100;
 const fils = n => Math.round((Number(n) || 0) * 100);
-async function stripe(env, method, path, params) {
+async function stripeRaw(env, method, path, params) {   // never throws on a Stripe error: { ok, status, j, msg }
   const init = { method, headers: { Authorization: 'Bearer ' + env.STRIPE_SECRET_KEY } };
   if (params) { init.headers['Content-Type'] = 'application/x-www-form-urlencoded'; init.body = new URLSearchParams(params).toString(); }
   const r = await fetch((env.STRIPE_API || 'https://api.stripe.com') + '/v1' + path, init);
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) { console.error('stripe', method, path, r.status, j.error && j.error.message); throw Object.assign(new Error('The payment service did not answer — please try again'), { status: 502 }); }
-  return j;
+  return { ok: r.ok, status: r.status, j, msg: String((j && j.error && j.error.message) || '').slice(0, 300) };
+}
+async function stripe(env, method, path, params) {
+  const r = await stripeRaw(env, method, path, params);
+  if (!r.ok) { console.error('stripe', method, path, r.status, r.msg); throw Object.assign(new Error('The payment service did not answer — please try again'), { status: 502 }); }
+  return r.j;
 }
 async function getDoc(db, col, id) { const r = await db.q('select data::text from docs where col=$1 and id=$2 and not deleted', [col, id]); return r.rows.length ? JSON.parse(r.rows[0][0]) : null; }
 /* the order's lines and total from the catalogue's own prices (same sums as the website: store.js lineTotal / deliveryFee) */
@@ -445,15 +451,54 @@ async function stripeSigOk(secret, header, body) {
 const siteOf = (env, url) => /^(localhost|127\.)/.test(url.hostname) ? url.origin : String(env.SITE_URL || url.origin).replace(/\/+$/, '');
 async function pay(ctx, db, op, url, who) {
   const { request: req, env } = ctx; const M = req.method;
+  /* Stripe's webhook. With STRIPE_WEBHOOK_SECRET set, the signature is checked. Without it the message is only a hint:
+     the payment is read again from Stripe with our own key, so a made-up message can never mark an order paid. */
   if (op === 'webhook' && M === 'POST') {
-    if (!env.STRIPE_WEBHOOK_SECRET) return err(503, 'The webhook secret is not set');
-    const body = await req.text();
-    if (!await stripeSigOk(env.STRIPE_WEBHOOK_SECRET, req.headers.get('Stripe-Signature'), body)) return err(400, 'Bad signature');
+    if (!env.STRIPE_WEBHOOK_SECRET && !env.STRIPE_SECRET_KEY) return err(503, 'Card payment is not connected');
+    const body = await req.text(); if (body.length > 300000) return err(413, 'Too large');
+    if (env.STRIPE_WEBHOOK_SECRET && !await stripeSigOk(env.STRIPE_WEBHOOK_SECRET, req.headers.get('Stripe-Signature'), body)) return err(400, 'Bad signature');
     let ev; try { ev = JSON.parse(body); } catch (e) { return err(400, 'Bad json'); }
-    if (ev && (ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded')) await settle(ctx, db, ev.data && ev.data.object, url);
+    if (ev && (ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded')) {
+      let s = ev.data && ev.data.object;
+      if (!env.STRIPE_WEBHOOK_SECRET) {
+        const sid = String((s && s.id) || ''); if (!/^cs_[A-Za-z0-9_]{6,200}$/.test(sid)) return err(400, 'Bad session');
+        const r = await stripeRaw(env, 'GET', '/checkout/sessions/' + sid);
+        if (r.status === 404) return err(400, 'Unknown session');   // not one of ours: nothing to retry
+        if (!r.ok) return err(502, 'The payment service did not answer');   // Stripe sends the message again later
+        s = r.j;
+      }
+      await settle(ctx, db, s, url);
+    }
     return json({ received: true });
   }
   if (!env.STRIPE_SECRET_KEY) return err(503, op === 'link' ? 'Card payment is not connected yet (Stripe). Once it is, this button sends the client a payment link.' : 'Card payment is not available yet');
+  /* owner, once after the key is set: checks the Stripe account, opens (and closes) a payment page in AED the way the website
+     does, and makes sure Stripe's webhook points at this site. Returns no secret. */
+  if (op === 'setup' && M === 'POST') {
+    if (!who) return err(401, 'Sign in'); if (who.role !== 'owner') return err(403, OWNER_ONLY);
+    const site = siteOf(env, url), hook = site + '/api/pay/webhook';
+    const out = { live: /^(sk|rk)_live_/.test(String(env.STRIPE_SECRET_KEY)), signed: !!env.STRIPE_WEBHOOK_SECRET, hook };
+    const a = await stripeRaw(env, 'GET', '/account');
+    if (a.status === 401) return json(Object.assign(out, { ok: false, step: 'key', error: 'Stripe did not accept the key', detail: a.msg }));
+    out.account = a.ok ? { name: ((a.j.settings || {}).dashboard || {}).display_name || (a.j.business_profile || {}).name || '', country: a.j.country, currency: a.j.default_currency, charges: a.j.charges_enabled, payouts: a.j.payouts_enabled } : { unreadable: a.status };
+    const s = await stripeRaw(env, 'POST', '/checkout/sessions', {
+      mode: 'payment', success_url: site + '/?check={CHECKOUT_SESSION_ID}', cancel_url: site + '/', 'metadata[check]': '1',
+      'line_items[0][quantity]': '1', 'line_items[0][price_data][currency]': 'aed', 'line_items[0][price_data][unit_amount]': '200',
+      'line_items[0][price_data][product_data][name]': 'Connection check (not an order)'
+    });
+    if (!s.ok) return json(Object.assign(out, { ok: false, step: 'checkout', error: 'Stripe cannot open a payment page on this account yet', detail: s.msg }));
+    out.checkout = { currency: s.j.currency, methods: s.j.payment_method_types, live: s.j.livemode };
+    await stripeRaw(env, 'POST', '/checkout/sessions/' + s.j.id + '/expire', {});
+    const EV = ['checkout.session.completed', 'checkout.session.async_payment_succeeded'];
+    const l = await stripeRaw(env, 'GET', '/webhook_endpoints?limit=100');
+    if (!l.ok) return json(Object.assign(out, { ok: false, step: 'webhook', error: 'Stripe did not show its webhooks', detail: l.msg }));
+    const have = (l.j.data || []).find(w => w.url === hook && w.status === 'enabled' && EV.every(e => (w.enabled_events || []).includes(e) || (w.enabled_events || []).includes('*')));
+    if (!have) {
+      const c = await stripeRaw(env, 'POST', '/webhook_endpoints', { url: hook, 'enabled_events[0]': EV[0], 'enabled_events[1]': EV[1], description: 'The Touch website: marks orders paid' });
+      if (!c.ok) return json(Object.assign(out, { ok: false, step: 'webhook', error: 'Stripe did not create the webhook', detail: c.msg }));
+    }
+    return json(Object.assign(out, { ok: true, webhook: have ? 'already there' : 'created' }));
+  }
   /* staff: "Payment link" on an unpaid order → approves this exact total for card payment and returns the client's link.
      A website order whose total differs from today's catalogue prices needs a second, confirmed call (force). */
   if (op === 'link' && M === 'POST') {

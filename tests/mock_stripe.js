@@ -4,8 +4,9 @@
 //   GET  /pay/:id                     → fake payment page: marks the session paid and returns to success_url
 //   GET  /cancel/:id                  → fake payment page: customer pressed "back" → cancel_url
 //   POST /_hook/:id?to=<api>&secret=  → sends a signed checkout.session.completed webhook to the API (optionally ?bad=1)
+//   GET /v1/account · POST /v1/checkout/sessions/:id/expire · GET|POST /v1/webhook_endpoints   → for POST /api/pay/setup (GET /_hooks lists them)
 const http = require('http'), crypto = require('crypto');
-const sessions = {}; let n = 0;
+const sessions = {}, hooks = []; let n = 0;
 const send = (res, code, obj, headers) => { res.writeHead(code, Object.assign({ 'Content-Type': 'application/json' }, headers || {})); res.end(typeof obj === 'string' ? obj : JSON.stringify(obj)); };
 http.createServer((req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1:8799'); let body = '';
@@ -19,6 +20,13 @@ http.createServer((req, res) => {
         sessions[id] = { id, object: 'checkout.session', url: 'http://127.0.0.1:8799/pay/' + id, amount_total: total, currency: 'aed', payment_status: 'unpaid', client_reference_id: p.get('client_reference_id'), metadata: { order_id: p.get('metadata[order_id]'), order_no: p.get('metadata[order_no]') }, customer_email: p.get('customer_email'), success_url: p.get('success_url'), cancel_url: p.get('cancel_url'), payment_intent: 'pi_mock_' + n, _names: names };
         return send(res, 200, sessions[id]);
       }
+      /* the calls of POST /api/pay/setup */
+      if (url.pathname === '/v1/account' && req.method === 'GET') return req.headers.authorization === 'Bearer sk_test_mock' ? send(res, 200, { id: 'acct_mock', country: 'AE', default_currency: 'aed', charges_enabled: true, payouts_enabled: true, settings: { dashboard: { display_name: 'The Touch (mock)' } } }) : send(res, 401, { error: { message: 'Invalid API Key provided' } });
+      const ex = /^\/v1\/checkout\/sessions\/(cs_[A-Za-z0-9_]+)\/expire$/.exec(url.pathname);
+      if (req.method === 'POST' && ex && sessions[ex[1]]) { sessions[ex[1]].status = 'expired'; return send(res, 200, sessions[ex[1]]); }
+      if (url.pathname === '/v1/webhook_endpoints' && req.method === 'GET') return send(res, 200, { data: hooks });
+      if (url.pathname === '/v1/webhook_endpoints' && req.method === 'POST') { const p = new URLSearchParams(body); const w = { id: 'we_mock' + (hooks.length + 1), url: p.get('url'), status: 'enabled', enabled_events: [p.get('enabled_events[0]'), p.get('enabled_events[1]')].filter(Boolean) }; hooks.push(w); return send(res, 200, Object.assign({ secret: 'whsec_never_used' }, w)); }
+      if (url.pathname === '/_hooks') return send(res, 200, hooks);
       const m = /^\/v1\/checkout\/sessions\/(cs_[A-Za-z0-9_]+)$/.exec(url.pathname);
       if (req.method === 'GET' && m) return sessions[m[1]] ? send(res, 200, sessions[m[1]]) : send(res, 404, { error: { message: 'no such session' } });
       const pg = /^\/(pay|cancel)\/(cs_[A-Za-z0-9_]+)$/.exec(url.pathname);

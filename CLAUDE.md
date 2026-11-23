@@ -25,8 +25,11 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
 - Card payment online: **Stripe Checkout** (no library — plain HTTPS calls). The website saves the order unpaid, `POST /api/pay/checkout`
   rebuilds the amount from our own prices and returns Stripe's payment page; the order is marked paid by the webhook
   `POST /api/pay/webhook` and by `GET /api/pay/confirm` on the confirmation page (`settle()`, runs once). Payment method id
-  `card_online`, money stored in `payment.other`. Secrets `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`; switched on for customers
-  in Admin → Settings → Online payment options → "Card online". Refunds are made in the Stripe dashboard.
+  `card_online`, money stored in `payment.other`. One secret is enough: `STRIPE_SECRET_KEY` (set by the shop itself with
+  `npx wrangler pages secret put STRIPE_SECRET_KEY --project-name the-touch`, then redeploy and `POST /api/pay/setup` as the owner: it
+  checks the account and creates Stripe's webhook). Without `STRIPE_WEBHOOK_SECRET` (optional) every webhook message is treated as a
+  hint and the payment is read again from Stripe. Switched on for customers in Admin → Settings → Online payment options →
+  "Card online". Refunds are made in the Stripe dashboard.
 - Order page + payment link: every website order carries a random `key`; `/order/<no>?k=<key>` is the customer's own page (thank-you,
   invoice, "Pay by card"), filled from `GET /api/order/<no>?k=` when opened on another device (no phone / e-mail / address in it).
   Admin → order → **Payment link** calls `POST /api/pay/link` (staff): it stores `payment.linkTotal/linkAt/linkBy` (= this exact total is
@@ -135,6 +138,7 @@ checkout. Dates/cut-offs use Dubai time via `dxbNow()`.
   `npx wrangler pages dev --port 8788` → `python tests/smoke_test.py --live`. Never use the shop's database for tests.
 - Card payment, payment link, order page and new-order alert: `node tests/mock_stripe.js` + the live-mode server, then
   `python tests/pay_test.py <folder>` and `python tests/order_link_test.py <folder>`; sign-in and roles: `python tests/auth_test.py <folder>`.
+  `python tests/pay_setup_test.py` covers the shop's real setup (key only): run it with `STRIPE_WEBHOOK_SECRET` commented out in `.dev.vars`.
 - After any change: run the smoke test and check the browser console for errors on both pages.
 
 ## Go-live (see docs/LAUNCH-CHECKLIST.md)
