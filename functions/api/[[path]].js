@@ -174,6 +174,8 @@ function publicCreateOk(col, d) {
   if (col === 'orders') {
     const p = d.payment || {};
     return d.channel === 'web' && d.status === 'new' && d.stockApplied === false && p.paid === false &&
+      Object.keys(p).every(k => k === 'method' || k === 'paid') &&   // nothing else: "payment link approved by staff" can only be set by staff
+      (d.key == null || KEY.test(d.key)) &&
       ['cod', 'card_on_delivery', 'link', 'card_online'].includes(p.method) && Array.isArray(d.items) && d.items.length > 0 && d.items.length < 50 &&
       typeof d.total === 'number' && d.total > 0;
   }
@@ -187,6 +189,43 @@ const cacheKey = (origin, col) => new Request(origin + '/api/db/' + col + '?edge
 async function purge(origin, col) { try { await caches.default.delete(cacheKey(origin, col)); } catch (e) { } }
 const publicDoc = (col, d) => { if (col === 'settings') delete d.pin; return d; };
 
+/* "something new happened" signal for admin screens in a background tab: they ask GET /api/ping (no database, so the
+   database can sleep) and only load the changes when this time moves. Written when a website order / enquiry arrives
+   and when a card payment is received. */
+async function touch(env) { try { if (env.PHOTOS_KV) await env.PHOTOS_KV.put('sys:ping', String(NOW())); } catch (e) { } }
+async function pinged(env) {
+  if (!env.PHOTOS_KV) return 0;
+  try { return Number(await env.PHOTOS_KV.get('sys:ping', { cacheTtl: 30 })) || 0; }
+  catch (e) { try { return Number(await env.PHOTOS_KV.get('sys:ping')) || 0; } catch (e2) { return 0; } }
+}
+
+/* ---------- the customer's own order page: /order/<no>?k=<key> ----------
+   The key is a random string saved inside the order when it is placed (or made by POST /api/pay/link). Whoever holds
+   the link can read this summary: no phone number, e-mail or street address in it. */
+const KEY = /^[A-Za-z0-9]{16,40}$/;
+const randKey = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'; return [...crypto.getRandomValues(new Uint8Array(22))].map(b => A[b % A.length]).join(''); };
+async function orderByNo(db, no, k) {
+  if (!ID.test(no) || !KEY.test(k)) return null;
+  const r = await db.q("select data::text from docs where col='orders' and not deleted and data->>'no'=$1 limit 5", [no]);
+  for (const [d] of r.rows) { const o = JSON.parse(d); if (typeof o.key === 'string' && KEY.test(o.key) && await sameText(o.key, k)) return o; }
+  return null;
+}
+/* staff sent a payment link for exactly this total (POST /api/pay/link) */
+const linkOk = o => { const p = (o && o.payment) || {}; return Number(p.linkTotal) > 0 && Math.abs(Number(p.linkTotal) - Number(o.total)) < 0.005 && NOW() - Number(p.linkAt) < 30 * DAY; };
+const payable = (env, o) => { const p = o.payment || {}; return !!env.STRIPE_SECRET_KEY && o.status !== 'cancelled' && p.paid !== true && (linkOk(o) || (o.channel === 'web' && p.method === 'card_online' && NOW() - Number(o.created) < 2 * DAY)); };
+async function orderView(env, db, no, url) {
+  const o = await orderByNo(db, String(no || ''), String(url.searchParams.get('k') || ''));
+  if (!o) return err(404, 'Order not found');
+  const p = o.payment || {}, n = v => Number(v) || 0;
+  return json({
+    no: o.no, created: n(o.created), status: o.status, channel: o.channel, fulfil: o.fulfil, emirate: o.emirate || '', area: o.area || '', date: o.date || '', slot: o.slot || '',
+    customer: { name: String((o.customer || {}).name || '') },
+    items: (Array.isArray(o.items) ? o.items : []).slice(0, 100).map(l => ({ name: String(l.name || ''), unit: l.unit === 'kg' ? 'kg' : 'pc', price: n(l.price), grams: n(l.grams), qty: n(l.qty), disc: n(l.disc) })),
+    subtotal: n(o.subtotal), discount: n(o.discount), delivery: n(o.delivery), total: n(o.total), vat: n(o.vat),
+    payment: { method: p.method, paid: p.paid === true, paidAt: n(p.paidAt) }, canPay: payable(env, o)
+  });
+}
+
 /* ---------- router ---------- */
 export async function onRequest(ctx) {
   const { request: req, env } = ctx;
@@ -194,6 +233,7 @@ export async function onRequest(ctx) {
   const seg = (Array.isArray(ctx.params.path) ? ctx.params.path : [ctx.params.path]).filter(Boolean);
   const [a, col, id, op] = seg; const M = req.method;
   try {
+    if (a === 'ping' && M === 'GET') return json({ t: await pinged(env) });
     if (!env.DATABASE_URL) return err(503, 'DATABASE_URL is not set');
     const db = neon(env);
     const who = await whoIs(req, env, db); const staff = who ? who.email : null; const owner = !!who && who.role === 'owner';
@@ -213,7 +253,7 @@ export async function onRequest(ctx) {
       await db.tx([['insert into login_fail (ip, at) values ($1,$2)', [ip, NOW()]], ['insert into login_fail (ip, at) values ($1,$2)', [ekey, NOW()]], ['delete from login_fail where at<$1', [NOW() - DAY]]]);
       return err(401, 'Wrong email or password');
     }
-    if (a === 'me') return who ? json({ email: who.email, role: who.role, name: who.name, source: who.source }) : err(401, 'Sign in');
+    if (a === 'me') return who ? json({ email: who.email, role: who.role, name: who.name, source: who.source, pay: !!env.STRIPE_SECRET_KEY, mail: !!env.RESEND_API_KEY }) : err(401, 'Sign in');
     if (a === 'staff') return await staffApi(ctx, db, who, col);
     if (a === 'password' && M === 'POST') return await changePassword(ctx, db, who);
 
@@ -222,6 +262,15 @@ export async function onRequest(ctx) {
       if (url.searchParams.get('summary')) {
         if (!env.MAIL) return json({ ok: false, error: 'The mail worker is not connected' });
         const r = await env.MAIL.fetch('https://mail/summary', { method: 'POST' }); return json(await r.text());
+      }
+      const to = String(url.searchParams.get('to') || '').trim();
+      if (to) {   // ?to=someone@… → a sample of the customer's confirmation email, through Resend
+        if (!okEmail(to)) return err(400, 'Bad email address');
+        if (!env.RESEND_API_KEY) return json({ ok: false, error: 'RESEND_API_KEY is not set' });
+        const s = (await getDoc(db, 'settings', 'main')) || {};
+        const r0 = await db.q("select data::text from docs where col='orders' and not deleted and data->>'channel'='web' order by updated desc limit 1");
+        const d = r0.rows.length ? JSON.parse(r0.rows[0][0]) : { no: 'W000000-SAMPLE', items: [{ name: 'Assorted Signature Box', unit: 'pc', price: 315, qty: 1 }], subtotal: 315, delivery: 0, total: 315, vat: 15, fulfil: 'pickup', date: '', payment: { method: 'cod', paid: false }, customer: { name: 'Sample Client' } };
+        return json(await send(env, { to: [to], subject: `Your order ${d.no} — The Touch (sample)`, reply_to: okEmail(s.email) ? s.email : undefined, html: customerMail(d, s, siteOf(env, url)) }));
       }
       return json(await sendShop(env, { to: [env.SHOP_EMAIL], subject: 'Test email from The Touch admin', html: frame(`<div style="font-family:Georgia,serif;font-size:22px;margin-bottom:10px">It works</div><p style="font-size:14px;line-height:1.7;margin:0;color:#5a4a3f">This inbox receives an email for every new website order and event enquiry. Sent by ${H(staff)}.</p>`, {}) }));
     }
@@ -247,7 +296,8 @@ export async function onRequest(ctx) {
       return json({ url: '/media/' + key });
     }
 
-    if (a === 'pay') return await pay(ctx, db, col, url);
+    if (a === 'pay') return await pay(ctx, db, col, url, who);
+    if (a === 'order' && M === 'GET') return await orderView(env, db, col, url);
 
     if (a !== 'db' || !COLS.includes(col) || (id && !ID.test(id))) return err(404, 'Not found');
 
@@ -276,15 +326,19 @@ export async function onRequest(ctx) {
       const d = await readJSON(req, staff ? 1.5e6 : 3.2e4); d.id = id;
       if (staff && !owner && !cashierCan('put', col, d) && !(PUBLIC_CREATE.includes(col) && publicCreateOk(col, d))) return err(403, OWNER_ONLY);
       if (staff) {
-        await db.q(`insert into docs (col,id,data,updated,deleted) values ($1,$2,$3::jsonb,$4,false)
-          on conflict (col,id) do update set data=excluded.data, updated=excluded.updated, deleted=false`, [col, id, JSON.stringify(d), NOW()]);
+        const r = await db.q(`insert into docs (col,id,data,updated,deleted) values ($1,$2,$3::jsonb,$4,false)
+          on conflict (col,id) do update set data=excluded.data, updated=excluded.updated, deleted=false returning (xmax = 0)`, [col, id, JSON.stringify(d), NOW()]);
         if (PUBLIC_READ.includes(col)) await purge(url.origin, col);
+        // a website order / enquiry placed from a browser that is also signed in to the admin (the owner trying the site, or
+        // ordering for a client): it is new and just made, so the boutique and the customer are told exactly as usual
+        const isNew = r.rows && r.rows[0] && String(r.rows[0][0]).charAt(0) === 't';
+        if (isNew && (col === 'orders' || col === 'enquiries') && publicCreateOk(col, d) && NOW() - Number(d.created) < 10 * 6e4) { ctx.waitUntil(touch(env)); ctx.waitUntil(notify(env, db, col, d, url).catch(e => console.error('email', e))); }
         return json({ ok: true });
       }
       if (!PUBLIC_CREATE.includes(col) || !publicCreateOk(col, d)) return err(403, 'Not allowed');
       const r = await db.q('insert into docs (col,id,data,updated) values ($1,$2,$3::jsonb,$4) on conflict (col,id) do nothing', [col, id, JSON.stringify(d), NOW()]);
       if (!r.rowCount) return err(409, 'Already exists');
-      if (col === 'orders' || col === 'enquiries') ctx.waitUntil(notify(env, db, col, d, url.origin).catch(e => console.error('email', e)));
+      if (col === 'orders' || col === 'enquiries') { ctx.waitUntil(touch(env)); ctx.waitUntil(notify(env, db, col, d, url).catch(e => console.error('email', e))); }
       return json({ ok: true });
     }
     if (!staff) return err(401, 'Sign in');
@@ -356,7 +410,8 @@ async function priceOrder(db, o) {
   return { lines, subtotal, delivery, total: r2(subtotal + delivery) };
 }
 /* mark the order paid — called by the webhook and by the confirmation page; the database update happens only once */
-async function settle(ctx, db, session, origin) {
+async function settle(ctx, db, session, url) {
+  const origin = url.origin;
   const id = String((session && (session.client_reference_id || (session.metadata || {}).order_id)) || '');
   if (!session || session.payment_status !== 'paid' || !ID.test(id)) return { paid: false };
   const o = await getDoc(db, 'orders', id); if (!o) return { paid: false };
@@ -367,6 +422,13 @@ async function settle(ctx, db, session, origin) {
     where col='orders' and id=$1 and not deleted and coalesce(data->'payment'->>'paid','false') <> 'true'`, [id, JSON.stringify(pay), NOW()]);
   if (r.rowCount) {
     const c = o.customer || {};
+    ctx.waitUntil(touch(ctx.env));
+    if (okEmail(c.email) && ctx.env.RESEND_API_KEY) ctx.waitUntil((async () => {   // the customer's receipt
+      const s = (await getDoc(db, 'settings', 'main')) || {}; const paid = Object.assign({}, o, { payment: pay });
+      await send(ctx.env, { to: [c.email.trim()], subject: `Payment received — order ${o.no} — The Touch`, reply_to: okEmail(s.email) ? s.email : undefined,
+        html: frame(`<div style="font-family:Georgia,serif;font-size:24px;margin-bottom:8px">Payment received${c.name ? ', ' + H(String(c.name).split(' ')[0]) : ''}</div>
+<p style="font-size:14px;line-height:1.7;margin:0 0 20px;color:#5a4a3f">Thank you. We have received your card payment of <b>${AED(o.total)}</b> for order <b>${H(o.no)}</b>.</p>${orderTable(paid)}${orderFacts(paid)}${KEY.test(o.key || '') ? mailBtn(siteOf(ctx.env, url) + '/order/' + o.no + '?k=' + o.key, 'VIEW YOUR INVOICE') : ''}`, s) });
+    })().catch(() => { }));
     ctx.waitUntil(sendShop(ctx.env, { to: [ctx.env.SHOP_EMAIL], reply_to: okEmail(c.email) ? c.email.trim() : undefined, subject: `Payment received · ${o.no} · ${AED(o.total)}`,
       html: frame(`<div style="font-family:Georgia,serif;font-size:22px;margin-bottom:8px">Payment received</div><p style="font-size:14px;line-height:1.7;margin:0 0 6px;color:#5a4a3f">Order <b>${H(o.no)}</b> was paid online by card: <b>${AED(o.total)}</b>.</p><p style="font-size:14px;line-height:1.7;margin:0;color:#5a4a3f">${H(c.name || '')} · ${H(c.phone || '')}</p><p style="margin:26px 0 0;text-align:center"><a href="${H(origin)}/admin.html" style="display:inline-block;background:#1a1412;color:#d9b77e;text-decoration:none;padding:13px 26px;font-size:13px;letter-spacing:2px">OPEN THE ORDER</a></p>`, {}) }).catch(() => { }));
   }
@@ -380,27 +442,55 @@ async function stripeSigOk(secret, header, body) {
   for (const s of sigs) if (await sameText(s, mac)) return true;
   return false;
 }
-async function pay(ctx, db, op, url) {
+const siteOf = (env, url) => /^(localhost|127\.)/.test(url.hostname) ? url.origin : String(env.SITE_URL || url.origin).replace(/\/+$/, '');
+async function pay(ctx, db, op, url, who) {
   const { request: req, env } = ctx; const M = req.method;
   if (op === 'webhook' && M === 'POST') {
     if (!env.STRIPE_WEBHOOK_SECRET) return err(503, 'The webhook secret is not set');
     const body = await req.text();
     if (!await stripeSigOk(env.STRIPE_WEBHOOK_SECRET, req.headers.get('Stripe-Signature'), body)) return err(400, 'Bad signature');
     let ev; try { ev = JSON.parse(body); } catch (e) { return err(400, 'Bad json'); }
-    if (ev && (ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded')) await settle(ctx, db, ev.data && ev.data.object, url.origin);
+    if (ev && (ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded')) await settle(ctx, db, ev.data && ev.data.object, url);
     return json({ received: true });
   }
-  if (!env.STRIPE_SECRET_KEY) return err(503, 'Card payment is not available yet');
-  if (op === 'checkout' && M === 'POST') {
+  if (!env.STRIPE_SECRET_KEY) return err(503, op === 'link' ? 'Card payment is not connected yet (Stripe). Once it is, this button sends the client a payment link.' : 'Card payment is not available yet');
+  /* staff: "Payment link" on an unpaid order → approves this exact total for card payment and returns the client's link.
+     A website order whose total differs from today's catalogue prices needs a second, confirmed call (force). */
+  if (op === 'link' && M === 'POST') {
+    if (!who) return err(401, 'Sign in');
     const b = await readJSON(req, 500); const id = String(b.id || ''); if (!ID.test(id)) return err(400, 'Bad order');
-    const o = await getDoc(db, 'orders', id);
-    if (!o || o.channel !== 'web' || o.status === 'cancelled' || !(o.payment && o.payment.method === 'card_online') || !(NOW() - Number(o.created) < 2 * DAY)) return err(404, 'Order not found');
-    if (o.payment.paid) return json({ paid: true, no: o.no });
-    const p = await priceOrder(db, o);
-    if (!p || Math.abs(p.total - Number(o.total)) > 0.01) return err(409, 'The prices have changed — please place your order again');
+    const o = await getDoc(db, 'orders', id); if (!o || o.status === 'cancelled') return err(404, 'Order not found');
+    if (o.payment && o.payment.paid) return err(409, 'This order is already paid');
+    const total = r2(o.total); if (!(total >= 2)) return err(400, 'The amount is too small for a card payment');
+    const sum = r2((Array.isArray(o.items) ? o.items : []).reduce((a, l) => a + lineTotal(l), 0) - (Number(o.discount) || 0) + (Number(o.delivery) || 0));
+    if (Math.abs(sum - total) > 0.01) return err(409, 'The total of this order does not match its items — check the order first');
+    if (o.channel === 'web' && !b.force) { const p = await priceOrder(db, o); if (!p || Math.abs(p.total - total) > 0.01) return json({ check: true, total, catalogue: p ? p.total : null }); }
+    const key = KEY.test(o.key || '') ? o.key : randKey();
+    const payment = Object.assign({}, o.payment, { linkTotal: total, linkAt: NOW(), linkBy: who.email });
+    const r = await db.q(`update docs set data = data || $2::jsonb, updated=$3 where col='orders' and id=$1 and not deleted and coalesce(data->'payment'->>'paid','false') <> 'true'`, [id, JSON.stringify({ key, payment }), NOW()]);
+    if (!r.rowCount) return err(409, 'This order is already paid');
+    return json({ url: siteOf(env, url) + '/order/' + o.no + '?k=' + key, total, no: o.no });
+  }
+  if (op === 'checkout' && M === 'POST') {
+    const b = await readJSON(req, 500); let o = null, id = '';
+    if (b.no) { o = await orderByNo(db, String(b.no), String(b.k || '')); id = o ? String(o.id) : ''; }   // from the order page (payment link)
+    else { id = String(b.id || ''); if (!ID.test(id)) return err(400, 'Bad order'); o = await getDoc(db, 'orders', id); }
+    if (!o || !ID.test(id) || o.status === 'cancelled') return err(404, 'Order not found');
+    if (o.payment && o.payment.paid) return json({ paid: true, no: o.no });
+    let p;
+    if (linkOk(o)) {   // staff approved this total: charge it as it stands (itemised when the lines add up to it)
+      const lines = (Array.isArray(o.items) ? o.items : []).map(l => ({ name: String(l.name || 'Item').slice(0, 120) + (l.unit === 'kg' ? ' · ' + (l.grams >= 1000 ? l.grams / 1000 + ' kg' : l.grams + ' g') : '') + (l.qty > 1 ? ' × ' + l.qty : ''), amount: lineTotal(l) })).filter(l => l.amount > 0);
+      const delivery = r2(o.delivery); const whole = Math.abs(r2(lines.reduce((a, l) => a + l.amount, 0) + delivery) - r2(o.total)) < 0.005 && lines.length > 0 && lines.length <= 60;
+      p = whole ? { lines, delivery, total: r2(o.total) } : { lines: [{ name: 'The Touch order ' + o.no, amount: r2(o.total) }], delivery: 0, total: r2(o.total) };
+    } else {
+      if (o.channel !== 'web' || !(o.payment && o.payment.method === 'card_online') || !(NOW() - Number(o.created) < 2 * DAY)) return err(404, 'Order not found');
+      p = await priceOrder(db, o);
+      if (!p || Math.abs(p.total - Number(o.total)) > 0.01) return err(409, 'The prices have changed — please place your order again');
+    }
+    const kq = KEY.test(o.key || '') ? '&k=' + o.key : '';
     const q = {
       mode: 'payment', client_reference_id: id, 'metadata[order_id]': id, 'metadata[order_no]': o.no,
-      success_url: url.origin + '/order/' + o.no + '?paid=1&sid={CHECKOUT_SESSION_ID}', cancel_url: url.origin + '/order/' + o.no + '?pay=cancelled',
+      success_url: url.origin + '/order/' + o.no + '?paid=1&sid={CHECKOUT_SESSION_ID}' + kq, cancel_url: url.origin + '/order/' + o.no + '?pay=cancelled' + kq,
       'payment_intent_data[description]': 'The Touch order ' + o.no, 'payment_intent_data[metadata][order_no]': o.no, 'payment_intent_data[metadata][order_id]': id
     };
     const mail = (o.customer || {}).email; if (okEmail(mail)) q.customer_email = mail.trim();
@@ -414,14 +504,14 @@ async function pay(ctx, db, op, url) {
   }
   if (op === 'confirm' && M === 'GET') {
     const sid = String(url.searchParams.get('sid') || ''); if (!/^cs_[A-Za-z0-9_]{6,200}$/.test(sid)) return err(400, 'Bad session');
-    return json(await settle(ctx, db, await stripe(env, 'GET', '/checkout/sessions/' + sid), url.origin));
+    return json(await settle(ctx, db, await stripe(env, 'GET', '/checkout/sessions/' + sid), url));
   }
   return err(404, 'Not found');
 }
 
 /* ---------- emails ---------- */
 const H = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const AED = n => 'AED ' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+const AED = n => { n = Math.round((Number(n) || 0) * 100) / 100; return 'AED ' + n.toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); };
 const lineTotal = l => Math.max(0, Math.round(((l.unit === 'kg' ? l.price * l.grams / 1000 : l.price) * l.qty - (l.disc || 0)) * 100) / 100);
 const qtyLabel = l => l.unit === 'kg' ? (l.grams >= 1000 ? l.grams / 1000 + ' kg' : l.grams + ' g') + (l.qty > 1 ? ' × ' + l.qty : '') : '× ' + l.qty;
 const PAY = { cod: 'Cash on delivery', card_on_delivery: 'Card on delivery', link: 'Payment link', card_online: 'Card online' };
@@ -429,13 +519,25 @@ const payName = o => { const p = o.payment || {}, m = p.method; const s = PAY[m]
 const nice = d => { const x = new Date(String(d || '') + 'T12:00:00'); return isNaN(x) ? (d || '') : x.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }); };
 const okEmail = e => typeof e === 'string' && /^[^\s@<>]{1,64}@[^\s@<>]{1,190}\.[a-z]{2,}$/i.test(e.trim());
 
-async function send(env, msg) {
-  if (!env.RESEND_API_KEY) return;
-  const r = await fetch('https://api.resend.com/emails', {
-    method: 'POST', headers: { Authorization: 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(Object.assign({ from: env.MAIL_FROM || 'The Touch <orders@thetouchchocolate.com>' }, msg))
-  });
-  if (!r.ok) console.error('resend', r.status, (await r.text()).slice(0, 300));
+async function send(env, msg) {   // to customers, through Resend
+  if (!env.RESEND_API_KEY) return { ok: false, error: 'RESEND_API_KEY is not set' };
+  try {
+    const r = await fetch((env.RESEND_API || 'https://api.resend.com') + '/emails', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ from: env.MAIL_FROM || 'The Touch <orders@thetouchchocolate.com>' }, msg))
+    });
+    if (r.ok) return { ok: true, via: 'resend' };
+    const t = (await r.text()).slice(0, 300); console.error('resend', r.status, t); return { ok: false, status: r.status, error: t };
+  } catch (e) { console.error('resend', e && e.message); return { ok: false, error: String((e && e.message) || e).slice(0, 200) }; }
+}
+const mailBtn = (href, label) => `<p style="margin:26px 0 0;text-align:center"><a href="${H(href)}" style="display:inline-block;background:#1a1412;color:#d9b77e;text-decoration:none;padding:13px 26px;font-size:13px;letter-spacing:2px">${label}</a></p>`;
+/* the customer's order confirmation: what they ordered, where and when, and a button to their order page (invoice, card payment) */
+function customerMail(d, s, site) {
+  const c = d.customer || {}, p = d.payment || {}; const wa = String(s.whatsapp || '').replace(/\D/g, '');
+  const page = KEY.test(d.key || '') ? site + '/order/' + d.no + '?k=' + d.key : '';
+  const due = p.method === 'card_online' && !p.paid;
+  return frame(`<div style="font-family:Georgia,serif;font-size:24px;margin-bottom:8px">Thank you${c.name ? ', ' + H(String(c.name).split(' ')[0]) : ''}</div>
+<p style="font-size:14px;line-height:1.7;margin:0 0 20px;color:#5a4a3f">We have received your order <b>${H(d.no)}</b>. ${due ? 'It is confirmed as soon as your card payment is complete.' : 'Our concierge will confirm it with you shortly on WhatsApp.'}</p>${orderTable(d)}${orderFacts(d)}${page ? mailBtn(page, due ? 'COMPLETE YOUR PAYMENT' : 'VIEW YOUR ORDER &amp; INVOICE') : ''}${wa ? `<p style="margin:16px 0 0;text-align:center;font-size:13px"><a href="https://wa.me/${wa}?text=${encodeURIComponent('Hello, about my order ' + d.no)}" style="color:#9c6036">Message us on WhatsApp</a></p>` : ''}`, s);
 }
 /* boutique inbox: the mail worker when it is connected, otherwise Resend */
 async function sendShop(env, msg) {
@@ -474,8 +576,9 @@ ${f(o.fulfil === 'pickup' ? 'Pick-up' : 'Delivery', o.fulfil === 'pickup' ? 'At 
 ${f('Date', H([nice(o.date), o.slot].filter(Boolean).join(' · ')))}${f('Payment', H(payName(o)))}
 ${f('Gift', H([g.to && 'To ' + g.to, g.phone, g.msg && '“' + g.msg + '”'].filter(Boolean).join(' · ')))}${f('Notes', H(o.notes))}</table>`;
 }
-async function notify(env, db, col, d, origin) {
+async function notify(env, db, col, d, url) {
   if (!env.RESEND_API_KEY && !env.MAIL) return;
+  const origin = url.origin;
   let s = {}; try { const r = await db.q("select data::text from docs where col='settings' and id='main'"); if (r.rows.length) s = JSON.parse(r.rows[0][0]); } catch (e) { }
   const shop = env.SHOP_EMAIL || s.email; const reply = okEmail(s.email) ? s.email : undefined;
   const btn = (href, label) => `<p style="margin:26px 0 0;text-align:center"><a href="${H(href)}" style="display:inline-block;background:#1a1412;color:#d9b77e;text-decoration:none;padding:13px 26px;font-size:13px;letter-spacing:2px">${label}</a></p>`;
@@ -486,14 +589,7 @@ async function notify(env, db, col, d, origin) {
       to: [shop], subject: `New web order ${d.no} · ${c.name || ''} · ${AED(d.total)}`, reply_to: okEmail(c.email) ? c.email.trim() : undefined,
       html: frame(`<div style="font-family:Georgia,serif;font-size:22px;margin-bottom:6px">New website order</div><div style="color:#8a7766;font-size:13px;margin-bottom:18px">Confirm it with the client on WhatsApp, then move it on the Orders board.</div>${orderTable(d)}${orderFacts(d)}${btn(origin + '/admin.html', 'OPEN THE ADMIN')}`, s)
     }));
-    if (okEmail(c.email)) {
-      const wa = String(s.whatsapp || '').replace(/\D/g, '');
-      jobs.push(send(env, {
-        to: [c.email.trim()], subject: `Your order ${d.no} — The Touch`, reply_to: reply,
-        html: frame(`<div style="font-family:Georgia,serif;font-size:24px;margin-bottom:8px">Thank you${c.name ? ', ' + H(String(c.name).split(' ')[0]) : ''}</div>
-<p style="font-size:14px;line-height:1.7;margin:0 0 20px;color:#5a4a3f">We have received your order <b>${H(d.no)}</b>. Our concierge will confirm it with you shortly on WhatsApp.</p>${orderTable(d)}${orderFacts(d)}${wa ? btn('https://wa.me/' + wa + '?text=' + encodeURIComponent('Hello, about my order ' + d.no), 'MESSAGE US ON WHATSAPP') : ''}`, s)
-      }));
-    }
+    if (okEmail(c.email)) jobs.push(send(env, { to: [c.email.trim()], subject: `Your order ${d.no} — The Touch`, reply_to: reply, html: customerMail(d, s, siteOf(env, url)) }));
   }
   if (col === 'enquiries' && okEmail(shop)) {
     const f = (k, v) => v ? `<tr><td style="padding:4px 14px 4px 0;color:#8a7766;white-space:nowrap;vertical-align:top">${k}</td><td style="padding:4px 0">${H(v)}</td></tr>` : '';

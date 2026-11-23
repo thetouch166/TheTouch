@@ -91,6 +91,11 @@
     money(n, cur) { n = Number(n) || 0; return (cur || 'AED') + ' ' + n.toLocaleString('en-AE', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); },
     r2(n) { return Math.round((Number(n) || 0) * 100) / 100; },
     uid(p) { return (p || '') + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
+    key() {   // private key of an order's own page (/order/<no>?k=…): only someone holding the link can open it
+      const A = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'; let b;
+      try { b = crypto.getRandomValues(new Uint8Array(22)); } catch (e) { b = Array.from({ length: 22 }, () => Math.floor(Math.random() * 256)); }
+      return Array.from(b, x => A[x % A.length]).join('');
+    },
     orderNo(prefix) {
       const d = new Date(); const pad = n => String(n).padStart(2, '0'); const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
       let r = ''; for (let i = 0; i < 5; i++) r += A[Math.floor(Math.random() * A.length)];
@@ -204,8 +209,14 @@
     },
     _loop() {
       if (cloud._timer) return;
-      const tick = async () => { if (!document.hidden) await cloud._poll(); cloud._timer = setTimeout(tick, cloud.isAdmin() ? 5000 : 60000); };
+      // screen in front: ask the database every 5 s. Admin in a background tab: ask the light "anything new?" signal every 20 s
+      // (no database, so it can sleep) and load the changes only when it moved — new-order alerts keep working.
+      const tick = async () => { if (!document.hidden) await cloud._poll(); else if (cloud.isAdmin()) await cloud._ping(); cloud._timer = setTimeout(tick, cloud.isAdmin() ? (document.hidden ? 20000 : 5000) : 60000); };
       cloud._timer = setTimeout(tick, cloud.isAdmin() ? 5000 : 60000);
+    },
+    async _ping() {
+      const cols = Object.keys(cloud._c).filter(c => cloud._c[c].ready); if (!cols.length) return;
+      try { const r = await fetch(API + '/ping', { cache: 'no-store' }); const j = await r.json(); if (j && j.t > Math.min(...cols.map(c => cloud._c[c].t))) await cloud._poll(); } catch (e) { }
     },
     async _poll() {
       const cols = Object.keys(cloud._c).filter(c => cloud._c[c].ready); if (!cols.length || cloud._busy) return;
@@ -282,6 +293,7 @@
   const num = v => { const n = Number(v); return isFinite(n) ? n : 0; };
   TT.cleanOrder = function (o) {
     o = o || {}; o.id = safeId(o.id); o.no = safeId(o.no) || o.id.slice(-8);
+    o.key = /^[A-Za-z0-9]{16,40}$/.test(o.key || '') ? o.key : '';   // key of the customer's order page
     o.channel = o.channel === 'pos' ? 'pos' : 'web';
     o.status = STATUS.includes(o.status) ? o.status : 'new';
     o.created = num(o.created) || Date.now();

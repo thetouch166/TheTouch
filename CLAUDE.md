@@ -27,6 +27,14 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
   `POST /api/pay/webhook` and by `GET /api/pay/confirm` on the confirmation page (`settle()`, runs once). Payment method id
   `card_online`, money stored in `payment.other`. Secrets `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`; switched on for customers
   in Admin → Settings → Online payment options → "Card online". Refunds are made in the Stripe dashboard.
+- Order page + payment link: every website order carries a random `key`; `/order/<no>?k=<key>` is the customer's own page (thank-you,
+  invoice, "Pay by card"), filled from `GET /api/order/<no>?k=` when opened on another device (no phone / e-mail / address in it).
+  Admin → order → **Payment link** calls `POST /api/pay/link` (staff): it stores `payment.linkTotal/linkAt/linkBy` (= this exact total is
+  approved for card payment, 30 days) and returns the link to send on WhatsApp; `/api/pay/checkout` then accepts `{no,k}`. A website
+  order can never set those fields itself (`publicCreateOk`).
+- New-order alert in the admin: pop-up with the order + sound (`orderAlert`, `showAlert`, `chime`, `ringStart`), settings per device in
+  localStorage `tt_alert` (Settings → New-order alert). In a background tab the admin asks `GET /api/ping` every 20 s (KV key `sys:ping`,
+  no database) and syncs only when it moved, so alerts keep working while the database can sleep.
 - `public/js/config.js` sets `window.TT_API='/api'` (live) except on port 5500 → **offline mode** (localStorage) for dev/tests.
 
 ## Layout
@@ -61,7 +69,7 @@ tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live agains
 - `TT.DB` = backend with the SAME API in both modes: `init, all(col), get(col,id), put(col,obj), patch(col,id,part),
   inc(col,id,field,delta), del(col,id), watch(col,cb) → unsubscribe, signIn, signOut, isAdmin`, plus `DB.mode`
   (`'local'` | `'live'`), `upload(dataUrl)→url` (R2 in live, data URL offline). Always go through `TT.DB`.
-- Live `watch` = initial load + admin polls `/api/sync?since=` every 5 s (paused while the tab is hidden), website
+- Live `watch` = initial load + admin polls `/api/sync?since=` every 5 s (tab hidden: `/api/ping` every 20 s, sync only on news), website
   re-reads products every 60 s (edge-cached 60 s, purged on staff writes). Writes apply locally at once (optimistic).
 - Collections: `products`, `orders`, `settings` (doc id `main`), `enquiries`, `shifts`, `stock` (stock movement log), `subscribers` (newsletter `{id,email,created,source}`; public create-only).
 - `TT.boot({admin})` loads settings + products (seeds the catalogue when empty). `TT.U` = utils
@@ -78,7 +86,7 @@ tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live agains
 - **order**: `{id, no, channel:'web'|'pos', status:'new'|'confirmed'|'preparing'|'ready'|'completed'|'cancelled',
   created, customer:{name,phone,email}, fulfil:'instore'|'pickup'|'delivery', emirate, area, address, date, slot,
   gift:{to,phone,msg}, notes, items:[{pid,name,unit,price,grams,qty,disc}], subtotal, discount, delivery, total, vat,
-  payment:{method, paid, cash, card, other, tendered, change, ref, paidAt, paidShift}, stockApplied, cashier, shiftId}`
+  payment:{method, paid, cash, card, other, tendered, change, ref, paidAt, paidShift, linkTotal, linkAt, linkBy}, stockApplied, cashier, shiftId, key}`
 - **shift**: `{id, cashier, openedAt, float, status, closedAt, counted, expected, cash, card, other, variance}`
 - **stock** (movement log): `{id, pid, name, unit, type:'receive'|'count'|'remove'|'adjust', qty, before, after, note, by, at}`
 - Stock rule: POS sales deduct at sale; web orders deduct when moved past `new`; cancel/void restores
@@ -87,7 +95,7 @@ tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live agains
 ## admin.html map (search these section comments)
 `/* === HOME / DASHBOARD === */` renderHome · `/* === POS === */` renderPOS, drawTiles, drawTicket, weighModal,
 customItem, detailsModal, custModal, discModal, heldModal, startPay, payModal, doneModal, receiptHTML · invoice: invoiceCanvas (WhatsApp image), invoiceA4 (print/PDF), invoiceModal ·
-`/* === ORDERS === */` renderOrders, drawBoard, drawList, orderHTML, bindOrder, markPaid, setStatus ·
+`/* === ORDERS === */` renderOrders, drawBoard, drawList, orderHTML, bindOrder, payLink, waClientText, markPaid, setStatus · new-order alert pop-up: orderAlert, showAlert, alertBody ·
 `/* === PRODUCTS === */` renderProducts, productModal, stockModal, stockHistory, stockCSV, countSheet · REPORTS renderReports, exportCSV · CLIENTS clientStats ·
 EVENTS renderEvents · SETTINGS renderSettings. Shared helpers at the top: toast, modal, ask (in-app confirm —
 never use window.confirm/alert), chime, waLink, applyStock, shift functions (openShiftModal, closeShiftModal).
@@ -104,7 +112,7 @@ never use window.confirm/alert), chime, waLink, applyStock, shift functions (ope
 
 ## index.html map
 Router `route()` on real paths (History API; `go(path)` to navigate from code, old `#/…` links are converted):
-`/` pageHome · `/shop/<cat>` pageShop · `/p/<id>` pageProduct · `/checkout` pageCheckout · `/order/<no>` pageOrder ·
+`/` pageHome · `/shop/<cat>` pageShop · `/p/<id>` pageProduct · `/checkout` pageCheckout · `/order/<no>?k=<key>` pageOrder (invoiceHTML, waOrderText) ·
 `/story` · `/events` · `/delivery` · `/privacy` `/terms` `/refunds` pageLegal · anything else pageNotFound.
 **A new page or category must be added in three places:** `route()` + `PAGE_META` here, `PAGES`/`CATS` in
 `functions/[[path]].js` (server titles, sitemap), and `CATS` in `js/store.js`. Links are written as real paths
@@ -125,6 +133,8 @@ checkout. Dates/cut-offs use Dubai time via `dxbNow()`.
   `python tests/smoke_test.py` (website order → admin → POS sale → shift close; prints PASS/FAIL).
 - Live mode: `.dev.vars` (test Neon DATABASE_URL + `STAFF_LOGINS="owner@thetouch.ae:secret123"`) →
   `npx wrangler pages dev --port 8788` → `python tests/smoke_test.py --live`. Never use the shop's database for tests.
+- Card payment, payment link, order page and new-order alert: `node tests/mock_stripe.js` + the live-mode server, then
+  `python tests/pay_test.py <folder>` and `python tests/order_link_test.py <folder>`; sign-in and roles: `python tests/auth_test.py <folder>`.
 - After any change: run the smoke test and check the browser console for errors on both pages.
 
 ## Go-live (see docs/LAUNCH-CHECKLIST.md)

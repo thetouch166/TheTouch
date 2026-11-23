@@ -276,6 +276,17 @@ table.t tr:hover td{background:var(--soft2)}
 @keyframes fi{from{opacity:0}}
 .mbox{background:var(--card);border-radius:20px;width:min(520px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden;animation:pu .2s;box-shadow:0 30px 80px rgba(20,6,9,.35)}
 .mbox.wide{width:min(860px,100%)}
+/* new-order alert pop-up */
+.mbox.nal{width:min(640px,100%)}
+.mbox.nal .mh{background:linear-gradient(135deg,#55091a,#40050e);border-bottom:2px solid var(--gold)}
+.mbox.nal .mh h3{color:#fff;display:flex;align-items:center;gap:10px}.mbox.nal .mh .x{color:#fff;background:rgba(255,255,255,.16)}
+.nbell{display:inline-block;transform-origin:50% 10%;animation:nring 1.1s ease-in-out 4}
+@keyframes nring{0%,100%{transform:rotate(0)}15%{transform:rotate(-20deg)}30%{transform:rotate(16deg)}45%{transform:rotate(-12deg)}60%{transform:rotate(8deg)}75%{transform:rotate(-4deg)}}
+.nah{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.nno{font-size:22px;font-weight:700;letter-spacing:.01em}
+.ntot{text-align:end;font-size:24px;font-weight:700;color:var(--hd);line-height:1.2}.ntot small{display:block;font-size:12px;font-weight:500;color:var(--mute);margin-top:3px}
+.fld input[type=range]{padding:0;border:0;background:none;height:44px;accent-color:var(--gold);box-shadow:none}
+@media(prefers-reduced-motion:reduce){.nbell{animation:none}}
 @keyframes pu{from{transform:translateY(16px) scale(.98)}}
 .mh{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
 .mh h3{font-size:18px;font-weight:700;flex:1}
@@ -612,6 +623,14 @@ const AR={
  'WhatsApp client':'واتساب العميل','Send to driver':'إرسال للسائق','Payment received':'تم استلام الدفعة','Link':'رابط','online':'أونلاين','Confirm payment':'تأكيد الدفع','Payment collected?':'هل تم تحصيل الدفعة؟','Record payment':'تسجيل الدفعة','Void sale':'إلغاء البيع',
  'Stock will be returned to inventory.':'سيُعاد المخزون إلى المستودع.','This order will be cancelled.':'سيتم إلغاء هذا الطلب.','Confirm':'تأكيد','New online order':'طلب جديد من الموقع','Undo':'تراجع',
  '⚠ The total of this website order does not match its items. Check prices before confirming.':'⚠ إجمالي هذا الطلب لا يطابق منتجاته. تحقق من الأسعار قبل التأكيد.',
+ // new-order alert + payment link
+ 'New-order alert':'تنبيه الطلب الجديد','Sound':'الصوت','On':'تشغيل','Off':'إيقاف','Tone':'النغمة','Chime':'رنين','Bell':'جرس','Ring':'هاتف','Volume':'مستوى الصوت','Repeat until the order is opened':'التكرار حتى فتح الطلب','Order pop-up':'نافذة الطلب','Try it':'تجربة',
+ 'Test order alert':'تجربة تنبيه الطلب','A new website order rings and opens a pop-up with its details. Keep this page open: it also works while you are on another tab.':'عند وصول طلب جديد من الموقع يرنّ الجهاز وتظهر نافذة بتفاصيله. أبقِ هذه الصفحة مفتوحة: يعمل التنبيه أيضاً وأنت في تبويب آخر.',
+ 'Desktop notifications are on.':'إشعارات سطح المكتب مفعّلة.','Desktop notifications are blocked in this browser.':'إشعارات سطح المكتب محظورة في هذا المتصفح.','Allow desktop notifications':'السماح بإشعارات سطح المكتب',
+ 'New online order':'طلب جديد من الموقع','Test: new online order':'تجربة: طلب جديد من الموقع','Open order':'فتح الطلب','Confirm order →':'تأكيد الطلب ←','Close':'إغلاق','Website':'الموقع','This is only a test — nothing was ordered.':'هذه تجربة فقط — لم يُطلب شيء.',
+ 'Sound and pop-up are both off: a new order shows only this small message':'الصوت والنافذة متوقفان: يظهر الطلب الجديد كرسالة صغيرة فقط','This is how a new website order sounds':'هكذا يبدو صوت الطلب الجديد من الموقع',
+ 'Payment link':'رابط الدفع','Payment link ·':'رابط الدفع ·','Amount to pay by card':'المبلغ المطلوب بالبطاقة','Link for the client':'رابط العميل','Copy link':'نسخ الرابط','Link copied ✓':'تم نسخ الرابط ✓','Check the amount first':'تحقق من المبلغ أولاً','Create the link':'إنشاء الرابط',
+ 'The client opens the link, sees the invoice and pays by card. This order then turns to Paid by itself.':'يفتح العميل الرابط فيرى الفاتورة ويدفع بالبطاقة، ثم يتحول هذا الطلب إلى «مدفوع» تلقائياً.','Payment received':'تم استلام الدفعة','Could not create the payment link':'تعذّر إنشاء رابط الدفع',
  // invoice
  'Invoice':'فاتورة','Tax Invoice':'فاتورة ضريبية','Preparing invoice…':'جارٍ تجهيز الفاتورة…','Print / PDF (A4)':'طباعة / PDF (A4)','Download':'تنزيل','WhatsApp text':'رسالة واتساب','Send on WhatsApp':'إرسال عبر واتساب','WhatsApp':'واتساب',
  'Could not draw the invoice image — use Print / PDF.':'تعذّر إنشاء صورة الفاتورة — استخدم الطباعة / PDF.',
@@ -680,7 +699,7 @@ const AR_RX=[
  [/^(.+) is back on sale$/,'$1 معروض للبيع مجدداً'],[/^(.+) hidden from website & POS$/,'تم إخفاء $1 من الموقع ونقطة البيع'],[/^(.+) shows 0 in stock — added anyway$/,'$1 مخزونه 0 — تمت الإضافة رغم ذلك'],
  [/^No clients match “(.+)”$/,'لا يوجد عملاء مطابقون «$1»'],[/^No products match “(.+)”$/,'لا توجد منتجات مطابقة «$1»'],[/^Enquiry marked as (.+)$/,(m,s)=>'تم تحديث الطلب إلى '+(AR[s]||s)],
  [/^Move to (.+?)(\s*[→›])?$/,(m,s,a)=>'نقل إلى '+(AR[s]||s)+(a?' ←':'')],[/^([\d.,]+) (kg|pcs|g)$/,(m,n,u)=>n+' '+({kg:'كغ',pcs:'قطعة',g:'غ'})[u]],[/^(.+) \(unpaid\)$/,(m,s)=>(AR[s]||s)+' (غير مدفوع)'],[/^(.+) \(UNPAID\)$/,(m,s)=>(AR[s]||s)+' (غير مدفوع)'],[/^Gift for (.+)$/,'هدية إلى $1'],[/^Gift message for (.+)$/,'رسالة الهدية إلى $1'],
- [/^Close shift$/,'إغلاق الوردية'],[/^Low-stock alert below \((kg|pcs)\)$/,(m,u)=>'تنبيه المخزون المنخفض أقل من ('+(u==='kg'?'كغ':'قطع')+')'],[/^(Quantity received|Quantity removed|Counted on the shelf) \((kg|pcs)\)$/,(m,s,u)=>AR[s]+' ('+(u==='kg'?'كغ':'قطع')+')'],
+ [/^Close shift$/,'إغلاق الوردية'],[/^\+(\d+) more waiting$/,'+$1 بانتظار العرض'],[/^Payment link made (.+)$/,'أُنشئ رابط الدفع $1'],[/^Low-stock alert below \((kg|pcs)\)$/,(m,u)=>'تنبيه المخزون المنخفض أقل من ('+(u==='kg'?'كغ':'قطع')+')'],[/^(Quantity received|Quantity removed|Counted on the shelf) \((kg|pcs)\)$/,(m,s,u)=>AR[s]+' ('+(u==='kg'?'كغ':'قطع')+')'],
  [/^(.+) \(AED\)$/,(m,s)=>(AR[s]||s)+' (درهم)'],[/^Unit price \(per kg\)$/,'سعر الوحدة (للكيلو)'],[/^Payment: (.+)$/,(m,s)=>'الدفع: '+(AR[s]||s)],[/^Cancel (.+)\?$/,'إلغاء $1؟'],[/^Void \/ refund (.+)\?$/,'إلغاء / استرداد $1؟'],
  [/^Refund (.+) to the client \((.+)\)\.$/,(m,a,b)=>'استرداد '+a+' للعميل ('+(AR[b]||b)+').'],[/^(.+) will be removed from the website and POS\.$/,'سيُحذف $1 من الموقع ونقطة البيع.'],[/^(.+) is still marked unpaid \((.+)\)\.$/,'$1 ما زال غير مدفوع ($2).']
 ];
@@ -723,7 +742,22 @@ applyTheme();
 function toast(m,gold,onclick){const t=$('#toast');t.innerHTML=m;t.className='toast on'+(gold?' gold':'');t.onclick=()=>{t.className='toast';onclick&&onclick()};clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',gold?6000:2400)}
 function modal(html,cls){const el=document.createElement('div');el.className='modal';el.innerHTML=`<div class="mbox ${cls||''}">${html}</div>`;el.addEventListener('mousedown',e=>{if(e.target===el)el.close()});$('#modalRoot').appendChild(el);el.close=()=>{el.remove();el.onclose&&el.onclose()};el.querySelectorAll('[data-close]').forEach(b=>b.onclick=el.close);return el}
 function ask(title,msg,ok,danger){return new Promise(r=>{let done=false;const m=modal(`<div class="mh"><h3>${title}</h3></div><div class="mb"><p style="line-height:1.6">${msg}</p></div><div class="mf"><button class="btn b-line" id="an">Cancel</button><button class="btn ${danger?'b-bad':'b-dark'}" id="ay" style="min-width:130px">${ok||'Confirm'}</button></div>`);m.onclose=()=>{if(!done)r(false)};m.querySelector('#an').onclick=()=>m.close();m.querySelector('#ay').onclick=()=>{done=true;m.close();r(true)}})}
-function chime(){try{const a=new (window.AudioContext||window.webkitAudioContext)();[[880,0],[1175,.16],[1568,.32]].forEach(([f,t])=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,a.currentTime+t);g.gain.linearRampToValueAtTime(.25,a.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t+.6);o.connect(g);g.connect(a.destination);o.start(a.currentTime+t);o.stop(a.currentTime+t+.7)})}catch(e){}}
+/* new-order alert on this device: sound + pop-up (Settings → New-order alert). Browsers play sound only after a first tap on the page. */
+const ALERT=Object.assign({sound:true,tone:'chime',vol:80,repeat:true,popup:true},(()=>{try{return JSON.parse(localStorage.getItem('tt_alert')||'{}')}catch(e){return {}}})());
+const saveAlert=()=>{try{localStorage.setItem('tt_alert',JSON.stringify(ALERT))}catch(e){}};
+let AC=null,ringWait=false;   // ringWait: an alert came before the first tap; it rings as soon as the browser allows sound
+function audio(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume().then(()=>{if(ringWait){ringWait=false;if(alertM)chime()}}).catch(()=>{});return AC}catch(e){return null}}
+['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>audio(),{capture:true,passive:true}));
+const TONES={ // notes: [frequency Hz, starts at (s), lasts (s), wave, loudness]
+  chime:[[880,0,.7,'sine',1],[1175,.16,.7,'sine',1],[1568,.32,1.2,'sine',1]],
+  bell:[[1319,0,1.5,'sine',1],[2637,0,.9,'sine',.3],[3956,0,.4,'sine',.12],[1047,.62,1.9,'sine',1],[2093,.62,1.1,'sine',.3],[3140,.62,.5,'sine',.12]],
+  ring:[0,.95].flatMap(b=>Array.from({length:8},(_,i)=>[i%2?1175:1480,b+i*.075,.075,'triangle',.9]))};
+function chime(force){if(!force&&!ALERT.sound)return;const a=audio();if(!a)return;if(a.state!=='running'){ringWait=true;return}const v=Math.max(.1,Math.min(1,(+ALERT.vol||80)/100))*.55,t0=a.currentTime+.04;
+  try{(TONES[ALERT.tone]||TONES.chime).forEach(([f,t,d,w,l])=>{const o=a.createOscillator(),g=a.createGain();o.type=w;o.frequency.value=f;g.gain.setValueAtTime(.0001,t0+t);g.gain.linearRampToValueAtTime(v*l,t0+t+.012);g.gain.exponentialRampToValueAtTime(.0001,t0+t+d);o.connect(g);g.connect(a.destination);o.start(t0+t);o.stop(t0+t+d+.05)})}catch(e){}}
+let ringT=0;
+function ringStart(){ringStop();chime();if(ALERT.sound&&ALERT.repeat){let n=0;ringT=setInterval(()=>{if(++n>24){ringStop();return}chime()},5000)}}   // rings again every 5 s (2 minutes at most) until the pop-up is closed
+function ringStop(){clearInterval(ringT);ringT=0}
+const SITE=()=>/^(localhost|127\.)/.test(location.hostname)?location.origin:'https://thetouchchocolate.com';   // the public website (order pages, payment links)
 function statusOf(id){return TT.STATUSES.find(s=>s.id===id)||{name:esc(id),color:'#999'}}
 function stTag(id){const s=statusOf(id);return `<span class="tag" style="background:${s.color}">${s.name}</span>`}
 function waLink(phone,text){let p=String(phone||'').replace(/\D/g,'');if(p.startsWith('00'))p=p.slice(2);if(p.startsWith('0'))p='971'+p.slice(1);if(p.length===9)p='971'+p;return 'https://wa.me/'+p+(text?'?text='+encodeURIComponent(text):'')}
@@ -792,7 +826,7 @@ const CASHIER=()=>DB.role==='cashier';const NOCASH=['reports','customers'];   //
 async function unlock(){$('#login').classList.add('hidden');document.body.classList.toggle('cashier',CASHIER());if(started)return;started=true;await startData();go(VIEW);if(!SHIFT)setTimeout(()=>openShiftModal(),300)}
 
 /* =================== data =================== */
-let seenOrders=null;const freshIds=new Set();
+let seenOrders=null,paidSeen=null;const freshIds=new Set();
 async function startData(){
   await TT.boot({admin:true});S=TT.settings;PRODUCTS=TT.products;drawShiftPill();
   DB.watch('products',ps=>{PRODUCTS=ps;if(VIEW==='pos')drawTiles();if(VIEW==='products')renderProducts()});
@@ -800,11 +834,15 @@ async function startData(){
   DB.watch('orders',os=>{
     os=os.map(o=>{try{return TT.cleanOrder(o)}catch(e){return null}}).filter(Boolean);
     os.sort((a,b)=>b.created-a.created);
-    const fresh=seenOrders?os.filter(o=>!seenOrders.has(o.id)&&o.channel==='web'):[];
-    seenOrders=new Set(os.map(o=>o.id));ORDERS=os;
-    if(fresh.length){chime();fresh.forEach(o=>freshIds.add(o.id));const f=fresh[0];
-      toast(`🔔 New online order <b>${esc(f.no)}</b> · ${esc(f.customer.name)} · ${money(f.total)} <u style="margin-inline-start:6px">View</u>`,true,()=>openOrder(f.id));
-      if(window.Notification&&Notification.permission==='granted'){try{new Notification('The Touch — new order '+f.no,{body:f.customer.name+' · '+money(f.total),icon:'img/monogram-flat.png'})}catch(e){}}}
+    const prev=seenOrders;const fresh=prev?os.filter(o=>!prev.has(o.id)&&o.channel==='web'):[];
+    const paidNow=prev&&paidSeen?os.filter(o=>o.payment.paid&&o.payment.method==='card_online'&&prev.has(o.id)&&!paidSeen.has(o.id)):[];   // paid online a moment ago (card / payment link)
+    seenOrders=new Set(os.map(o=>o.id));paidSeen=new Set(os.filter(o=>o.payment.paid).map(o=>o.id));ORDERS=os;
+    if(fresh.length){fresh.forEach(o=>freshIds.add(o.id));const f=fresh[0];
+      if(ALERT.popup)fresh.slice().reverse().forEach(orderAlert);
+      else{chime();toast(`🔔 New online order <b>${esc(f.no)}</b> · ${esc(f.customer.name)} · ${money(f.total)} <u style="margin-inline-start:6px">View</u>`,true,()=>openOrder(f.id))}
+      if(window.Notification&&Notification.permission==='granted'){try{const n=new Notification('The Touch — new order '+f.no,{body:f.customer.name+' · '+money(f.total),icon:'img/monogram-flat.png',tag:'tt-'+f.id});n.onclick=()=>{window.focus();n.close()}}catch(e){}}}
+    else if(paidNow.length){const f=paidNow[0];chime();toast(`💳 Payment received <b>${esc(f.no)}</b> · ${esc(f.customer.name)} · ${money(f.total)} <u style="margin-inline-start:6px">View</u>`,true,()=>openOrder(f.id))}
+    if(alertM&&alertM._oid){const cur=os.find(x=>x.id===alertM._oid);const b=alertM.querySelector('#nabody');if(cur&&b)b.innerHTML=alertBody(cur)}
     const n=os.filter(o=>o.status==='new').length;$('#newDot').textContent=n;$('#newDot').classList.toggle('hidden',!n);
     ({orders:renderOrders,reports:renderReports,customers:renderCustomers,home:renderHome})[VIEW]?.();
   });
@@ -813,6 +851,37 @@ async function startData(){
   if(window.Notification&&Notification.permission==='default'){try{Notification.requestPermission()}catch(e){}}
 }
 setInterval(()=>{if(VIEW!=='home')$('#vsub').textContent=new Date().toLocaleString(LOC,{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})},1000);
+
+/* =================== new-order alert pop-up =================== */
+const alertQ=[];let alertM=null;
+function alertBody(o){const p=o.payment||{};
+  return `<div class="nah"><div><div class="nno" data-en>${esc(o.no)}</div><div class="muted small">🌐 Website · ${U.fmtTime(o.created)}</div></div>
+    <div class="ntot">${money(o.total)}<small>${payName(o)} · ${p.paid?'<b style="color:var(--ok)">Paid</b>':'<b style="color:var(--warn)">Not paid yet</b>'}</small></div></div>
+   ${o.tampered?'<div class="giftbox" style="background:#fbecee;border-color:#ecc9cd;color:var(--bad)">⚠ The total of this website order does not match its items. Check prices before confirming.</div>':''}
+   <dl class="kv" style="margin-top:16px"><dt>Client</dt><dd><b>${esc(o.customer.name||'—')}</b>${o.customer.phone?' · '+esc(o.customer.phone):''}</dd>
+    <dt>${fulfilLabel(o)}</dt><dd>${o.fulfil==='pickup'?'Boutique pick-up':esc([o.address,o.area,o.emirate].filter(Boolean).join(', '))}<br><b>${niceDate(o.date)}</b> ${esc(o.slot||'')}</dd>
+    ${o.notes?`<dt>Notes</dt><dd>${esc(o.notes)}</dd>`:''}</dl>
+   ${o.gift&&(o.gift.msg||o.gift.to)?`<div class="giftbox">🎁 <b>Gift${o.gift.to?' for '+esc(o.gift.to):''}</b>${o.gift.phone?' · '+esc(o.gift.phone):''}<br>${esc(o.gift.msg||'')}</div>`:''}
+   <div style="margin-top:12px">${o.items.map(l=>`<div class="it"><div><b style="font-weight:600">${esc(l.name)}</b><div class="small muted">${l.unit==='kg'?U.qtyLabel(l)+' × '+l.qty:'× '+l.qty}</div></div><div style="font-weight:600">${money(U.lineTotal(l))}</div></div>`).join('')}</div>`}
+function orderAlert(o){   // a new website order: ring and show its details; several orders wait their turn
+  if(alertQ.includes(o.id))return;alertQ.push(o.id);
+  if(alertM){const c=alertM.querySelector('#namore');if(c)c.textContent=alertQ.length>1?'+'+(alertQ.length-1)+' more waiting':'';ringStart();return}
+  showAlert()}
+function showAlert(test){
+  const o=test||ORDERS.find(x=>x.id===alertQ[0]);if(!o){alertQ.shift();if(alertQ.length)showAlert();return}
+  const m=alertM=modal(`<div class="mh"><h3><span class="nbell">🔔</span><span>${test?'Test: new online order':'New online order'}</span></h3><button class="x" data-close aria-label="Close">×</button></div>
+   <div class="mb" id="nabody">${alertBody(o)}</div>
+   <div class="mf"><span class="muted small" id="namore" style="margin-inline-end:auto;align-self:center">${!test&&alertQ.length>1?'+'+(alertQ.length-1)+' more waiting':''}</span>
+    ${test?'<button class="btn b-dark" data-close style="min-width:130px">Close</button>':`<button class="btn b-line" data-close>Later</button>${o.customer.phone?`<a class="btn b-line" target="_blank" rel="noopener" href="${waLink(o.customer.phone,waClientText(o))}">WhatsApp client</a>`:''}<button class="btn b-line" id="naopen">Open order</button>${o.status==='new'?'<button class="btn b-dark" id="naok">Confirm order →</button>':''}`}</div>`,'nal');
+  m._oid=test?'':o.id;
+  m.onclose=()=>{ringStop();alertM=null;if(!test){alertQ.shift();freshIds.delete(o.id);if(alertQ.length)setTimeout(showAlert,250)}};
+  const op=m.querySelector('#naopen');if(op)op.onclick=()=>{m.close();openOrder(o.id)};
+  const ok=m.querySelector('#naok');if(ok)ok.onclick=async()=>{ok.disabled=true;m.close();await setStatus(o,'confirmed')};
+  if(test){chime()}else ringStart();
+}
+function sampleOrder(){const p=PRODUCTS.find(x=>x.active!==false&&x.web!==false&&x.unit!=='kg')||{id:'',name:'Assorted Signature Box',price:315};
+  return TT.cleanOrder({id:'test',no:'W-TEST',channel:'web',status:'new',created:Date.now(),customer:{name:'Test client',phone:'050 123 4567'},fulfil:'pickup',date:todayISO(),slot:'16:00 – 19:00',notes:'This is only a test — nothing was ordered.',
+    items:[{pid:p.id,name:p.name,unit:'pc',price:+p.price||0,qty:1}],subtotal:+p.price||0,discount:0,delivery:0,total:+p.price||0,vat:U.vatPart(+p.price||0,S.vatRate),payment:{method:'cod',paid:false}})}
 
 /* =================== router =================== */
 const TITLES={home:'Good day',pos:'Point of Sale',orders:'Orders',products:'Products & Stock',reports:'Reports',customers:'Clients',events:'Event Enquiries',settings:'Settings'};
@@ -1295,7 +1364,7 @@ function orderHTML(o,inModal){
    <dl class="kv">
      <dt>Client</dt><dd><b>${esc(o.customer.name||'Walk-in')}</b> ${o.customer.phone?`· ${esc(o.customer.phone)}`:''}${o.customer.email?'<br>'+esc(o.customer.email):''}</dd>
      ${o.fulfil&&o.fulfil!=='instore'?`<dt>${fulfilLabel(o)}</dt><dd>${o.fulfil==='pickup'?'Boutique pick-up':esc([o.address,o.area,o.emirate].filter(Boolean).join(', '))}<br><b>${niceDate(o.date)}</b> ${esc(o.slot||'')}</dd>`:''}
-     <dt>Payment</dt><dd>${payName(o)} · ${p.paid?'<b style="color:var(--ok)">Paid</b>':'<b style="color:var(--warn)">Not paid yet</b>'}${p.ref?' · ref '+esc(p.ref):''}</dd>
+     <dt>Payment</dt><dd>${payName(o)} · ${p.paid?'<b style="color:var(--ok)">Paid</b>':'<b style="color:var(--warn)">Not paid yet</b>'}${p.ref?' · ref '+esc(p.ref):''}${!p.paid&&p.linkAt?'<br><span class="small muted">Payment link made '+U.fmtTime(p.linkAt)+'</span>':''}</dd>
      ${o.notes?`<dt>Notes</dt><dd>${esc(o.notes)}</dd>`:''}
    </dl>
    ${o.gift&&(o.gift.msg||o.gift.to)?`<div class="giftbox">🎁 <b>Gift${o.gift.to?' for '+esc(o.gift.to):''}</b>${o.gift.phone?' · '+esc(o.gift.phone):''}<br>${esc(o.gift.msg||'')}</div>`:''}
@@ -1305,15 +1374,36 @@ function orderHTML(o,inModal){
     ${o.fulfil==='delivery'?`<div class="it"><span class="muted">Delivery</span><span>${o.delivery?money(o.delivery):'Free'}</span></div>`:''}
     <div class="it" style="font-weight:700;font-size:16px;border:0"><span>Total <span class="small muted" style="font-weight:500">incl. VAT ${money(o.vat)}</span></span><span>${money(o.total)}</span></div></div>
    <div class="sline" style="margin-bottom:0">
-     ${!p.paid&&o.status!=='cancelled'?`<button class="btn b-gold b-sm" data-paid="1">Mark as paid</button>`:''}
+     ${!p.paid&&o.status!=='cancelled'?`<button class="btn b-gold b-sm" data-paid="1">Mark as paid</button>${DB.mode==='live'?'<button class="btn b-line b-sm" data-plink="1">🔗 Payment link</button>':''}`:''}
      <button class="btn b-line b-sm" data-print="1">🖨 Receipt</button><button class="btn b-line b-sm" data-inv="1">Invoice · WhatsApp</button>
-     ${o.customer.phone?`<a class="btn b-line b-sm" target="_blank" rel="noopener" href="${waLink(o.customer.phone,`Dear ${o.customer.name||'client'}, thank you for your order ${o.no} with The Touch (${money(o.total)}).`+(o.fulfil&&o.fulfil!=='instore'?` We confirm your ${o.fulfil==='pickup'?'pick-up':'delivery'} on ${niceDate(o.date)} ${o.slot||''}.`:''))}">WhatsApp client</a>`:''}
+     ${o.customer.phone?`<a class="btn b-line b-sm" target="_blank" rel="noopener" href="${waLink(o.customer.phone,waClientText(o))}">WhatsApp client</a>`:''}
      ${o.fulfil==='delivery'?`<a class="btn b-line b-sm" target="_blank" rel="noopener" href="${waLink('',`🚚 The Touch delivery ${o.no}\n${o.customer.name} · ${o.customer.phone}\n${[o.address,o.area,o.emirate].filter(Boolean).join(', ')}\n${niceDate(o.date)} ${o.slot||''}\n${o.payment.paid?'PAID':'COLLECT '+money(o.total)+' ('+TT.payLabel(o.payment.method)+')'}${o.gift&&o.gift.to?'\nRecipient: '+o.gift.to+' '+(o.gift.phone||''):''}`)}">Send to driver</a>`:''}
    </div>`}
 function bindOrder(root,o,m){
   root.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{await setStatus(o,b.dataset.s);if(m)m.close()});
   const pd=root.querySelector('[data-paid]');if(pd)pd.onclick=()=>{markPaid(o,m?()=>openOrder(o.id):null);if(m)m.close()};
+  const pl=root.querySelector('[data-plink]');if(pl)pl.onclick=async()=>{pl.disabled=true;await payLink(o);pl.disabled=false};
   root.querySelector('[data-print]').onclick=()=>printReceipt(o);root.querySelector('[data-inv]').onclick=()=>invoiceModal(o);
+}
+/* message to the client on WhatsApp (*bold* shows as bold there); website orders carry the link to their order page + invoice */
+function waClientText(o){const L=['Dear '+(o.customer.name||'client')+',','','Thank you for your order with *The Touch* ✦','','*Order '+o.no+'* · '+money(o.total)];
+  if(o.fulfil&&o.fulfil!=='instore')L.push('We confirm your '+(o.fulfil==='pickup'?'pick-up':'delivery')+' on *'+niceDate(o.date)+'*'+(o.slot?' · '+o.slot:'')+'.');
+  if(o.key)L.push('','Your order & invoice:',SITE()+'/order/'+o.no+'?k='+o.key);
+  return L.join('\n')}
+/* payment link: the server approves this total for card payment and returns the client's link (their order page with a "Pay by card" button) */
+async function payLink(o){
+  const call=force=>DB.api('POST','/pay/link',{id:o.id,force});let r;
+  try{r=await call(false);
+    if(r.check){if(!(await ask('Check the amount first',`This website order totals <b>${money(r.total)}</b>, but today's prices give <b>${r.catalogue==null?'a different amount':money(r.catalogue)}</b>. Create a payment link for ${money(r.total)}?`,'Create the link')))return;r=await call(true)}}
+  catch(e){toast(esc(e.message||'Could not create the payment link'),true);return}
+  const text=['Dear '+(o.customer.name||'client')+',','','Thank you for your order with *The Touch* ✦','','*Order '+o.no+'*','Total: *'+money(r.total)+'*','','You can pay securely by card here:',r.url,'','The same page shows your invoice.'].join('\n');
+  const m=modal(`<div class="mh"><h3>Payment link · <span data-en>${esc(o.no)}</span></h3><button class="x" data-close aria-label="Close">×</button></div>
+   <div class="mb"><div class="meter" style="font-size:15px"><span>Amount to pay by card</span><b style="color:var(--hd)">${money(r.total)}</b></div>
+    <div class="fld" style="margin-top:14px"><label>Link for the client</label><input id="plu" readonly data-en value="${esc(r.url)}"></div>
+    <p class="small muted" style="margin-top:12px;line-height:1.6">The client opens the link, sees the invoice and pays by card. This order then turns to Paid by itself.</p></div>
+   <div class="mf"><button class="btn b-line" id="plc">Copy link</button>${o.customer.phone?`<a class="btn b-dark" target="_blank" rel="noopener" href="${waLink(o.customer.phone,text)}">Send on WhatsApp</a>`:''}</div>`);
+  const inp=m.querySelector('#plu');inp.onfocus=()=>inp.select();
+  m.querySelector('#plc').onclick=async()=>{try{await navigator.clipboard.writeText(r.url)}catch(e){inp.focus();inp.select();try{document.execCommand('copy')}catch(e2){}}toast('Link copied ✓')};
 }
 function markPaid(o,after){
   if(!SHIFT){openShiftModal(()=>markPaid(o,after));return}
@@ -1613,6 +1703,14 @@ function renderSettings(){
      <div class="fld"><label>Language</label><div class="seg" id="lgseg" data-en><button type="button" data-l="en" class="${LANG==='en'?'on':''}">English</button><button type="button" data-l="ar" class="${LANG==='ar'?'on':''}">العربية</button></div></div>
      <div class="fld"><label>Theme</label><div class="seg" id="thseg">${[['light','Light'],['dark','Dark'],['auto','Automatic']].map(([k,n])=>`<button type="button" data-t="${k}" class="${themePref()===k?'on':''}">${n}</button>`).join('')}</div></div>
    </div></div>
+   <div class="card sec"><h4>New-order alert <small>This device only · saved instantly</small></h4><div class="grid2">
+     <div class="fld"><label>Sound</label><div class="seg" id="alsnd"><button type="button" data-v="1" class="${ALERT.sound?'on':''}">On</button><button type="button" data-v="" class="${ALERT.sound?'':'on'}">Off</button></div></div>
+     <div class="fld"><label>Tone</label><div class="seg" id="altone">${[['chime','Chime'],['bell','Bell'],['ring','Ring']].map(([k,n])=>`<button type="button" data-t="${k}" class="${ALERT.tone===k?'on':''}">${n}</button>`).join('')}</div></div>
+     <div class="fld"><label>Volume</label><input type="range" id="alvol" min="10" max="100" step="10" value="${+ALERT.vol||80}" aria-label="Volume"></div>
+     <div class="fld"><label>Repeat until the order is opened</label><div class="seg" id="alrep"><button type="button" data-v="1" class="${ALERT.repeat?'on':''}">On</button><button type="button" data-v="" class="${ALERT.repeat?'':'on'}">Off</button></div></div>
+     <div class="fld"><label>Order pop-up</label><div class="seg" id="alpop"><button type="button" data-v="1" class="${ALERT.popup?'on':''}">On</button><button type="button" data-v="" class="${ALERT.popup?'':'on'}">Off</button></div></div>
+     <div class="fld"><label>Try it</label><button type="button" class="btn b-line" id="btest" style="width:100%">🔔 Test order alert</button></div>
+    </div><p class="small muted" style="margin-top:12px;line-height:1.6">A new website order rings and opens a pop-up with its details. Keep this page open: it also works while you are on another tab. <span id="alnote"></span></p></div>
    <div class="card sec own"><h4>Boutique</h4><div class="grid2">
      ${[['storeName','Store name'],['phone','Phone'],['whatsapp','WhatsApp number for orders (e.g. 9715…)'],['instagram','Instagram'],['email','Email'],['trn','VAT TRN (printed on receipts)'],['address','Address'],['vatRate','VAT %'],['announcement','Website announcement bar'],['receiptFooter','Receipt footer']].map(([k,l])=>`<div class="fld ${['announcement','receiptFooter','address'].includes(k)?'full':''}"><label>${l}</label><input data-k="${k}" value="${esc(S[k]==null?'':S[k])}"></div>`).join('')}
    </div></div>
@@ -1622,7 +1720,7 @@ function renderSettings(){
    <div class="card sec"><h4>Security</h4>${DB.mode==='local'?`<div class="grid2"><div class="fld"><label>Admin PIN (4 digits)</label><input data-k="pin" inputmode="numeric" maxlength="4" value="${esc(S.pin)}"></div></div>`:'<div id="staffBox"><p class="muted small">Loading…</p></div>'}</div>
    <div class="card sec own"><h4>Data &amp; connection</h4>
      <p class="small muted" style="margin-bottom:12px;line-height:1.6">Mode: <b>${DB.mode==='live'?'LIVE — synced across all devices':'OFFLINE — data stays in this browser. Website orders from customers\' phones reach this screen only after Live mode is connected (see SETUP.md).'}</b></p>
-     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn b-line" id="bexp">⬇ Backup</button><label class="btn b-line">⬆ Restore<input type="file" accept=".json" id="bimp" hidden></label>${DB.mode==='local'?'<button class="btn b-bad" id="breset">Reset demo data</button>':''}<button class="btn b-line" id="btest">🔔 Test order alert</button></div></div>
+     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn b-line" id="bexp">⬇ Backup</button><label class="btn b-line">⬆ Restore<input type="file" accept=".json" id="bimp" hidden></label>${DB.mode==='local'?'<button class="btn b-bad" id="breset">Reset demo data</button>':''}</div></div>
    <div class="savebar own" id="sbar"><span class="msg">All changes saved</span><button class="btn b-dark" id="ssave" style="min-width:180px">Save settings</button></div>
   </div>`;
   $('#lgseg').onclick=e=>{const b=e.target.closest('[data-l]');if(b&&b.dataset.l!==LANG)setLang(b.dataset.l)};
@@ -1639,7 +1737,14 @@ function renderSettings(){
   $('#bimp').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(!(await ask('Restore backup?','Items with the same IDs will be overwritten.','Restore')))return;
     let data;try{data=JSON.parse(await f.text())}catch(err){toast('This file is not a valid backup');return}for(const c of ['products','orders','enquiries','shifts','settings'])for(const x of (data[c]||[]))await DB.put(c,x);toast('Backup restored ✓')};
   if($('#breset'))$('#breset').onclick=async()=>{if(await ask('Reset all demo data?','Deletes ALL orders, products, shifts and settings on this device and restores the original catalogue.','Reset everything',true)){Object.keys(localStorage).filter(k=>k.startsWith('tt_')).forEach(k=>localStorage.removeItem(k));location.reload()}};
-  $('#btest').onclick=()=>{chime();toast('🔔 This is how a new website order sounds',true)};
+  const segOn=(id,key)=>{$(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;ALERT[key]=!!b.dataset.v;saveAlert();$(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(key==='sound'&&ALERT.sound)chime()}};
+  segOn('#alsnd','sound');segOn('#alrep','repeat');segOn('#alpop','popup');
+  $('#altone').onclick=e=>{const b=e.target.closest('button');if(!b)return;ALERT.tone=b.dataset.t;saveAlert();$('#altone').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));chime(true)};
+  $('#alvol').onchange=e=>{ALERT.vol=+e.target.value||80;saveAlert();chime(true)};
+  $('#btest').onclick=()=>{if(alertM)return;if(ALERT.popup)showAlert(sampleOrder());else{chime();toast(ALERT.sound?'🔔 This is how a new website order sounds':'Sound and pop-up are both off: a new order shows only this small message',true)}};
+  const note=()=>{const n=$('#alnote');if(!n||!window.Notification)return;const st=Notification.permission;
+    n.innerHTML=st==='granted'?'Desktop notifications are on.':st==='denied'?'Desktop notifications are blocked in this browser.':'<button type="button" class="btn b-line b-sm" id="alperm" style="margin-inline-start:6px">Allow desktop notifications</button>';
+    const b=$('#alperm');if(b)b.onclick=async()=>{try{await Notification.requestPermission()}catch(e){}note()}};note();
 }
 
 /* =================== boot =================== */

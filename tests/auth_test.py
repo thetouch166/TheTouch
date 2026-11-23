@@ -90,7 +90,7 @@ with sync_playwright() as pw:
     check('cashier sees stock but no Edit / Add / on-sale switch', c.locator('#ptable tbody tr').count() > 0 and c.evaluate("[...document.querySelectorAll('[data-ed],#padd,#ptable .switch')].every(e=>getComputedStyle(e).display==='none')") and c.evaluate("[...document.querySelectorAll('#ptable .sv')].some(e=>getComputedStyle(e).display!=='none')"))
     c.evaluate("go('settings')"); c.wait_for_selector('#spw', timeout=20000)
     shown = c.evaluate("[...document.querySelectorAll('#view .card h4')].filter(h=>getComputedStyle(h.parentElement).display!=='none').map(h=>h.childNodes[0].textContent.trim())")
-    check('cashier Settings: only Display and Security, with "Change my password"', shown == ['Display', 'Security'] and c.locator('#spw').count() == 1 and c.locator('#sadd').count() == 0, ','.join(shown))
+    check('cashier Settings: only Display, New-order alert and Security, with "Change my password"', shown == ['Display', 'New-order alert', 'Security'] and c.locator('#spw').count() == 1 and c.locator('#sadd').count() == 0, ','.join(shown))
     c.screenshot(path=out + '/cashier-settings.png')
     c.click('#spw'); c.wait_for_timeout(400); c.fill('#p_old', pw_gen); c.fill('#p_new', 'Samia-New-2026'); c.fill('#p_rep', 'Samia-New-2026'); c.click('#p_save'); c.wait_for_selector('#p_save', state='detached', timeout=20000)
     check('cashier changes her password on the screen and stays signed in', api('POST', '/api/login', {'email': EMAIL, 'pass': 'Samia-New-2026'})[0] == 200 and c.evaluate("fetch('/api/me',{headers:{Authorization:'Bearer '+localStorage.tt_tok}}).then(r=>r.status)") == 200)

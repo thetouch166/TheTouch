@@ -105,6 +105,8 @@ function describe(path, data, site) {
     title: PAGES[pg][0] + ' | The Touch Chocolates Abu Dhabi', desc: PAGES[pg][1], path: '/' + pg, ld: [crumbs([['Home', '/'], [PAGES[pg][0], '/' + pg]])],
     pre: `<h1>${esc(PAGES[pg][0])}</h1><p>${esc(PAGES[pg][1])}</p>${nav}`
   });
+  // an order's own page: the title and text below are what WhatsApp shows as the link's preview card
+  if (pg === 'order' && arg && !extra && /^[A-Za-z0-9_-]{1,40}$/.test(arg)) return page({ title: 'Order ' + arg + ' | ' + BRAND, desc: 'Your order with The Touch, luxury chocolates and gifts in Abu Dhabi. Open it to see the order details, the invoice and the payment.', path: '/order/' + arg, noindex: true });
   if (PRIVATE[pg] && !extra && (pg === 'order' ? !!arg : !arg)) return page({ title: PRIVATE[pg] + ' | ' + BRAND, desc: HOME_DESC, path: '/' + pg, noindex: true });
   return null;   // not one of the website's pages
 }
