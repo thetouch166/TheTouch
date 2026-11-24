@@ -30,6 +30,9 @@ const PAGES = {
   terms: ['Terms & Conditions', 'The terms that apply when you order from The Touch.'],
   refunds: ['Refunds & Returns', 'Our policy on cancellations, returns, replacements and refunds.']
 };
+/* occasions: the boutique's own list (Admin → Products → Occasions); until it is saved once, the same starting list as js/store.js */
+const DEFAULT_OCC = [['birthday', 'Birthday'], ['newborn', 'New Born'], ['wedding', 'Wedding & Engagement'], ['thankyou', 'Thank You'], ['ramadan', 'Ramadan'], ['eid', 'Eid'], ['nationalday', 'National Day'], ['christmas', 'Christmas']].map(([id, name]) => ({ id, name, on: true }));
+const occList = s => (Array.isArray(s.occasions) ? s.occasions : DEFAULT_OCC).filter(o => o && o.id && o.name && o.on !== false);
 const PRIVATE = { checkout: 'Checkout', order: 'Your order' };   // real pages, but not for search results
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -105,7 +108,7 @@ function describe(path, data, site) {
     });
   }
   if (pg === 'occasion' && arg && !extra) {   // a page per occasion, named in Admin → Products → Occasions
-    const o = (Array.isArray(s.occasions) ? s.occasions : []).find(x => x && x.id === arg && x.on !== false && x.name); if (!o) return null;
+    const o = occList(s).find(x => x.id === arg); if (!o) return null;
     const list = products.filter(p => Array.isArray(p.occasions) && p.occasions.includes(arg));
     return page({
       title: o.name + ' Chocolate Gifts | The Touch Chocolates Abu Dhabi', desc: clip(o.desc || 'Chocolate gifts for ' + o.name + ' by The Touch, Abu Dhabi: gift boxes, trays and arrangements finished by hand and delivered across the UAE.', 300), path: '/occasion/' + arg,
@@ -130,7 +133,7 @@ function sitemap(data, site) {
   const urls = [['/', today, '1.0'], ['/shop/all', today, '0.9']]
     .concat(cats.map(c => ['/shop/' + c, today, '0.8']))
     .concat(data.products.map(p => ['/p/' + p.id, day(p.updated), '0.8']))
-    .concat((Array.isArray(data.s.occasions) ? data.s.occasions : []).filter(o => o && o.id && o.name && o.on !== false && data.products.some(p => Array.isArray(p.occasions) && p.occasions.includes(o.id))).map(o => ['/occasion/' + o.id, today, '0.7']))
+    .concat(occList(data.s).filter(o => data.products.some(p => Array.isArray(p.occasions) && p.occasions.includes(o.id))).map(o => ['/occasion/' + o.id, today, '0.7']))
     .concat(['occasions', 'about', 'contact', 'events', 'delivery'].map(p => ['/' + p, today, '0.5']))
     .concat(['privacy', 'terms', 'refunds'].map(p => ['/' + p, today, '0.2']));
   return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
