@@ -413,6 +413,16 @@ body.sbar-on .toast{bottom:96px}
 .paybox b{font-weight:600;color:var(--ink)}
 .paybox.done{border-color:#b9d3bd;background:#eef6ef;color:#2f6b3a;font-weight:500}
 .paybox .sub{display:block;margin-top:12px;font-size:12px;color:var(--mute);text-decoration:underline;text-underline-offset:4px;min-height:32px}.paybox .sub:hover{color:var(--bur)}
+.payform{position:relative;left:50%;transform:translateX(-50%);width:min(1000px,calc(100vw - 32px));margin:26px 0 8px;background:#fff;border:1px solid var(--line);box-shadow:0 18px 50px rgba(64,5,14,.07);text-align:left}
+.payform .pfh{display:flex;align-items:center;gap:14px;padding:14px 22px;background:var(--bur);color:#fff}
+.payform .pfh b{font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:.02em;color:#fff}
+.payform .pfh span{font-size:11.5px;letter-spacing:.1em;color:#e9d3b4;margin-left:auto;white-space:nowrap}
+.payform .pfh button{background:transparent;cursor:pointer;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#fff;border:1px solid rgba(255,255,255,.35);padding:9px 14px;min-height:40px}
+.payform .pfh button:hover{background:rgba(255,255,255,.12)}
+.payform .pfl{padding:70px 20px;text-align:center;color:var(--mute);font-size:13.5px}
+.payform #payMount{padding:8px 0 2px}
+.payform .pfn{padding:12px 22px 16px;border-top:1px solid var(--line);font-size:12px;line-height:1.6;color:var(--mute);text-align:center}
+@media(max-width:640px){.payform .pfh{flex-wrap:wrap;gap:8px;padding:12px 16px}.payform .pfh b{font-size:20px}.payform .pfh span{margin-left:0;order:3;width:100%}.payform .pfh button{margin-left:auto}}
 .ok .acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 /* the customer's invoice on the order page (prints alone: body.pinv) */
 .ok.wide{max-width:760px}
@@ -843,17 +853,28 @@ function pageCheckout(){syncCart();
     let saved=true;try{await DB.put('orders',order)}catch(err){console.error(err);saved=false}
     sessionStorage.setItem('tt_last',JSON.stringify(order));Cart.clear();
     const op='/order/'+order.no+'?k='+order.key;
-    if(saved&&pay==='card_online'){btn.textContent='Opening the payment page…';const r=await startCardPayment(order);if(r===true)return;go(op+(r==='paid'?'':'&pay=failed'));return}
+    if(saved&&pay==='card_online'){go(op+'&pay=now');return}   // the order page opens the card form
     go(op+(saved?'':'&wa=1'));
   };
 }
-/* card payment: the order is already saved; the API builds the amount from our own prices and returns the payment page */
-async function startCardPayment(o){ // o = the order (own device: its id · opened from a link: number + key) → true: leaving for the payment page · 'paid': already paid · false: could not start
-  try{const r=await fetch(window.TT_API+'/pay/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o.id?{id:o.id}:{no:o.no,k:o.key})});const j=await r.json().catch(()=>({}));
+/* card payment: the order is already saved; the API builds the amount from our own prices and returns the card form for this page
+   (Stripe embedded Checkout: {clientSecret, pk}) or, when that is not set up, the address of Stripe's own payment page */
+async function startCardPayment(o){ // o = the order (own device: its id · opened from a link: number + key) → {clientSecret,pk}: open the form here · true: leaving for the payment page · 'paid': already paid · false: could not start
+  try{const r=await fetch(window.TT_API+'/pay/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({embed:true},o.id?{id:o.id}:{no:o.no,k:o.key}))});const j=await r.json().catch(()=>({}));
+    if(r.ok&&j.clientSecret&&j.pk)return j;
     if(r.ok&&j.url){location.href=j.url;return true}
     if(r.ok&&j.paid)return 'paid';toast(U.esc(j.error||'Card payment could not be started'))}
   catch(e){toast('Card payment could not be started — please check your connection')}
   return false}
+/* the card form inside our page. Stripe allows one at a time: route() closes it when the page changes. */
+var PAYCK=null;
+function closePayForm(){try{if(PAYCK)PAYCK.destroy()}catch(e){}PAYCK=null}
+function stripeJs(){if(window.Stripe)return Promise.resolve();
+  const load=src=>new Promise((ok,no)=>{const x=document.createElement('script');x.src=src;x.onload=ok;x.onerror=()=>{x.remove();no(new Error('stripe.js did not load'))};document.head.appendChild(x)});
+  return load('https://js.stripe.com/endive/stripe.js').catch(()=>load('https://js.stripe.com/v3/'))}
+async function openPayForm(sel,j){await stripeJs();const sp=window.Stripe(j.pk),make=sp.createEmbeddedCheckoutPage||sp.initEmbeddedCheckout;closePayForm();
+  const ck=await make.call(sp,{fetchClientSecret:async()=>j.clientSecret});if(!$(sel)){try{ck.destroy()}catch(e){}return false}
+  PAYCK=ck;ck.mount(sel);return true}
 const orderUrl=o=>!FILE&&o&&o.key?location.origin+'/order/'+o.no+'?k='+o.key:'';
 function fmtDay(d){if(!d)return'';const x=new Date(d+'T12:00:00');return isNaN(x)?d:x.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'})}
 /* the order as a WhatsApp message to the boutique (WhatsApp shows *bold* and _italic_; the link opens the order with its invoice) */
@@ -888,9 +909,10 @@ async function pageOrder(no){
   const q=new URLSearchParams(location.search),k=/^[A-Za-z0-9]{16,40}$/.test(q.get('k')||'')?q.get('k'):'',here=location.pathname,api=window.TT_API;
   let o=null;try{const x=JSON.parse(sessionStorage.getItem('tt_last')||'null');if(x&&x.no===no)o=x}catch(e){}
   const fresh=!!o;if(o&&!o.key&&k)o.key=k;
-  const st={busy:!!(q.get('sid')&&api),paid:false,unsure:false,note:'',loading:!o&&!!k&&!!api,missing:false};
+  const st={busy:!!(q.get('sid')&&api),paid:false,unsure:false,note:'',loading:!o&&!!k&&!!api,missing:false,form:false};
   document.body.classList.add('pinv');
   const draw=()=>{
+    if(st.form){if(st.paid||!o||(o.payment||{}).paid||o.status==='cancelled'){closePayForm();st.form=false}else if($('#payMount'))return}   // never redraw over an open card form
     const p=o?o.payment||{}:{},paid=st.paid||!!p.paid,cancelled=!!o&&o.status==='cancelled';
     const due=!!o&&!!api&&!paid&&!cancelled&&!st.busy&&(o.canPay!=null?o.canPay:p.method==='card_online');
     const head=st.missing?'We could not find this order':st.loading?'Opening your order…':cancelled?'This order was cancelled':st.busy?'Confirming your payment…':paid&&(p.method==='card_online'||!fresh)?'Your order is confirmed and paid':due?'One more step: your payment':fresh?'Your order has been received':'Your order with The Touch';
@@ -898,12 +920,18 @@ async function pageOrder(no){
     const wa=fresh?waLink(waOrderText(o)):waLink('Hello, about my order '+no);
     app.innerHTML=`<div class="ok${o?' wide':''}"><img class="mono" src="img/monogram-gold.png" alt=""><span class="eyebrow">${(n=>fresh||paid?'Thank you'+(n?', '+U.esc(n):''):n?'Hello, '+U.esc(n):'The Touch')(o&&o.customer&&o.customer.name?o.customer.name.split(' ')[0]:'')}</span>
    <h1 class="h2" id="okH" style="margin-top:14px">${head}</h1><div class="no">ORDER ${U.esc(no)}</div>
-   <div id="payBox">${st.busy?'<div class="paybox">Confirming your payment…</div>':st.note?'<div class="paybox">'+st.note+'</div>':paid?'<div class="paybox done">✓ Payment received — thank you</div>':due?`<div class="paybox"><b>${why}</b><br>${fresh?'Your order is saved. ':''}Pay securely by card to confirm it.<br><button class="btn btn-dark" id="payNow" style="margin-top:14px">Pay ${money(o.total)} by card</button>${o.key?'<button class="sub" id="payShare" style="margin-left:auto;margin-right:auto">Someone else is paying? Share the payment link</button>':''}</div>`:''}</div>
+   <div id="payBox">${st.form?`<div class="payform" id="payForm"><div class="pfh"><b>Secure card payment</b><span>ORDER ${U.esc(no)} · ${money(o.total)}</span><button id="payClose" aria-label="Close the card form">Close</button></div><div class="pfl" id="payLoad">Opening the secure card form…</div><div id="payMount"></div><div class="pfn">Your card details go straight to Stripe, our payment partner. The Touch never sees or stores your card number.</div></div>`:st.busy?'<div class="paybox">Confirming your payment…</div>':st.note?'<div class="paybox">'+st.note+'</div>':paid?'<div class="paybox done">✓ Payment received — thank you</div>':due?`<div class="paybox"><b>${why}</b><br>${fresh?'Your order is saved. ':''}Pay securely by card to confirm it.<br><button class="btn btn-dark" id="payNow" style="margin-top:14px">Pay ${money(o.total)} by card</button>${o.key?'<button class="sub" id="payShare" style="margin-left:auto;margin-right:auto">Someone else is paying? Share the payment link</button>':''}</div>`:''}</div>
    ${st.missing?'<p style="margin:20px 0 30px">The link may be incomplete. Please message us and we will help you right away.</p>':fresh&&!due&&!paid?'<p style="margin:20px 0 30px">Our concierge will confirm your order shortly on WhatsApp. For a faster confirmation, send us your order now:</p>':'<div style="height:22px"></div>'}
    <div class="acts"><a class="btn btn-gold" href="${wa}" target="_blank" rel="noopener" id="waBtn">${fresh?'Send order on WhatsApp':'Message us on WhatsApp'}</a>${o?'<button class="btn btn-line" id="invPrint">Print / save invoice</button>':''}</div>
    <div style="margin-top:22px"><a class="link" href="/">Continue shopping</a></div>
    ${o?invoiceHTML(o):''}</div>`;
-    const pn=$('#payNow');if(pn)pn.onclick=async e=>{const b=e.currentTarget,t=b.textContent;b.disabled=true;b.textContent='Opening the payment page…';const r=await startCardPayment(o);if(r==='paid'){st.paid=true;save();draw()}else if(!r){b.disabled=false;b.textContent=t}};
+    const pn=$('#payNow');if(pn)pn.onclick=async e=>{const b=e.currentTarget,t=b.textContent;b.disabled=true;b.textContent='Opening secure payment…';const r=await startCardPayment(o);if(location.pathname!==here)return;
+      if(r==='paid'){st.paid=true;save();draw()}
+      else if(r&&r.clientSecret){st.form=true;draw();const fm=$('#payForm');if(fm)window.scrollTo({top:Math.max(0,fm.getBoundingClientRect().top+window.scrollY-96),behavior:'smooth'});
+        try{if(await openPayForm('#payMount',r)){const l=$('#payLoad');if(l)l.remove()}}
+        catch(err){console.error(err);closePayForm();st.form=false;draw();toast('The card form could not be opened — please try again')}}
+      else if(!r){b.disabled=false;b.textContent=t}};
+    const pc=$('#payClose');if(pc)pc.onclick=()=>{closePayForm();st.form=false;draw()};
     const ps=$('#payShare');if(ps)ps.onclick=async()=>{const url=orderUrl(o),text='Payment link for The Touch order '+o.no+' ('+money(o.total)+')';
       if(navigator.share){try{await navigator.share({title:'The Touch — payment link',text,url});return}catch(e){if(e&&e.name==='AbortError')return}}
       try{await navigator.clipboard.writeText(url);toast('Payment link copied — paste it in a message')}catch(e){toast(U.esc(url))}};
@@ -921,6 +949,7 @@ async function pageOrder(no){
       else if(!o)st.missing=true}
     catch(e){if(!o)st.missing=true}
     st.loading=false;draw()}
+  if(q.get('pay')==='now'&&!FILE&&location.pathname===here){history.replaceState(null,'',here+(k?'?k='+k:''));const b=$('#payNow');if(b)b.click()}   // straight from the checkout: open the card form
 }
 
 function pageStory(){
@@ -1082,7 +1111,7 @@ function route(){
   const h=curPath();const [pg,arg]=h.split('?')[0].split('/');
   renderNav();setMeta(pg,arg);
   document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(pg==='shop'?arg:pg)));
-  closeSearch();closeDrawers();document.body.classList.remove('sbar-on','pinv');{const t=$('#toast');if(t&&!t._keep)t.classList.remove('on')}
+  closeSearch();closeDrawers();document.body.classList.remove('sbar-on','pinv');closePayForm();{const t=$('#toast');if(t&&!t._keep)t.classList.remove('on')}
   if(pg==='shop')pageShop(arg);else if(pg==='p')pageProduct(arg);else if(pg==='checkout')pageCheckout();else if(pg==='order')pageOrder(arg);
   else if(pg==='story')pageStory();else if(pg==='events')pageEvents();else if(pg==='delivery')pageDelivery();
   else if(pg==='privacy'||pg==='terms'||pg==='refunds')pageLegal(pg);else if(!pg)pageHome();else pageNotFound();

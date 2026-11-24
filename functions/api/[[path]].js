@@ -14,6 +14,8 @@
      RESEND_API_KEY  Resend API key                              optional (no key = no emails to customers)
      STRIPE_SECRET_KEY      Stripe secret key (sk_live_… / sk_test_…)   optional (no key = no card payment online)
                             After setting it: redeploy, then POST /api/pay/setup as the owner (checks the account, creates the webhook).
+     STRIPE_PUBLISHABLE_KEY Stripe publishable key (pk_live_… / pk_test_…, same mode as the secret key)   optional: with it the card
+                            form opens inside our own order page; without it the customer pays on Stripe's page
      STRIPE_WEBHOOK_SECRET  optional: signing secret of the Stripe webhook (whsec_…). Without it every webhook message is
                             checked by reading the payment again from Stripe, so it is not needed for safety.
    Plain vars (wrangler.toml): MAIL_FROM, SHOP_EMAIL
@@ -448,6 +450,8 @@ async function stripeSigOk(secret, header, body) {
   for (const s of sigs) if (await sameText(s, mac)) return true;
   return false;
 }
+/* the publishable key for the on-site card form: only when it belongs to the same mode (test / live) as the secret key */
+const pubKey = env => { const pk = String(env.STRIPE_PUBLISHABLE_KEY || '').trim(), sk = String(env.STRIPE_SECRET_KEY || ''); return /^pk_(live|test)_[A-Za-z0-9]{10,}$/.test(pk) && /^pk_live_/.test(pk) === /^(sk|rk)_live_/.test(sk) ? pk : ''; };
 const siteOf = (env, url) => /^(localhost|127\.)/.test(url.hostname) ? url.origin : String(env.SITE_URL || url.origin).replace(/\/+$/, '');
 async function pay(ctx, db, op, url, who) {
   const { request: req, env } = ctx; const M = req.method;
@@ -497,6 +501,15 @@ async function pay(ctx, db, op, url, who) {
       const c = await stripeRaw(env, 'POST', '/webhook_endpoints', { url: hook, 'enabled_events[0]': EV[0], 'enabled_events[1]': EV[1], description: 'The Touch website: marks orders paid' });
       if (!c.ok) return json(Object.assign(out, { ok: false, step: 'webhook', error: 'Stripe did not create the webhook', detail: c.msg }));
     }
+    /* on-site card form: is the publishable key there, and does Stripe know our domain (needed for Apple Pay / Google Pay / Link in the form)? */
+    out.form = pubKey(env) ? 'on the site' : env.STRIPE_PUBLISHABLE_KEY ? 'publishable key does not match the secret key (test / live)' : 'no publishable key: Stripe\'s own page is used';
+    const host = new URL(site).hostname;
+    if (pubKey(env) && !/^(localhost|127\.)/.test(host)) {
+      const d = await stripeRaw(env, 'GET', '/payment_method_domains?limit=100&domain_name=' + encodeURIComponent(host));
+      let dom = d.ok ? (d.j.data || []).find(x => x.domain_name === host) : null;
+      if (d.ok && !dom) { const c = await stripeRaw(env, 'POST', '/payment_method_domains', { domain_name: host }); dom = c.ok ? c.j : null; if (!c.ok) out.domainError = c.msg; }
+      if (dom) out.wallets = { domain: dom.domain_name, enabled: dom.enabled, apple_pay: (dom.apple_pay || {}).status, google_pay: (dom.google_pay || {}).status, link: (dom.link || {}).status };
+    }
     return json(Object.assign(out, { ok: true, webhook: have ? 'already there' : 'created' }));
   }
   /* staff: "Payment link" on an unpaid order → approves this exact total for card payment and returns the client's link.
@@ -533,9 +546,9 @@ async function pay(ctx, db, op, url, who) {
       if (!p || Math.abs(p.total - Number(o.total)) > 0.01) return err(409, 'The prices have changed — please place your order again');
     }
     const kq = KEY.test(o.key || '') ? '&k=' + o.key : '';
+    const back = url.origin + '/order/' + o.no + '?paid=1&sid={CHECKOUT_SESSION_ID}' + kq;
     const q = {
       mode: 'payment', client_reference_id: id, 'metadata[order_id]': id, 'metadata[order_no]': o.no,
-      success_url: url.origin + '/order/' + o.no + '?paid=1&sid={CHECKOUT_SESSION_ID}' + kq, cancel_url: url.origin + '/order/' + o.no + '?pay=cancelled' + kq,
       'payment_intent_data[description]': 'The Touch order ' + o.no, 'payment_intent_data[metadata][order_no]': o.no, 'payment_intent_data[metadata][order_id]': id
     };
     const mail = (o.customer || {}).email; if (okEmail(mail)) q.customer_email = mail.trim();
@@ -543,7 +556,15 @@ async function pay(ctx, db, op, url, who) {
       q[`line_items[${i}][quantity]`] = '1'; q[`line_items[${i}][price_data][currency]`] = 'aed';
       q[`line_items[${i}][price_data][unit_amount]`] = String(fils(l.amount)); q[`line_items[${i}][price_data][product_data][name]`] = l.name;
     });
-    const s = await stripe(env, 'POST', '/checkout/sessions', q);
+    /* the card form inside our own page (Stripe "embedded" Checkout): needs the publishable key, and the page must ask for it (embed).
+       Anything else — or Stripe refusing it — falls back to Stripe's own payment page. */
+    const pk = pubKey(env);
+    if (b.embed && pk) {
+      const e = await stripeRaw(env, 'POST', '/checkout/sessions', Object.assign({}, q, { ui_mode: 'embedded_page', return_url: back }));
+      if (e.ok && e.j.client_secret) return json({ clientSecret: e.j.client_secret, pk });
+      console.error('stripe embedded form', e.status, e.msg);
+    }
+    const s = await stripe(env, 'POST', '/checkout/sessions', Object.assign({}, q, { success_url: back, cancel_url: url.origin + '/order/' + o.no + '?pay=cancelled' + kq }));
     if (!s.url) return err(502, 'The payment page could not be opened');
     return json({ url: s.url });
   }

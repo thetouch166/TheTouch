@@ -37,7 +37,7 @@ with sync_playwright() as pw:
     check('card is offered first and selected', pg.evaluate("document.querySelector('#pay input:checked').value") == 'card_online', pg.evaluate("[...document.querySelectorAll('#pay input')].map(i=>i.value).join(',')"))
     check('button says "Continue to payment"', pg.inner_text('#place').strip().lower() == 'continue to payment', pg.inner_text('#place'))
     pg.screenshot(path=out + '/pay-checkout.png', full_page=True)
-    pg.click('#place'); pg.wait_for_url('**/order/**', timeout=30000); pg.wait_for_timeout(2500)
+    pg.click('#place'); pg.wait_for_url(lambda u: 'paid=1' in u, timeout=30000); pg.wait_for_timeout(2500)   # order page (pay=now) → payment page → back
     check('returned to the confirmation page with a session', 'paid=1' in pg.url and 'sid=cs_' in pg.url, pg.url)
     check('page says the payment was received', 'Payment received' in pg.inner_text('#payBox') and 'paid' in pg.inner_text('#okH').lower(), pg.inner_text('#payBox'))
     pg.screenshot(path=out + '/pay-paid.png')
@@ -52,7 +52,7 @@ with sync_playwright() as pw:
     # B. customer leaves the payment page → order saved, unpaid, "pay now" → then Stripe's webhook marks it paid
     pg2 = ctx.new_page(); pg2.on('pageerror', lambda e: errs.append(str(e)))
     pg2.route('**/pay/cs_*', lambda route: route.continue_(url=route.request.url.replace('/pay/', '/cancel/')))
-    checkout(pg2, 'Cancel Tester'); pg2.click('#place'); pg2.wait_for_url('**/order/**', timeout=30000); pg2.wait_for_timeout(1500)
+    checkout(pg2, 'Cancel Tester'); pg2.click('#place'); pg2.wait_for_url(lambda u: 'pay=cancelled' in u, timeout=30000); pg2.wait_for_timeout(1500)
     check('cancelled payment returns to the order page', 'pay=cancelled' in pg2.url and 'not completed' in pg2.inner_text('#payBox') and pg2.locator('#payNow').count() == 1, pg2.inner_text('#payBox').replace('\n', ' '))
     pg2.screenshot(path=out + '/pay-cancelled.png')
     last2 = pg2.evaluate("JSON.parse(sessionStorage.tt_last)")
