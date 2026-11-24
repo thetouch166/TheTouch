@@ -445,6 +445,17 @@ body.sbar-on .toast{bottom:96px}
 .invc .tot{margin-left:auto;min-width:260px}.invc .tot div{display:flex;justify-content:space-between;gap:30px;padding:4px 0;color:var(--slate)}
 .invc .tot .g{border-top:1px solid var(--gold);margin-top:8px;padding-top:12px;color:var(--bur);align-items:baseline}
 .invc .tot .g span:first-child{font-size:10px;letter-spacing:.24em;text-transform:uppercase;font-weight:600}.invc .tot .g span:last-child{font-family:var(--serif);font-size:30px;font-weight:500}
+.invc .qn{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);color:var(--slate);white-space:pre-line}
+.invc .rcp{margin-top:22px;border:1px solid #b9d3bd;background:#f3f9f4;padding:14px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;color:var(--ink)}
+.invc .rcp b{font-weight:600}@media(max-width:640px){.invc .rcp{grid-template-columns:1fr 1fr}}
+.qbox{max-width:560px;margin:22px auto 4px;padding:22px 24px;border:1px solid var(--line);background:var(--cream);text-align:left}
+.qbox h3{font-family:var(--serif);font-size:24px;font-weight:500;color:var(--bur);margin-bottom:6px;text-align:center}
+.qbox p{font-size:13.5px;line-height:1.7;color:var(--slate);text-align:center}
+.qbox .fld{margin-top:14px}.qbox .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.qbox .g2{grid-template-columns:1fr}}
+.qbox .btn{width:100%;margin-top:18px}.qbox .alt{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin-top:12px}
+.qbox .alt button,.qbox .alt a{font-size:12px;color:var(--mute);text-decoration:underline;text-underline-offset:4px;min-height:40px;background:none;cursor:pointer}
+.qbox .alt button:hover,.qbox .alt a:hover{color:var(--bur)}
+.qbox.done{border-color:#b9d3bd;background:#eef6ef}.qbox.done h3{color:#2f6b3a}.qbox.off{border-color:#e3c5c9;background:#fbeeef}.qbox.off h3{color:#8a1c2b}
 .invc .ft{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);text-align:center;color:var(--mute);font-size:12px}.invc .ft em{display:block;font-family:var(--serif);font-size:18px;color:var(--bur);margin-bottom:4px}
 @media(max-width:640px){.invc{padding:30px 20px 26px;margin-top:34px}.invc .im{grid-template-columns:1fr;gap:16px}.invc .ih img{height:50px}.invc .ih .t b{font-size:24px}.invc .tot{min-width:0;width:100%}.invc .ipay{white-space:normal}.invc .c{padding-left:8px;padding-right:8px}}
 @media print{body.pinv>*:not(main){display:none!important}body.pinv{background:#fff}body.pinv .ok{padding:0;max-width:none}body.pinv .ok>*:not(.invc){display:none!important}body.pinv .invc{border:0;box-shadow:none;margin:0;padding:6mm 2mm}}
@@ -892,17 +903,78 @@ function waOrderText(o){
   const u=orderUrl(o);if(u)L.push('','Order & invoice:',u);
   return L.join('\n')}
 /* the invoice the customer sees on the order page (and prints / saves as PDF) */
-function invoiceHTML(o){const p=o.payment||{};const cancelled=o.status==='cancelled';
+function invoiceHTML(o,receipt){const p=o.payment||{};const cancelled=o.status==='cancelled';const co=o.company&&o.company.name?o.company:null;   // receipt: the paid version, titled "Receipt"
+  const dmy=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
   const row=(k,v)=>'<div><span>'+k+'</span><span>'+v+'</span></div>';
   const where=o.fulfil==='pickup'?'':U.esc([o.area,o.emirate].filter(Boolean).join(', '));const when=U.esc([fmtDay(o.date),o.slot].filter(Boolean).join(' · '));
-  return `<div class="invc" id="invc"><div class="ih"><img src="img/logo-burgundy.png" alt="The Touch"><div class="t"><b>${S.trn?'Tax Invoice':'Invoice'}</b><span>No. ${U.esc(o.no)}</span><span>${new Date(o.created||Date.now()).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</span></div></div>
+  return `<div class="invc" id="invc"><div class="ih"><img src="img/logo-burgundy.png" alt="The Touch"><div class="t"><b>${receipt?'Receipt':S.trn?'Tax Invoice':'Invoice'}</b><span>${receipt?'For invoice ':''}No. ${U.esc(o.no)}</span><span>${dmy(o.created||Date.now())}</span>${o.po?'<span>PO '+U.esc(o.po)+'</span>':''}${o.quoteNo?'<span>Quotation '+U.esc(o.quoteNo)+'</span>':''}</div></div>
    <div class="im"><div><small>From</small><b>${U.esc(S.storeName||'The Touch')}</b><br>${U.esc(S.address)}<br>${U.esc(S.phone)}${S.trn?'<br>TRN '+U.esc(S.trn):''}</div>
-    <div><small>Billed to</small><b>${U.esc((o.customer&&o.customer.name)||'Client')}</b>${o.customer&&o.customer.phone?'<br>'+U.esc(o.customer.phone):''}</div>
+    <div><small>${receipt?'Received from':'Billed to'}</small>${co?`<b>${U.esc(co.name)}</b>${co.address?'<br>'+U.esc(co.address):''}${co.trn?'<br>TRN '+U.esc(co.trn):''}${co.contact?'<br>Attn. '+U.esc(co.contact):''}`:`<b>${U.esc((o.customer&&o.customer.name)||'Client')}</b>${o.customer&&o.customer.phone?'<br>'+U.esc(o.customer.phone):''}`}</div>
     <div><small>${o.fulfil==='pickup'?'Boutique pick-up':o.fulfil==='delivery'?'Delivery':'Order'}</small>${[where,when].filter(Boolean).join('<br>')||'—'}</div></div>
    <table><thead><tr><th>Description</th><th class="c">Qty</th><th class="r">Amount</th></tr></thead><tbody>${o.items.map(i=>`<tr><td>${U.esc(i.name)}<i>${money(i.price)}${i.unit==='kg'?' / kg':' each'}${i.disc?' · less '+money(i.disc):''}</i></td><td class="c">${i.unit==='kg'?U.qtyLabel(i)+(i.qty>1?' × '+i.qty:''):i.qty}</td><td class="r">${money(U.lineTotal(i))}</td></tr>`).join('')}</tbody></table>
    <div class="tw"><span class="ipay ${cancelled?'off':p.paid?'paid':''}">${cancelled?'Cancelled':p.paid?'Paid · '+U.esc(payName(p.method,o.fulfil)):o.canPay?'Awaiting payment':'Awaiting payment · '+U.esc(payName(p.method,o.fulfil))}</span>
     <div class="tot">${row('Subtotal',money(o.subtotal))}${o.discount?row('Discount','− '+money(o.discount)):''}${o.fulfil==='delivery'?row('Delivery',o.delivery?money(o.delivery):'Complimentary'):''}${row('Net (excl. VAT)',money(U.r2(o.total-o.vat)))}${row('VAT '+S.vatRate+'%',money(o.vat))}<div class="g"><span>Total</span><span>${money(o.total)}</span></div></div></div>
+   ${receipt&&p.paid?`<div class="rcp"><div><small>Amount received</small><b>${money(o.total)}</b></div><div><small>Date</small>${p.paidAt?dmy(p.paidAt):'—'}</div><div><small>Method</small>${U.esc(payName(p.method,o.fulfil))}</div><div><small>Reference</small>${U.esc(o.paidRef||p.ref||'—')}</div></div>`:''}
    <div class="ft"><em>${U.esc(S.receiptFooter||'Thank you for choosing The Touch')}</em>thetouchchocolate.com${S.instagram?' · @'+U.esc(S.instagram):''}</div></div>`}
+/* a company's quotation, as the company sees it on /quote/<no>?k=<key> */
+function quoteHTML(q){const c=q.company||{},row=(k,v)=>'<div><span>'+k+'</span><span>'+v+'</span></div>';
+  const dmy=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const tag={sent:['Awaiting your approval',''],approved:['Approved','paid'],invoiced:['Approved · invoiced','paid'],declined:['Declined','off'],expired:['Expired','off']}[q.status]||['',''];
+  return `<div class="invc" id="invc"><div class="ih"><img src="img/logo-burgundy.png" alt="The Touch"><div class="t"><b>Quotation</b><span>No. ${U.esc(q.no)}</span><span>${dmy(q.created||Date.now())}</span>${q.validUntil?'<span>Valid until '+U.esc(fmtDay(q.validUntil))+'</span>':''}</div></div>
+   <div class="im"><div><small>From</small><b>${U.esc(S.storeName||'The Touch')}</b><br>${U.esc(S.address)}<br>${U.esc(S.phone)}${S.trn?'<br>TRN '+U.esc(S.trn):''}</div>
+    <div><small>Prepared for</small><b>${U.esc(c.name||'')}</b>${c.address?'<br>'+U.esc(c.address):''}${c.trn?'<br>TRN '+U.esc(c.trn):''}${c.contact?'<br>Attn. '+U.esc(c.contact):''}</div>
+    <div><small>${q.fulfil==='pickup'?'Boutique pick-up':'Delivery'}</small>${q.date?U.esc(fmtDay(q.date)):'Date to be agreed'}${q.subject?'<small style="margin-top:12px">Subject</small>'+U.esc(q.subject):''}</div></div>
+   <table><thead><tr><th>Description</th><th class="c">Qty</th><th class="r">Amount</th></tr></thead><tbody>${q.items.map(i=>`<tr><td>${U.esc(i.name)}<i>${money(i.price)}${i.unit==='kg'?' / kg':' each'}${i.disc?' · less '+money(i.disc):''}</i></td><td class="c">${i.unit==='kg'?U.qtyLabel(i)+(i.qty>1?' × '+i.qty:''):i.qty}</td><td class="r">${money(U.lineTotal(i))}</td></tr>`).join('')}</tbody></table>
+   <div class="tw"><span class="ipay ${tag[1]}">${tag[0]}</span>
+    <div class="tot">${row('Subtotal',money(q.subtotal))}${q.discount?row('Discount','− '+money(q.discount)):''}${q.fulfil==='delivery'?row('Delivery',q.delivery?money(q.delivery):'Complimentary'):''}${row('Net (excl. VAT)',money(U.r2(q.total-q.vat)))}${row('VAT '+S.vatRate+'%',money(q.vat))}<div class="g"><span>Total</span><span>${money(q.total)}</span></div></div></div>
+   ${q.notes?'<div class="qn"><small>Notes</small>'+U.esc(q.notes)+'</div>':''}${q.terms?'<div class="qn"><small>Terms</small>'+U.esc(q.terms)+'</div>':''}
+   <div class="ft"><em>${U.esc(S.receiptFooter||'Thank you for choosing The Touch')}</em>thetouchchocolate.com${S.instagram?' · @'+U.esc(S.instagram):''}</div></div>`}
+/* quotation page: the company reads it and approves or declines it here; after the boutique makes the invoice it leads to the invoice */
+async function pageQuote(no){
+  const qs=new URLSearchParams(location.search),k=/^[A-Za-z0-9]{16,40}$/.test(qs.get('k')||'')?qs.get('k'):'',here=location.pathname,api=window.TT_API;
+  let q=null;const st={loading:true,missing:false,busy:false,decline:false};
+  document.body.classList.add('pinv');
+  const dmy=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const draw=()=>{
+    const s=q?q.status:'',a=q&&q.approval,inv=q&&q.invoice;
+    const head=st.missing?'We could not find this quotation':st.loading?'Opening your quotation…':s==='sent'?'Your quotation from The Touch':s==='approved'?'Quotation approved':s==='invoiced'?(inv&&inv.paid?'Invoice paid':'Your invoice is ready'):s==='declined'?'This quotation was declined':'This quotation has expired';
+    const box=!q?'':s==='sent'?(st.decline?`<div class="qbox"><h3>Decline this quotation?</h3><p>Tell us what we should change and we will send you a new one.</p>
+        <div class="fld"><label for="qdWhy">Reason (optional)</label><textarea id="qdWhy" maxlength="600"></textarea></div>
+        <button class="btn btn-dark" id="qdGo">Decline quotation</button><div class="alt"><button id="qdBack">Back</button></div></div>`
+      :`<div class="qbox"><h3>Approve this quotation</h3><p>Total <b>${money(q.total)}</b> (VAT included)${q.validUntil?' · valid until '+U.esc(fmtDay(q.validUntil)):''}.<br>After your approval we send you the invoice.</p>
+        <div class="g2"><div class="fld"><label for="qaName">Your full name</label><input id="qaName" maxlength="120" autocomplete="name"></div><div class="fld"><label for="qaPo">PO number (optional)</label><input id="qaPo" maxlength="60"></div></div>
+        <div class="fld"><label for="qaNote">Note for us (optional)</label><textarea id="qaNote" maxlength="600"></textarea></div>
+        <button class="btn btn-dark" id="qaGo">Approve quotation</button>
+        <div class="alt"><a href="${waLink('Hello, about quotation '+q.no+': ')}" target="_blank" rel="noopener">Ask for a change</a><button id="qaNo">Decline</button></div></div>`)
+      :s==='approved'?`<div class="qbox done"><h3>✓ Approved${a&&a.name?' by '+U.esc(a.name):''}</h3><p>${a?'On '+dmy(a.at)+(a.po?' · PO '+U.esc(a.po):'')+'. ':''}Thank you. We are preparing your invoice and will send it to you shortly.</p></div>`
+      :s==='invoiced'?`<div class="qbox done"><h3>${inv&&inv.paid?'✓ Paid — thank you':'Your invoice is ready'}</h3><p>${a&&a.name?'Approved by '+U.esc(a.name)+' on '+dmy(a.at)+'. ':''}${inv?(inv.paid?'Your receipt is on the invoice page.':'Open the invoice to see it and pay.'):'We will send you the invoice.'}</p>${inv?`<a class="btn btn-dark" href="/order/${U.esc(inv.no)}?k=${U.esc(inv.k)}">${inv.paid?'View invoice &amp; receipt':'View invoice &amp; pay'}</a>`:''}</div>`
+      :s==='declined'?'<div class="qbox off"><h3>Declined</h3><p>If you would like a new quotation, message us and we will prepare it.</p></div>'
+      :'<div class="qbox off"><h3>Expired</h3><p>Prices and availability may have changed. Message us and we will send you an updated quotation.</p></div>';
+    app.innerHTML=`<div class="ok${q?' wide':''}"><img class="mono" src="img/monogram-gold.png" alt=""><span class="eyebrow">${q&&q.company&&q.company.name?U.esc(q.company.name):'The Touch'}</span>
+     <h1 class="h2" id="qH" style="margin-top:14px">${head}</h1><div class="no">QUOTATION ${U.esc(no)}</div>
+     <div id="qBox">${box}</div>
+     ${st.missing?'<p style="margin:20px 0 30px">The link may be incomplete. Please message us and we will help you right away.</p>':'<div style="height:22px"></div>'}
+     <div class="acts"><a class="btn btn-gold" href="${waLink('Hello, about quotation '+no)}" target="_blank" rel="noopener">Message us on WhatsApp</a>${q?'<button class="btn btn-line" id="qPrint">Print / save quotation</button>':''}</div>
+     ${q?quoteHTML(q):''}</div>`;
+    const pr=$('#qPrint');if(pr)pr.onclick=()=>window.print();
+    const send=async(op,body,btn)=>{if(st.busy)return;st.busy=true;const t=btn.textContent;btn.disabled=true;btn.textContent='One moment…';
+      try{const r=await fetch(api+'/quote/'+encodeURIComponent(no)+'/'+op+'?k='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));
+        if(!r.ok)toast(U.esc(j.error||'That did not work — please try again'))}
+      catch(e){toast('That did not work — please check your connection')}
+      st.busy=false;st.decline=false;if(location.pathname!==here)return;btn.disabled=false;btn.textContent=t;await load()};
+    const go=$('#qaGo');if(go)go.onclick=()=>{const n=$('#qaName'),v=n.value.trim();if(v.length<2){n.closest('.fld').classList.add('err');n.focus();toast('Please enter your name');return}send('approve',{name:v,po:$('#qaPo').value.trim(),note:$('#qaNote').value.trim()},go)};
+    const nn=$('#qaNo');if(nn)nn.onclick=()=>{st.decline=true;draw()};
+    const bk=$('#qdBack');if(bk)bk.onclick=()=>{st.decline=false;draw()};
+    const dg=$('#qdGo');if(dg)dg.onclick=()=>send('decline',{reason:$('#qdWhy').value.trim()},dg);
+  };
+  const load=async()=>{
+    try{const r=await fetch(api+'/quote/'+encodeURIComponent(no)+'?k='+encodeURIComponent(k),{cache:'no-store'});if(location.pathname!==here)return;if(r.ok){q=await r.json();st.missing=false}else if(!q)st.missing=true}
+    catch(e){if(!q)st.missing=true}
+    st.loading=false;draw()};
+  draw();
+  if(!k||!api){st.loading=false;st.missing=true;draw();return}
+  await load();
+}
 /* order page: thank-you + invoice. Opened right after ordering (this browser remembers the order) or later from its private link
    (/order/<no>?k=<key> — the payment link the boutique sends): then the summary comes from the server. */
 async function pageOrder(no){
@@ -922,9 +994,9 @@ async function pageOrder(no){
    <h1 class="h2" id="okH" style="margin-top:14px">${head}</h1><div class="no">ORDER ${U.esc(no)}</div>
    <div id="payBox">${st.form?`<div class="payform" id="payForm"><div class="pfh"><b>Secure card payment</b><span>ORDER ${U.esc(no)} · ${money(o.total)}</span><button id="payClose" aria-label="Close the card form">Close</button></div><div class="pfl" id="payLoad">Opening the secure card form…</div><div id="payMount"></div><div class="pfn">Your card details go straight to Stripe, our payment partner. The Touch never sees or stores your card number.</div></div>`:st.busy?'<div class="paybox">Confirming your payment…</div>':st.note?'<div class="paybox">'+st.note+'</div>':paid?'<div class="paybox done">✓ Payment received — thank you</div>':due?`<div class="paybox"><b>${why}</b><br>${fresh?'Your order is saved. ':''}Pay securely by card to confirm it.<br><button class="btn btn-dark" id="payNow" style="margin-top:14px">Pay ${money(o.total)} by card</button>${o.key?'<button class="sub" id="payShare" style="margin-left:auto;margin-right:auto">Someone else is paying? Share the payment link</button>':''}</div>`:''}</div>
    ${st.missing?'<p style="margin:20px 0 30px">The link may be incomplete. Please message us and we will help you right away.</p>':fresh&&!due&&!paid?'<p style="margin:20px 0 30px">Our concierge will confirm your order shortly on WhatsApp. For a faster confirmation, send us your order now:</p>':'<div style="height:22px"></div>'}
-   <div class="acts"><a class="btn btn-gold" href="${wa}" target="_blank" rel="noopener" id="waBtn">${fresh?'Send order on WhatsApp':'Message us on WhatsApp'}</a>${o?'<button class="btn btn-line" id="invPrint">Print / save invoice</button>':''}</div>
+   <div class="acts"><a class="btn btn-gold" href="${wa}" target="_blank" rel="noopener" id="waBtn">${fresh?'Send order on WhatsApp':'Message us on WhatsApp'}</a>${o?'<button class="btn btn-line" id="invPrint">Print / save invoice</button>':''}${o&&paid&&!cancelled?'<button class="btn btn-line" id="rcPrint">Print / save receipt</button>':''}</div>
    <div style="margin-top:22px"><a class="link" href="/">Continue shopping</a></div>
-   ${o?invoiceHTML(o):''}</div>`;
+   ${o?invoiceHTML(st.paid&&!p.paid?Object.assign({},o,{payment:Object.assign({},p,{paid:true})}):o):''}</div>`;
     const pn=$('#payNow');if(pn)pn.onclick=async e=>{const b=e.currentTarget,t=b.textContent;b.disabled=true;b.textContent='Opening secure payment…';const r=await startCardPayment(o);if(location.pathname!==here)return;
       if(r==='paid'){st.paid=true;save();draw()}
       else if(r&&r.clientSecret){st.form=true;draw();const fm=$('#payForm');if(fm)window.scrollTo({top:Math.max(0,fm.getBoundingClientRect().top+window.scrollY-96),behavior:'smooth'});
@@ -936,6 +1008,8 @@ async function pageOrder(no){
       if(navigator.share){try{await navigator.share({title:'The Touch — payment link',text,url});return}catch(e){if(e&&e.name==='AbortError')return}}
       try{await navigator.clipboard.writeText(url);toast('Payment link copied — paste it in a message')}catch(e){toast(U.esc(url))}};
     const ip=$('#invPrint');if(ip)ip.onclick=()=>window.print();
+    const rc=$('#rcPrint');if(rc)rc.onclick=()=>{const el=$('#invc');if(!el)return;el.outerHTML=invoiceHTML(Object.assign({},o,{payment:Object.assign({},o.payment,{paid:true})}),true);   // print the receipt version, then show the invoice again
+      const back=()=>{removeEventListener('afterprint',back);const e2=$('#invc');if(e2&&location.pathname===here)e2.outerHTML=invoiceHTML(o)};addEventListener('afterprint',back);window.print()};
   };
   const save=()=>{if(fresh&&o){if(st.paid)o.payment.paid=true;try{sessionStorage.setItem('tt_last',JSON.stringify(o))}catch(e){}}};
   draw();
@@ -1093,7 +1167,7 @@ const PAGE_META={ // title, description (the product and collection pages build 
   privacy:['Privacy Policy','How The Touch collects, uses and protects your personal information.'],
   terms:['Terms & Conditions','The terms that apply when you order from The Touch.'],
   refunds:['Refunds & Returns','Our policy on cancellations, returns, replacements and refunds.'],
-  checkout:['Checkout',''],order:['Your order','']};
+  checkout:['Checkout',''],order:['Your order',''],quote:['Your quotation','']};
 function setMeta(pg,arg){
   let t,d,path='/'+[pg,arg].filter(Boolean).join('/');const base=PAGE_META[''];
   if(pg==='p'){const p=byId(arg);if(p&&p.active!==false&&p.web!==false){t=p.name;d=p.desc}}
@@ -1112,7 +1186,7 @@ function route(){
   renderNav();setMeta(pg,arg);
   document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(pg==='shop'?arg:pg)));
   closeSearch();closeDrawers();document.body.classList.remove('sbar-on','pinv');closePayForm();{const t=$('#toast');if(t&&!t._keep)t.classList.remove('on')}
-  if(pg==='shop')pageShop(arg);else if(pg==='p')pageProduct(arg);else if(pg==='checkout')pageCheckout();else if(pg==='order')pageOrder(arg);
+  if(pg==='shop')pageShop(arg);else if(pg==='p')pageProduct(arg);else if(pg==='checkout')pageCheckout();else if(pg==='order')pageOrder(arg);else if(pg==='quote'&&arg)pageQuote(arg);
   else if(pg==='story')pageStory();else if(pg==='events')pageEvents();else if(pg==='delivery')pageDelivery();
   else if(pg==='privacy'||pg==='terms'||pg==='refunds')pageLegal(pg);else if(!pg)pageHome();else pageNotFound();
   window.scrollTo(0,0);

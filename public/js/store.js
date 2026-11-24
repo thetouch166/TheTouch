@@ -294,7 +294,9 @@
   TT.cleanOrder = function (o) {
     o = o || {}; o.id = safeId(o.id); o.no = safeId(o.no) || o.id.slice(-8);
     o.key = /^[A-Za-z0-9]{16,40}$/.test(o.key || '') ? o.key : '';   // key of the customer's order page
-    o.channel = o.channel === 'pos' ? 'pos' : 'web';
+    o.channel = o.channel === 'pos' || o.channel === 'b2b' ? o.channel : 'web';   // b2b = a company invoice made from a quotation
+    if (o.company && typeof o.company === 'object' && o.company.name) { const c = o.company, t = (v, n) => String(v == null ? '' : v).slice(0, n); o.company = { id: safeId(c.id), name: t(c.name, 200), trn: t(c.trn, 40), address: t(c.address, 400), contact: t(c.contact, 120), phone: t(c.phone, 40), email: t(c.email, 160) }; } else delete o.company;
+    o.quoteNo = safeId(o.quoteNo); o.po = String(o.po == null ? '' : o.po).slice(0, 60);
     o.status = STATUS.includes(o.status) ? o.status : 'new';
     o.created = num(o.created) || Date.now();
     o.customer = Object.assign({ name: '', phone: '', email: '' }, o.customer || {});

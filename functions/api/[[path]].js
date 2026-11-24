@@ -21,7 +21,8 @@
    Plain vars (wrangler.toml): MAIL_FROM, SHOP_EMAIL
 */
 
-const COLS = ['products', 'settings', 'orders', 'enquiries', 'shifts', 'stock', 'subscribers'];
+const COLS = ['products', 'settings', 'orders', 'enquiries', 'shifts', 'stock', 'subscribers', 'quotes', 'companies'];
+const OWNER_COLS = ['subscribers', 'quotes', 'companies'];   // read and written by the owner only
 const PUBLIC_READ = ['products', 'settings'];             // the website reads these (edge-cached)
 const PUBLIC_CREATE = ['orders', 'enquiries', 'subscribers'];
 const ID = /^[A-Za-z0-9_\-]{1,80}$/;
@@ -224,10 +225,65 @@ async function orderView(env, db, no, url) {
   return json({
     no: o.no, created: n(o.created), status: o.status, channel: o.channel, fulfil: o.fulfil, emirate: o.emirate || '', area: o.area || '', date: o.date || '', slot: o.slot || '',
     customer: { name: String((o.customer || {}).name || '') },
+    company: o.company && o.company.name ? { name: String(o.company.name).slice(0, 200), trn: String(o.company.trn || '').slice(0, 40), address: String(o.company.address || '').slice(0, 400), contact: String(o.company.contact || '').slice(0, 120) } : null,
+    po: String(o.po || '').slice(0, 60), quoteNo: String(o.quoteNo || '').slice(0, 40), paidRef: p.paid === true ? String(p.ref || '').slice(0, 80) : '',
     items: (Array.isArray(o.items) ? o.items : []).slice(0, 100).map(l => ({ name: String(l.name || ''), unit: l.unit === 'kg' ? 'kg' : 'pc', price: n(l.price), grams: n(l.grams), qty: n(l.qty), disc: n(l.disc) })),
     subtotal: n(o.subtotal), discount: n(o.discount), delivery: n(o.delivery), total: n(o.total), vat: n(o.vat),
     payment: { method: p.method, paid: p.paid === true, paidAt: n(p.paidAt) }, canPay: payable(env, o)
   });
+}
+
+/* ---------- quotations for companies: /quote/<no>?k=<key> ----------
+   The owner writes a quotation in the admin (col quotes, owner only) and sends the company its private link. The company
+   reads it there and approves or declines it (the only two things the link can change, and only once). The boutique then
+   turns an approved quotation into an invoice: an order with channel 'b2b' that is paid like any payment link. */
+async function quoteByNo(db, no, k) {
+  if (!ID.test(no) || !KEY.test(k)) return null;
+  const r = await db.q("select data::text from docs where col='quotes' and not deleted and data->>'no'=$1 limit 5", [no]);
+  for (const [d] of r.rows) { const q = JSON.parse(d); if (typeof q.key === 'string' && KEY.test(q.key) && await sameText(q.key, k)) return q; }
+  return null;
+}
+const dxbDay = () => new Date(NOW() + 4 * 36e5).toISOString().slice(0, 10);   // today's date in Abu Dhabi
+const quoteState = q => q.status === 'sent' && /^\d{4}-\d\d-\d\d$/.test(q.validUntil || '') && q.validUntil < dxbDay() ? 'expired' : (['sent', 'approved', 'declined', 'invoiced'].includes(q.status) ? q.status : 'draft');
+async function quoteApi(ctx, db, no, op, url) {
+  const { request: req, env } = ctx; const M = req.method;
+  const q = await quoteByNo(db, String(no || ''), String(url.searchParams.get('k') || ''));
+  if (!q || quoteState(q) === 'draft') return err(404, 'Quotation not found');
+  const n = v => Number(v) || 0, t = (v, max) => String(v == null ? '' : v).slice(0, max || 300);
+  if (M === 'GET' && !op) {
+    const c = q.company || {}, a = q.approval || {}; let invoice = null;
+    if (q.orderId && ID.test(String(q.orderId))) { const o = await getDoc(db, 'orders', String(q.orderId)); if (o && o.status !== 'cancelled' && KEY.test(o.key || '')) invoice = { no: o.no, k: o.key, paid: !!(o.payment && o.payment.paid) }; }
+    return json({
+      no: q.no, created: n(q.created), status: quoteState(q), validUntil: t(q.validUntil, 10), subject: t(q.subject, 200),
+      company: { name: t(c.name, 200), trn: t(c.trn, 40), address: t(c.address, 400), contact: t(c.contact, 120) },
+      items: (Array.isArray(q.items) ? q.items : []).slice(0, 100).map(l => ({ name: t(l.name), unit: l.unit === 'kg' ? 'kg' : 'pc', price: n(l.price), grams: n(l.grams), qty: n(l.qty), disc: n(l.disc) })),
+      subtotal: n(q.subtotal), discount: n(q.discount), delivery: n(q.delivery), total: n(q.total), vat: n(q.vat),
+      fulfil: q.fulfil === 'pickup' ? 'pickup' : 'delivery', date: t(q.date, 10), notes: t(q.notes, 2000), terms: t(q.terms, 3000),
+      approval: a.at ? { at: n(a.at), name: t(a.name, 120), po: t(a.po, 60) } : null, invoice
+    });
+  }
+  if (M === 'POST' && (op === 'approve' || op === 'decline')) {
+    const b = await readJSON(req, 3000); const state = quoteState(q);
+    if (state === 'expired') return err(409, 'This quotation has expired. Please ask us for a new one.');
+    if (state !== 'sent') return err(409, state === 'declined' ? 'This quotation was declined' : 'This quotation is already approved');
+    const name = t(b.name, 120).trim(); if (op === 'approve' && name.length < 2) return err(400, 'Please enter your name');
+    const part = op === 'approve'
+      ? { status: 'approved', approval: { at: NOW(), name, po: t(b.po, 60).trim(), note: t(b.note, 600).trim(), ip: t(req.headers.get('CF-Connecting-IP'), 60) } }
+      : { status: 'declined', declined: { at: NOW(), name, reason: t(b.reason, 600).trim() } };
+    const r = await db.q("update docs set data = data || $2::jsonb, updated=$3 where col='quotes' and id=$1 and not deleted and data->>'status'='sent'", [String(q.id), JSON.stringify(part), NOW()]);
+    if (!r.rowCount) return err(409, 'This quotation was already answered');
+    ctx.waitUntil(touch(env));
+    const c = q.company || {}, ok = op === 'approve';
+    ctx.waitUntil(sendShop(env, {
+      to: [env.SHOP_EMAIL], subject: `Quotation ${q.no} ${ok ? 'approved' : 'declined'} · ${c.name || ''} · ${AED(q.total)}`,
+      html: frame(`<div style="font-family:Georgia,serif;font-size:22px;margin-bottom:8px">Quotation ${ok ? 'approved' : 'declined'}</div>
+<p style="font-size:14px;line-height:1.7;margin:0 0 6px;color:#5a4a3f"><b>${H(c.name || 'The company')}</b> ${ok ? 'approved' : 'declined'} quotation <b>${H(q.no)}</b> (${AED(q.total)}).</p>
+<p style="font-size:14px;line-height:1.7;margin:0;color:#5a4a3f">${ok ? 'Approved by ' + H(name) + (part.approval.po ? ' · PO ' + H(part.approval.po) : '') + (part.approval.note ? '<br>“' + H(part.approval.note) + '”' : '') : (name ? 'By ' + H(name) + '. ' : '') + (part.declined.reason ? 'Reason: “' + H(part.declined.reason) + '”' : '')}</p>
+<p style="margin:26px 0 0;text-align:center"><a href="${H(url.origin)}/admin.html" style="display:inline-block;background:#1a1412;color:#d9b77e;text-decoration:none;padding:13px 26px;font-size:13px;letter-spacing:2px">${ok ? 'CREATE THE INVOICE' : 'OPEN THE ADMIN'}</a></p>`, {})
+    }).catch(() => { }));
+    return json({ ok: true, status: part.status });
+  }
+  return err(404, 'Not found');
 }
 
 /* ---------- router ---------- */
@@ -281,7 +337,7 @@ export async function onRequest(ctx) {
 
     if (a === 'sync' && M === 'GET') {   // admin: everything that changed since a moment
       if (!staff) return err(401, 'Sign in');
-      const cols = String(url.searchParams.get('cols') || '').split(',').filter(c => COLS.includes(c) && (owner || c !== 'subscribers'));
+      const cols = String(url.searchParams.get('cols') || '').split(',').filter(c => COLS.includes(c) && (owner || !OWNER_COLS.includes(c)));
       const since = Math.max(0, +url.searchParams.get('since') || 0); const t = NOW();
       if (!cols.length) return json({ t, rows: [] });
       const r = await db.q('select col, id, deleted, data::text from docs where col = any($1::text[]) and updated > $2', ['{' + cols.join(',') + '}', since]);
@@ -302,13 +358,14 @@ export async function onRequest(ctx) {
 
     if (a === 'pay') return await pay(ctx, db, col, url, who);
     if (a === 'order' && M === 'GET') return await orderView(env, db, col, url);
+    if (a === 'quote') return await quoteApi(ctx, db, col, id, url);
 
     if (a !== 'db' || !COLS.includes(col) || (id && !ID.test(id))) return err(404, 'Not found');
 
     /* read */
     if (M === 'GET' && !id) {
       if (!staff && !PUBLIC_READ.includes(col)) return err(401, 'Sign in');
-      if (staff && !owner && col === 'subscribers') return err(403, OWNER_ONLY);
+      if (staff && !owner && OWNER_COLS.includes(col)) return err(403, OWNER_ONLY);
       const t = NOW(); const edge = !staff;
       if (edge) { try { const hit = await caches.default.match(cacheKey(url.origin, col)); if (hit) return json(await hit.text()); } catch (e) { } }
       const r = await db.q('select data::text from docs where col=$1 and not deleted', [col]);
@@ -319,6 +376,7 @@ export async function onRequest(ctx) {
     }
     if (M === 'GET') {
       if (!staff && !PUBLIC_READ.includes(col)) return err(401, 'Sign in');
+      if (staff && !owner && OWNER_COLS.includes(col)) return err(403, OWNER_ONLY);
       const r = await db.q('select data::text from docs where col=$1 and id=$2 and not deleted', [col, id]);
       if (!r.rows.length) return err(404, 'Not found');
       return json(staff ? r.rows[0][0] : JSON.stringify(publicDoc(col, JSON.parse(r.rows[0][0]))));

@@ -35,6 +35,13 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
   Admin → order → **Payment link** calls `POST /api/pay/link` (staff): it stores `payment.linkTotal/linkAt/linkBy` (= this exact total is
   approved for card payment, 30 days) and returns the link to send on WhatsApp; `/api/pay/checkout` then accepts `{no,k}`. A website
   order can never set those fields itself (`publicCreateOk`).
+- Card form on our own page: with `STRIPE_PUBLISHABLE_KEY` set (same mode as the secret key) `/api/pay/checkout {embed:true}` returns `{clientSecret, pk}` and the
+  order page mounts Stripe's embedded Checkout (`ui_mode=embedded_page`, Stripe.js `https://js.stripe.com/endive/stripe.js`, `createEmbeddedCheckoutPage`;
+  `startCardPayment`, `openPayForm`, `closePayForm`). Without the key, or if Stripe refuses, the customer pays on Stripe's page as before.
+- Companies (B2B): **quotation → approval → invoice → payment → receipt**. Owner only: collections `quotes` + `companies` (Admin → Quotes). A sent
+  quotation has a private page `/quote/<no>?k=<key>` (`pageQuote`; API `GET /api/quote/<no>?k=`, `POST /api/quote/<no>/approve|decline?k=`, once only).
+  "Create invoice" turns an approved quotation into an order with `channel:'b2b'`, `company`, `quoteNo`, `po` (number `INV…`), which is sent and paid
+  like a payment link; the paid order page offers "Print / save receipt" (`invoiceHTML(o,true)`; admin `invoiceA4(o,true)`).
 - New-order alert in the admin: pop-up with the order + sound (`orderAlert`, `showAlert`, `chime`, `ringStart`), settings per device in
   localStorage `tt_alert` (Settings → New-order alert). In a background tab the admin asks `GET /api/ping` every 20 s (KV key `sys:ping`,
   no database) and syncs only when it moved, so alerts keep working while the database can sleep.
@@ -74,7 +81,8 @@ tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live agains
   (`'local'` | `'live'`), `upload(dataUrl)→url` (R2 in live, data URL offline). Always go through `TT.DB`.
 - Live `watch` = initial load + admin polls `/api/sync?since=` every 5 s (tab hidden: `/api/ping` every 20 s, sync only on news), website
   re-reads products every 60 s (edge-cached 60 s, purged on staff writes). Writes apply locally at once (optimistic).
-- Collections: `products`, `orders`, `settings` (doc id `main`), `enquiries`, `shifts`, `stock` (stock movement log), `subscribers` (newsletter `{id,email,created,source}`; public create-only).
+- Collections: `products`, `orders`, `settings` (doc id `main`), `enquiries`, `shifts`, `stock` (stock movement log), `subscribers` (newsletter `{id,email,created,source}`; public create-only),
+  `quotes` and `companies` (owner only, see the shapes below).
 - `TT.boot({admin})` loads settings + products (seeds the catalogue when empty). `TT.U` = utils
   (`money, r2, uid, orderNo, esc, vatPart, lineTotal, qtyLabel, dayKey, fmtTime, compressImage`).
 - `TT.cleanOrder(o)` normalises/sanitises every order read by the admin (protects against malformed or
@@ -86,10 +94,13 @@ tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live agains
   — `web:false` = sold in the boutique (POS) only: hidden from the website, its sitemap and saved bags
   — `min` = low-stock alert level (optional; default 2 kg / 5 pcs, see `lowLevel()`)
   — `unit:'kg'` → price per kg, stock in kg, sold by grams.
-- **order**: `{id, no, channel:'web'|'pos', status:'new'|'confirmed'|'preparing'|'ready'|'completed'|'cancelled',
+- **order**: `{id, no, channel:'web'|'pos'|'b2b' (b2b = company invoice: also `company:{id,name,trn,address,contact,phone,email}`, `quoteNo`, `quoteId`, `po`), status:'new'|'confirmed'|'preparing'|'ready'|'completed'|'cancelled',
   created, customer:{name,phone,email}, fulfil:'instore'|'pickup'|'delivery', emirate, area, address, date, slot,
   gift:{to,phone,msg}, notes, items:[{pid,name,unit,price,grams,qty,disc}], subtotal, discount, delivery, total, vat,
   payment:{method, paid, cash, card, other, tendered, change, ref, paidAt, paidShift, linkTotal, linkAt, linkBy}, stockApplied, cashier, shiftId, key}`
+- **quote**: `{id, no:'Q…', status:'draft'|'sent'|'approved'|'declined'|'invoiced' (shown as expired when sent and past `validUntil`), created, key, company:{…},
+  subject, items:[order lines], subtotal, discount, delivery, total, vat, fulfil:'delivery'|'pickup', date, validUntil, notes, terms, sentAt,
+  approval:{at,name,po,note,manual,by}, declined:{at,name,reason}, orderId, orderNo, invoicedAt, by}` · **company**: `{id,name,trn,address,contact,phone,email,notes,created}`
 - **shift**: `{id, cashier, openedAt, float, status, closedAt, counted, expected, cash, card, other, variance}`
 - **stock** (movement log): `{id, pid, name, unit, type:'receive'|'count'|'remove'|'adjust', qty, before, after, note, by, at}`
 - Stock rule: POS sales deduct at sale; web orders deduct when moved past `new`; cancel/void restores
@@ -100,7 +111,7 @@ tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live agains
 customItem, detailsModal, custModal, discModal, heldModal, startPay, payModal, doneModal, receiptHTML · invoice: invoiceCanvas (WhatsApp image), invoiceA4 (print/PDF), invoiceModal ·
 `/* === ORDERS === */` renderOrders, drawBoard, drawList, orderHTML, bindOrder, payLink, waClientText, markPaid, setStatus · new-order alert pop-up: orderAlert, showAlert, alertBody ·
 `/* === PRODUCTS === */` renderProducts, productModal, stockModal, stockHistory, stockCSV, countSheet · REPORTS renderReports, exportCSV · CLIENTS clientStats ·
-EVENTS renderEvents · SETTINGS renderSettings. Shared helpers at the top: toast, modal, ask (in-app confirm —
+EVENTS renderEvents · `/* === QUOTATIONS FOR COMPANIES === */` renderQuotes, companyForm, quoteForm, openQuote, sendQuote, markApproved, quoteToInvoice, invoiceSend, quoteA4, watchQuotes · SETTINGS renderSettings. Shared helpers at the top: toast, modal, ask (in-app confirm —
 never use window.confirm/alert), chime, waLink, applyStock, shift functions (openShiftModal, closeShiftModal).
 
 ### Admin language & theme (per device, localStorage `tt_lang` / `tt_theme`)
@@ -115,7 +126,7 @@ never use window.confirm/alert), chime, waLink, applyStock, shift functions (ope
 
 ## index.html map
 Router `route()` on real paths (History API; `go(path)` to navigate from code, old `#/…` links are converted):
-`/` pageHome · `/shop/<cat>` pageShop · `/p/<id>` pageProduct · `/checkout` pageCheckout · `/order/<no>?k=<key>` pageOrder (invoiceHTML, waOrderText) ·
+`/` pageHome · `/shop/<cat>` pageShop · `/p/<id>` pageProduct · `/checkout` pageCheckout · `/order/<no>?k=<key>` pageOrder (invoiceHTML, waOrderText) · `/quote/<no>?k=<key>` pageQuote (quoteHTML) ·
 `/story` · `/events` · `/delivery` · `/privacy` `/terms` `/refunds` pageLegal · anything else pageNotFound.
 **A new page or category must be added in three places:** `route()` + `PAGE_META` here, `PAGES`/`CATS` in
 `functions/[[path]].js` (server titles, sitemap), and `CATS` in `js/store.js`. Links are written as real paths
@@ -139,6 +150,8 @@ checkout. Dates/cut-offs use Dubai time via `dxbNow()`.
 - Card payment, payment link, order page and new-order alert: `node tests/mock_stripe.js` + the live-mode server, then
   `python tests/pay_test.py <folder>` and `python tests/order_link_test.py <folder>`; sign-in and roles: `python tests/auth_test.py <folder>`.
   `python tests/pay_setup_test.py` covers the shop's real setup (key only): run it with `STRIPE_WEBHOOK_SECRET` commented out in `.dev.vars`.
+  `python tests/quote_test.py <folder>` runs the company flow (company → quotation → approval → invoice → card payment → receipt). The on-site card form
+  itself can only be tried against Stripe's test mode (real `sk_test_`/`pk_test_` keys passed with `--binding`), not against the stand-in.
 - After any change: run the smoke test and check the browser console for errors on both pages.
 
 ## Go-live (see docs/LAUNCH-CHECKLIST.md)
