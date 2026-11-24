@@ -863,7 +863,7 @@ body.sbar-on .toast{bottom:96px}
   <div class="mlinks" onclick="closeDrawers()">
     <a href="/">Home <span>›</span></a>
     <a href="/shop/all">Shop all <span>›</span></a>
-    <a href="/make-your-own">Make your own box <span>›</span></a>
+    <a href="/make-your-own" id="mMyo" style="display:none">Make your own box <span>›</span></a>
     <div id="mCats" style="display:contents"></div>
     <div class="mlab">Shop by occasion</div>
     <div id="mOcc" style="display:contents"></div>
@@ -945,6 +945,7 @@ function renderNav(){
     +drop('/shop/all','shop','Shop',cats.map(c=>`<a href="/shop/${c.id}">${U.esc(c.nav||c.name)}<span lang="ar">${MENU_AR[c.id]||U.esc(c.ar)}</span></a>`).join('')+'<a class="all" href="/shop/all">All chocolates</a>')
     +(occ.length?drop('/occasions','occasions','Occasions',occ.map(o=>`<a href="/occasion/${o.id}">${U.esc(o.name)}${o.ar?`<span lang="ar">${U.esc(o.ar)}</span>`:''}</a>`).join('')+'<a class="all" href="/occasions">All occasions</a>',occ.length>5):'')
     +(TT.myoCfg().on?'<a href="/make-your-own" data-n="make-your-own">Make your own</a>':''));
+  {const mm=$('#mMyo');if(mm)mm.style.display=TT.myoCfg().on?'':'none'}   // phone menu: the box page only while it is open
   set($('#nav2'),'<a href="/about" data-n="about">About</a><a href="/contact" data-n="contact">Contact</a>');
   set($('#mCats'),cats.map(c=>`<a href="/shop/${c.id}">${U.esc(c.nav||c.name)} <span>${MENU_AR[c.id]||U.esc(c.ar)}</span></a>`).join(''));
   set($('#mOcc'),occ.map(o=>`<a href="/occasion/${o.id}">${U.esc(o.name)} <span>${U.esc(o.ar||'›')}</span></a>`).join(''));
