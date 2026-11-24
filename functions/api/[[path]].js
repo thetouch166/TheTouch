@@ -229,7 +229,8 @@ async function orderView(env, db, no, url) {
     customer: { name: String((o.customer || {}).name || '') },
     company: o.company && o.company.name ? { name: String(o.company.name).slice(0, 200), trn: String(o.company.trn || '').slice(0, 40), address: String(o.company.address || '').slice(0, 400), contact: String(o.company.contact || '').slice(0, 120) } : null,
     po: String(o.po || '').slice(0, 60), quoteNo: String(o.quoteNo || '').slice(0, 40), paidRef: p.paid === true ? String(p.ref || '').slice(0, 80) : '',
-    items: (Array.isArray(o.items) ? o.items : []).slice(0, 100).map(l => ({ name: String(l.name || ''), desc: String(l.desc || '').slice(0, 300), unit: l.unit === 'kg' ? 'kg' : 'pc', price: n(l.price), orig: n(l.orig), grams: n(l.grams), qty: n(l.qty), disc: n(l.disc) })),
+    items: (Array.isArray(o.items) ? o.items : []).slice(0, 100).map(l => ({ name: String(l.name || ''), desc: String(l.desc || '').slice(0, 300), unit: l.unit === 'kg' ? 'kg' : 'pc', price: n(l.price), orig: n(l.orig), grams: n(l.grams), qty: n(l.qty), disc: n(l.disc),
+      box: Array.isArray(l.box) && l.box.length ? l.box.slice(0, 12).map(b => ({ name: String((b && b.name) || '').slice(0, 80) })) : undefined })),
     subtotal: n(o.subtotal), discount: n(o.discount), delivery: n(o.delivery), total: n(o.total), vat: n(o.vat),
     payment: { method: p.method, paid: p.paid === true, paidAt: n(p.paidAt) }, canPay: payable(env, o)
   });
@@ -462,12 +463,32 @@ async function stripe(env, method, path, params) {
   return r.j;
 }
 async function getDoc(db, col, id) { const r = await db.q('select data::text from docs where col=$1 and id=$2 and not deleted', [col, id]); return r.rows.length ? JSON.parse(r.rows[0][0]) : null; }
+/* "Make your own" box: the same settings and sum as store.js (myoCfg / myoPrice), so the amount charged never comes from the browser */
+function myoCfg(s) {
+  const m = (s && s.myo) || {}, n = (v, d) => { v = Number(v); return isFinite(v) ? v : d; };
+  const c = { on: m.on === true, name: String(m.name || 'Signature box').slice(0, 60) };
+  c.lines = Math.min(12, Math.max(1, Math.round(n(m.lines, 9)))); c.grams = Math.min(10000, Math.max(100, n(m.grams, 1100)));
+  c.mode = ['weight', 'kg', 'fixed'].includes(m.mode) ? m.mode : 'weight'; c.kgPrice = Math.max(0, n(m.kgPrice, 0)); c.price = Math.max(0, n(m.price, 0)); c.fee = Math.max(0, n(m.fee, 0));
+  c.round = [0, 1, 5, 10].includes(n(m.round, 0)) ? n(m.round, 0) : 0; c.items = Array.isArray(m.items) ? m.items.map(String) : [];
+  return c;
+}
+function myoPrice(c, prices) {
+  const v = c.mode === 'fixed' ? c.price : c.mode === 'kg' ? c.kgPrice * c.grams / 1000 + c.fee : prices.reduce((a, p) => a + (Number(p) || 0) * (c.grams / c.lines) / 1000, 0) + c.fee;
+  return c.mode !== 'fixed' && c.round > 0 ? Math.ceil(v / c.round - 1e-9) * c.round : r2(v);
+}
+const boxText = l => l && Array.isArray(l.box) && l.box.length ? l.box.map((b, i) => (i + 1) + ' ' + String((b && b.name) || '').slice(0, 80)).join(' · ') : '';
 /* the order's lines and total from the catalogue's own prices (same sums as the website: store.js lineTotal / deliveryFee) */
 async function priceOrder(db, o) {
   const [pr, st] = await Promise.all([db.q("select data::text from docs where col='products' and not deleted"), db.q("select data::text from docs where col='settings' and id='main'")]);
   const prods = {}; pr.rows.forEach(([d]) => { const p = JSON.parse(d); prods[p.id] = p; }); const s = st.rows.length ? JSON.parse(st.rows[0][0]) : {};
   const lines = [];
   for (const l of (Array.isArray(o.items) ? o.items : [])) {
+    if (l && l.pid === 'myo') {   // a box the customer filled: every line must be a chocolate the boutique offers for it, the price is worked out here
+      const c = myoCfg(s), box = Array.isArray(l.box) ? l.box : [], n = Math.round(Number(l.qty)); if (!c.on || box.length !== c.lines || !(n >= 1 && n <= 50)) return null;
+      const ps = box.map(b => prods[b && b.pid]); if (ps.some(p => !p || p.active === false || p.unit !== 'kg' || (c.items.length && !c.items.includes(p.id)))) return null;
+      const amount = r2(myoPrice(c, ps.map(p => p.price)) * n); if (!(amount > 0)) return null;
+      lines.push({ name: (c.name + ' (make your own)').slice(0, 120) + (n > 1 ? ' × ' + n : ''), amount }); continue;
+    }
     const p = prods[l && l.pid]; const qty = Math.round(Number(l && l.qty)); const grams = Math.round(Number(l && l.grams) || 0);
     if (!p || p.active === false || p.web === false || !(qty >= 1 && qty <= 200)) return null;
     const kg = p.unit === 'kg'; if (kg && !(grams >= 50 && grams <= 20000)) return null;
@@ -690,7 +711,7 @@ function frame(inner, s) {
 </table></td></tr></table></body></html>`;
 }
 function orderTable(o) {
-  const rows = (o.items || []).map(l => `<tr><td style="padding:8px 0;border-bottom:1px solid #f0e7da">${H(l.name)}<div style="font-size:12px;color:#8a7766">${H(qtyLabel(l))}</div></td><td align="right" style="padding:8px 0;border-bottom:1px solid #f0e7da;white-space:nowrap">${AED(lineTotal(l))}</td></tr>`).join('');
+  const rows = (o.items || []).map(l => `<tr><td style="padding:8px 0;border-bottom:1px solid #f0e7da">${H(l.name)}${boxText(l) ? `<div style="font-size:12px;color:#8a7766">${H(boxText(l))}</div>` : ''}<div style="font-size:12px;color:#8a7766">${H(qtyLabel(l))}</div></td><td align="right" style="padding:8px 0;border-bottom:1px solid #f0e7da;white-space:nowrap">${AED(lineTotal(l))}</td></tr>`).join('');
   const t = (k, v, b) => `<tr><td style="padding:4px 0;${b ? 'font-weight:bold;font-size:16px' : 'color:#6d5a4c'}">${k}</td><td align="right" style="padding:4px 0;${b ? 'font-weight:bold;font-size:16px' : ''}">${v}</td></tr>`;
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">${rows}</table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;margin-top:10px">${t('Subtotal', AED(o.subtotal))}${o.discount ? t('Discount', '−' + AED(o.discount)) : ''}${o.fulfil === 'delivery' ? t('Delivery', o.delivery ? AED(o.delivery) : 'Complimentary') : ''}${t('Total', AED(o.total), 1)}${t('Includes VAT', AED(o.vat))}</table>`;

@@ -486,6 +486,7 @@ table.t tr:hover td{background:var(--soft2)}
 .ptop{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center}.ptop #pq{flex:1;min-width:200px}
 .ptools{display:flex;gap:8px;flex-wrap:wrap}
 .kpis.ks .kpi{padding:14px 18px}.kpis.ks .v{font-size:23px;margin-top:6px}
+.bxl{margin:5px 0 4px 18px;padding:0;font-size:12.5px;line-height:1.55;columns:2;column-gap:22px;color:var(--ink)}.bxl li{break-inside:avoid}
 .kpis.k5{grid-template-columns:repeat(5,1fr)}.kpi .v small{font-size:.55em;font-weight:600;color:var(--mute)}
 .psum{font-size:13px;color:var(--mute);margin:0 2px 12px}.psum b{color:var(--ink);font-weight:700}
 @media(max-width:1200px){.kpis.k5{grid-template-columns:repeat(3,1fr)}}
@@ -711,7 +712,7 @@ const AR={
  'Could not draw the invoice image — use Print / PDF.':'تعذّر إنشاء صورة الفاتورة — استخدم الطباعة / PDF.',
  // products & stock
  'Search products…':'ابحث عن منتج…','History':'السجل','Stock list':'قائمة المخزون','Count sheet':'ورقة الجرد','Products':'المنتجات','on sale':'معروض للبيع','Restock soon':'أعد التخزين قريباً','All above alert level':'الكل فوق حد التنبيه',
- 'Out of stock':'نفد من المخزون','View':'عرض','Everything available':'كل المنتجات متوفرة','Stock value':'قيمة المخزون','At selling price':'بسعر البيع','In the shop':'في المتجر الآن','boxed pieces':'قطعة معلّبة','Ordering from this page is being connected. Set the box, the price and the chocolates now: the switch opens when it is ready.':'يجري ربط الطلب من هذه الصفحة. جهّزي العلبة والسعر والشوكولاتة الآن، وسيُفتح الزر عند الجاهزية.','In this list':'في هذه القائمة','worth':'بقيمة','products':'منتج','Product':'المنتج','Category':'الفئة','Price':'السعر','Stock':'المخزون','On sale':'معروض للبيع',
+ 'Out of stock':'نفد من المخزون','View':'عرض','Everything available':'كل المنتجات متوفرة','Stock value':'قيمة المخزون','At selling price':'بسعر البيع','In the shop':'في المتجر الآن','boxed pieces':'قطعة معلّبة','Customers find it in the menu, build their box line by line and order it. Set the price first.':'يجده العملاء في القائمة، يكوّنون علبتهم صفاً بصف ويطلبونها. حدّدي السعر أولاً.','In this list':'في هذه القائمة','worth':'بقيمة','products':'منتج','Product':'المنتج','Category':'الفئة','Price':'السعر','Stock':'المخزون','On sale':'معروض للبيع',
  'Show password':'إظهار كلمة المرور','Signed in as':'تم تسجيل الدخول باسم','Owner':'المالك','Cashier':'كاشير','Access':'الصلاحية','Last sign-in':'آخر دخول','Never':'لم يدخل بعد','Add a person':'إضافة شخص','Change my password':'تغيير كلمة المرور','New person':'شخص جديد','Edit person':'تعديل الشخص','New password':'كلمة مرور جديدة','Generate':'توليد','Remove':'حذف','Current password':'كلمة المرور الحالية','Repeat the new password':'أعد كلمة المرور الجديدة','Change password':'تغيير كلمة المرور','Password changed ✓':'تم تغيير كلمة المرور ✓','The two passwords are not the same':'كلمتا المرور غير متطابقتين','Remove this person?':'حذف هذا الشخص؟','Removed':'تم الحذف','Developer login':'دخول المطوّر','Could not load the staff list.':'تعذّر تحميل قائمة الموظفين.','Leave empty to keep the current password':'اتركه فارغاً للإبقاء على كلمة المرور الحالية',
  'Owner: everything. Cashier: sales, orders, shifts and stock counts — not prices, products, reports, clients or settings.':'المالك: كل شيء. الكاشير: المبيعات والطلبات والورديات وجرد المخزون فقط — دون الأسعار والمنتجات والتقارير والعملاء والإعدادات.',
  'At least 8 characters, with letters and numbers. Write it down for this person — it is not shown again.':'8 أحرف على الأقل، بحروف وأرقام. دوّنها لهذا الشخص — لن تظهر مرة أخرى.',
@@ -838,7 +839,9 @@ function stTag(id){const s=statusOf(id);return `<span class="tag" style="backgro
 function waLink(phone,text){let p=String(phone||'').replace(/\D/g,'');if(p.startsWith('00'))p=p.slice(2);if(p.startsWith('0'))p='971'+p.slice(1);if(p.length===9)p='971'+p;return 'https://wa.me/'+p+(text?'?text='+encodeURIComponent(text):'')}
 function prod(id){return PRODUCTS.find(p=>p.id===id)}
 function stockUnits(l){return l.unit==='kg'?(l.grams/1000)*l.qty:l.qty}
-async function applyStock(o,sign){for(const l of o.items){if(!l.pid||!prod(l.pid))continue;try{await DB.inc('products',l.pid,'stock',U.r2(sign*stockUnits(l)))}catch(e){console.warn(e)}}}
+async function applyStock(o,sign){for(const l of o.items){
+  if(Array.isArray(l.box)&&l.box.length){for(const b of l.box){if(!b.pid||!prod(b.pid)||!(b.g>0))continue;try{await DB.inc('products',b.pid,'stock',U.r2(sign*b.g/1000*(l.qty||1)))}catch(e){console.warn(e)}}continue}   // a made box: each line's chocolate, by its grams
+  if(!l.pid||!prod(l.pid))continue;try{await DB.inc('products',l.pid,'stock',U.r2(sign*stockUnits(l)))}catch(e){console.warn(e)}}}
 function fmtStock(p){return p.unit==='kg'?U.r2(p.stock)+' kg':(p.stock||0)+' pcs'}
 function lowLevel(p){return p.min!=null&&p.min!==''&&isFinite(+p.min)?+p.min:(p.unit==='kg'?2:5)}
 function isLow(p){return (+p.stock||0)<lowLevel(p)}
@@ -937,7 +940,7 @@ function alertBody(o){const p=o.payment||{};
     <dt>${fulfilLabel(o)}</dt><dd>${o.fulfil==='pickup'?'Boutique pick-up':esc([o.address,o.area,o.emirate].filter(Boolean).join(', '))}<br><b>${niceDate(o.date)}</b> ${esc(o.slot||'')}</dd>
     ${o.notes?`<dt>Notes</dt><dd>${esc(o.notes)}</dd>`:''}</dl>
    ${o.gift&&(o.gift.msg||o.gift.to)?`<div class="giftbox">🎁 <b>Gift${o.gift.to?' for '+esc(o.gift.to):''}</b>${o.gift.phone?' · '+esc(o.gift.phone):''}<br>${esc(o.gift.msg||'')}</div>`:''}
-   <div style="margin-top:12px">${o.items.map(l=>`<div class="it"><div><b style="font-weight:600">${esc(l.name)}</b><div class="small muted">${l.unit==='kg'?U.qtyLabel(l)+' × '+l.qty:'× '+l.qty}</div></div><div style="font-weight:600">${money(U.lineTotal(l))}</div></div>`).join('')}</div>`}
+   <div style="margin-top:12px">${o.items.map(l=>`<div class="it"><div><b style="font-weight:600">${esc(l.name)}</b>${boxList(l)}<div class="small muted">${l.unit==='kg'?U.qtyLabel(l)+' × '+l.qty:'× '+l.qty}</div></div><div style="font-weight:600">${money(U.lineTotal(l))}</div></div>`).join('')}</div>`}
 function orderAlert(o){   // a new website order: ring and show its details; several orders wait their turn
   if(alertQ.includes(o.id))return;alertQ.push(o.id);
   if(alertM){const c=alertM.querySelector('#namore');if(c)c.textContent=alertQ.length>1?'+'+(alertQ.length-1)+' more waiting':'';ringStart();return}
@@ -1287,7 +1290,7 @@ function receiptHTML(o){
    <div class="row"><span>${esc(o.no)}</span><span>${dt.toLocaleDateString('en-GB')} ${dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span></div>
    ${o.cashier?`<div>Served by: ${esc(o.cashier)}</div>`:''}${o.customer&&o.customer.name?`<div>Client: ${esc(o.customer.name)} ${esc(o.customer.phone||'')}</div>`:''}
    ${o.fulfil&&o.fulfil!=='instore'?`<div>${fulfilLabel(o)}: ${esc(o.date||'')} ${esc(o.slot||'')}</div>`:''}<hr>
-   ${o.items.map(l=>`<div>${esc(l.name)}</div><div class="row"><span>&nbsp; ${l.unit==='kg'?U.qtyLabel(l)+' @'+l.price+'/kg':l.qty+' x '+l.price}${l.unit==='kg'&&l.qty>1?' x'+l.qty:''}</span><span>${U.r2(U.lineTotal(l)+(l.disc||0)).toFixed(2)}</span></div>${l.disc?`<div class="row"><span>&nbsp; discount</span><span>-${(+l.disc).toFixed(2)}</span></div>`:''}`).join('')}<hr>
+   ${o.items.map(l=>`<div>${esc(l.name)}</div>${l.box?`<div>&nbsp; ${esc(U.boxText(l))}</div>`:''}<div class="row"><span>&nbsp; ${l.unit==='kg'?U.qtyLabel(l)+' @'+l.price+'/kg':l.qty+' x '+l.price}${l.unit==='kg'&&l.qty>1?' x'+l.qty:''}</span><span>${U.r2(U.lineTotal(l)+(l.disc||0)).toFixed(2)}</span></div>${l.disc?`<div class="row"><span>&nbsp; discount</span><span>-${(+l.disc).toFixed(2)}</span></div>`:''}`).join('')}<hr>
    <div class="row"><span>Subtotal</span><span>${o.subtotal.toFixed(2)}</span></div>
    ${o.discount?`<div class="row"><span>Discount</span><span>-${o.discount.toFixed(2)}</span></div>`:''}
    ${o.delivery?`<div class="row"><span>Delivery</span><span>${o.delivery.toFixed(2)}</span></div>`:''}
@@ -1301,7 +1304,7 @@ function receiptHTML(o){
    ${o.gift&&o.gift.msg?`<div><b>Gift message${o.gift.to?' to '+esc(o.gift.to):''}:</b><br>${esc(o.gift.msg)}</div><hr>`:''}
    <div class="c">${esc(S.receiptFooter)}<br>@${esc(S.instagram)}</div></div>`}
 function receiptText(o){const L=[`*The Touch* — ${invTitle()} ${o.no}`,invDate(o),''];
-  o.items.forEach(l=>L.push(`• ${l.name}${l.unit==='kg'?' '+U.qtyLabel(l):''} × ${l.qty} — ${money(U.lineTotal(l))}`));
+  o.items.forEach(l=>{L.push(`• ${l.name}${l.unit==='kg'?' '+U.qtyLabel(l):''} × ${l.qty} — ${money(U.lineTotal(l))}`);if(l.box)L.push('   '+U.boxText(l))});
   L.push('');if(o.discount)L.push('Discount: −'+money(o.discount));if(o.delivery)L.push('Delivery: '+money(o.delivery));
   L.push(`*Total: ${money(o.total)}* (incl. VAT ${money(o.vat)})`,((o.payment||{}).paid?'Paid · ':'Payment: ')+payName(o));
   if(o.fulfil&&o.fulfil!=='instore')L.push(`${fulfilLabel(o)}: ${niceDate(o.date)} ${o.slot||''}`.trim());
@@ -1315,7 +1318,9 @@ const IV={bur:'#40050e',gold:'#b8843f',ink:'#2a2228',mute:'#857873',line:'#eadfc
 function invTitle(){return S.trn?'Tax Invoice':'Invoice'}
 function payName(o){const m=(o.payment||{}).method;if(o.fulfil==='pickup'){if(m==='cod')return 'Cash on pick-up';if(m==='card_on_delivery')return 'Card on pick-up'}return TT.payLabel(m)}
 function invDate(o){const d=new Date(o.created);return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
-function invItems(o){return o.items.map(l=>({n:l.name,d:(l.unit==='kg'?(l.qty>1?l.qty+' × ':'')+U.qtyLabel(l)+' @ '+money(l.price)+' / kg':l.qty+' × '+money(l.price))+(l.disc?' · less '+money(l.disc):''),a:money(U.lineTotal(l))}))}
+/* a "make your own" box in an order: the chocolate of each line, numbered as the box is laid */
+function boxList(l){return Array.isArray(l.box)&&l.box.length?`<ol class="bxl" data-en>${l.box.map(b=>`<li>${esc(b.name)}</li>`).join('')}</ol>`:''}
+function invItems(o){return o.items.map(l=>({n:l.name,b:U.boxText(l),d:(l.unit==='kg'?(l.qty>1?l.qty+' × ':'')+U.qtyLabel(l)+' @ '+money(l.price)+' / kg':l.qty+' × '+money(l.price))+(l.disc?' · less '+money(l.disc):''),a:money(U.lineTotal(l))}))}
 function invTotals(o){const r=[['Subtotal',money(o.subtotal)]];if(o.discount)r.push(['Discount','− '+money(o.discount)]);if(o.fulfil==='delivery')r.push(['Delivery',o.delivery?money(o.delivery):'Complimentary']);r.push(['Net (excl. VAT)',money(U.r2(o.total-o.vat))],['VAT '+S.vatRate+'%',money(o.vat)]);return r}
 function invFulfil(o){return o.fulfil==='pickup'?'Boutique pick-up':[o.address,o.area,o.emirate].filter(Boolean).join(', ')}
 async function invoiceCanvas(o){
@@ -1361,7 +1366,7 @@ function invoiceA4(o,receipt){if(o.company)return TT.docHTML(receipt?'receipt':'
    <div class="meta"><div><div class="lb">From</div><b>${esc(S.storeName||'The Touch')}</b><br>${esc(S.address)}<br>${esc(S.phone)}${S.email?'<br>'+esc(S.email):''}${S.trn?'<br>TRN '+esc(S.trn):''}</div>
     <div><div class="lb">${receipt?'Received from':'Billed to'}</div>${co?`<b>${esc(co.name)}</b>${co.address?'<br>'+esc(co.address):''}${co.trn?'<br>TRN '+esc(co.trn):''}${co.contact?'<br>Attn. '+esc(co.contact):''}`:`<b>${esc(o.customer.name||'Walk-in client')}</b>${o.customer.phone?'<br>'+esc(o.customer.phone):''}${o.customer.email?'<br>'+esc(o.customer.email):''}`}</div>
     <div><div class="lb">Date</div>${invDate(o)}${o.po?`<div class="lb" style="margin-top:3mm">PO number</div>${esc(o.po)}`:''}${o.quoteNo?`<div class="lb" style="margin-top:3mm">Quotation</div>${esc(o.quoteNo)}`:''}${o.fulfil&&o.fulfil!=='instore'?`<div class="lb" style="margin-top:3mm">${fulfilLabel(o)}</div>${esc(invFulfil(o))}<br>${esc([niceDate(o.date),o.slot].filter(Boolean).join(' · '))}`:''}</div></div>
-   <table><thead><tr><th>Description</th><th class="r">Amount</th></tr></thead><tbody>${invItems(o).map(l=>`<tr><td><b>${esc(l.n)}</b><div class="d">${esc(l.d)}</div></td><td class="r">${l.a}</td></tr>`).join('')}</tbody></table>
+   <table><thead><tr><th>Description</th><th class="r">Amount</th></tr></thead><tbody>${invItems(o).map(l=>`<tr><td><b>${esc(l.n)}</b>${l.b?`<div class="d">${esc(l.b)}</div>`:''}<div class="d">${esc(l.d)}</div></td><td class="r">${l.a}</td></tr>`).join('')}</tbody></table>
    <div class="tw"><div class="pay ${p.paid?'ok':''}">${p.paid?'Paid':'Awaiting payment'} · ${esc(payName(o))}${p.ref?' · Ref '+esc(p.ref):''}</div>
     <div class="tot">${invTotals(o).map(([k,v])=>`<div><span>${k}</span><span>${v}</span></div>`).join('')}<div class="grand"><span>Total</span><span>${money(o.total)}</span></div><div class="vi">VAT inclusive</div></div></div>
    ${receipt&&p.paid?`<div class="rk"><div><b>${money(o.total)}</b><small>Amount received</small></div><div><b style="font-size:12pt">${p.paidAt?new Date(p.paidAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'—'}</b><small>Date</small></div><div><b style="font-size:12pt">${esc(payName(o))}</b><small>Method</small></div><div><b style="font-size:9pt;word-break:break-all">${esc(p.ref||'—')}</b><small>Reference</small></div></div>`:''}
@@ -1446,7 +1451,7 @@ function orderHTML(o,inModal){
      ${o.notes?`<dt>Notes</dt><dd>${esc(o.notes)}</dd>`:''}
    </dl>
    ${o.gift&&(o.gift.msg||o.gift.to)?`<div class="giftbox">🎁 <b>Gift${o.gift.to?' for '+esc(o.gift.to):''}</b>${o.gift.phone?' · '+esc(o.gift.phone):''}<br>${esc(o.gift.msg||'')}</div>`:''}
-   <div style="margin-top:16px">${o.items.map(l=>`<div class="it"><div><b style="font-weight:600">${esc(l.name)}</b><div class="small muted">${l.unit==='kg'?U.qtyLabel(l)+' @ '+money(l.price)+'/kg':money(l.price)} × ${l.qty}${l.disc?' · −'+money(l.disc):''}</div></div><div style="font-weight:600">${money(U.lineTotal(l))}</div></div>`).join('')}
+   <div style="margin-top:16px">${o.items.map(l=>`<div class="it"><div><b style="font-weight:600">${esc(l.name)}</b>${boxList(l)}<div class="small muted">${l.unit==='kg'?U.qtyLabel(l)+' @ '+money(l.price)+'/kg':money(l.price)} × ${l.qty}${l.disc?' · −'+money(l.disc):''}</div></div><div style="font-weight:600">${money(U.lineTotal(l))}</div></div>`).join('')}
     <div class="it"><span class="muted">Subtotal</span><span>${money(o.subtotal)}</span></div>
     ${o.discount?`<div class="it"><span class="muted">Discount</span><span>−${money(o.discount)}</span></div>`:''}
     ${o.fulfil==='delivery'?`<div class="it"><span class="muted">Delivery</span><span>${o.delivery?money(o.delivery):'Free'}</span></div>`:''}
@@ -1529,7 +1534,7 @@ function renderProducts(){
   $('#pcats').innerHTML=[{id:'all',name:'All'},{id:'low',name:'⚠ Low stock'},{id:'out',name:'Out of stock'}].concat(TT.CATS).map(c=>`<button class="chip ${pCat===c.id?'on':''}" data-c="${c.id}">${c.name}</button>`).join('');
   $('#pcats').onclick=e=>{const b=e.target.closest('.chip');if(b){pCat=b.dataset.c;renderProducts()}};
   const q=pQ.toLowerCase();const list=PRODUCTS.filter(p=>(pCat==='all'||(pCat==='low'?isLow(p):pCat==='out'?st(p)<=0:p.cat===pCat))&&(!q||(p.name+' '+(p.sku||'')).toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name));
-  {const t=tot(list);$('#psum').innerHTML=`<span>In this list</span> <b>${list.length}</b> <span>products</span> ·<b>${num(t.kg)} kg</b>${t.pc?` · <b>${num(t.pc)}</b> <span>pcs</span>`:''} · <span>worth</span> <b>${money(t.val)}</b>`}
+  {const t=tot(list);$('#psum').innerHTML=`<span>In this list</span> <b>${list.length}</b> <span>products</span> · <b>${num(t.kg)} kg</b>${t.pc?` · <b>${num(t.pc)}</b> <span>pcs</span>`:''} · <span>worth</span> <b>${money(t.val)}</b>`}
   $('#ptable').innerHTML=`<thead><tr><th></th><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>On sale</th><th></th></tr></thead><tbody>${list.map(p=>`<tr class="${p.active===false?'off':''}"><td style="width:62px"><img class="pthumb" src="${esc(p.img)}" alt=""></td><td><b>${esc(pn(p))}</b>${p.featured?' <span class="tag" style="background:var(--gold)">Signature</span>':''}<div class="small muted">${esc(p.sku||'')} · ${p.unit==='kg'?'by weight':'per piece'}</div></td><td class="small">${esc(TT.catName(p.cat))}</td>
      <td class="pr"><b>${money(p.price)}</b><span class="small muted">${p.unit==='kg'?' /kg':''}</span></td>
      <td class="stc"><div class="stk ${st(p)<=0?'out':isLow(p)?'low':''}"><button data-sm="${p.id}" aria-label="Less stock" ${st(p)<=0?'disabled':''}>−</button><button class="sv" data-st="${p.id}" title="Receive, count or remove stock">${fmtStock(p)}</button><button data-sp="${p.id}" aria-label="More stock">+</button></div></td>
@@ -1794,7 +1799,7 @@ function renderMyo(){
   const view=$('#view');
   view.innerHTML=`<div class="myp">
    <div class="myp-main">
-    <div class="card sec myp-top"><label class="myon"><input type="checkbox" id="my_on" ${c.on?'checked':''} disabled><span><b>Show “Make your own” on the website</b><small>Ordering from this page is being connected. Set the box, the price and the chocolates now: the switch opens when it is ready.</small></span></label>
+    <div class="card sec myp-top"><label class="myon"><input type="checkbox" id="my_on" ${c.on?'checked':''}><span><b>Show “Make your own” on the website</b><small>Customers find it in the menu, build their box line by line and order it. Set the price first.</small></span></label>
       <a class="btn b-line b-sm" target="_blank" rel="noopener" href="${SITE()}/make-your-own">Open on the website ↗</a></div>
     <div class="card sec"><h4>The box</h4><div class="grid2" style="margin-top:14px">
       <div class="fld"><label>Box name</label><input id="my_name" value="${esc(c.name)}" maxlength="60"></div>

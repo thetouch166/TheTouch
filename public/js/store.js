@@ -96,7 +96,7 @@
     hours: '', mapUrl: '',   // contact page: opening hours and an optional Google Maps link
     // make your own box (Admin → Products → Make your own). mode: 'weight' = each line at its chocolate's price per kg ·
     // 'kg' = one price per kg for the box · 'fixed' = one price. fee = box and packaging on top (weight / kg). round = 0 | 1 | 5.
-    myo: { on: false, title: 'Make your own box', intro: 'Nine lines, each one a chocolate you choose. We lay them by hand, close the lid and tie the ribbon.', name: 'Signature box',
+    myo: { on: false, title: 'Make your own box',   // closed until the owner sets the price and opens it (Admin → Own box) intro: 'Nine lines, each one a chocolate you choose. We lay them by hand, close the lid and tie the ribbon.', name: 'Signature box',
       grams: 1100, lines: 9, per: 7, mode: 'weight', kgPrice: 0, price: 0, fee: 0, round: 0, maxSame: 9, items: [], favourites: [] },
     legalName: 'The Touch Planners For Chocolates and Sweets LLC–SPC',
     payTerms: '100% on advance.',
@@ -122,6 +122,8 @@
     vatPart(total, rate) { rate = rate == null ? 5 : rate; return U.r2(total - total / (1 + rate / 100)); },
     lineTotal(l) { return Math.max(0, U.r2((l.unit === 'kg' ? l.price * l.grams / 1000 : l.price) * l.qty - (l.disc || 0))); },
     qtyLabel(l) { return l.unit === 'kg' ? (l.grams >= 1000 ? (l.grams / 1000) + ' kg' : l.grams + ' g') : ''; },
+    /* a "make your own" box line carries box:[{pid,name,g}], one entry per line of the box in order: "1 Kunafah · 2 Macadamia …" */
+    boxText(l) { return l && Array.isArray(l.box) && l.box.length ? l.box.map((b, i) => (i + 1) + ' ' + b.name).join(' · ') : ''; },
     dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); },
     fmtTime(ts) { return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); },
     compressImage(file, max) {
@@ -340,6 +342,7 @@
     o.items = (Array.isArray(o.items) ? o.items : []).slice(0, 100).map(l => {
       const x = { pid: safeId(l && l.pid), name: String((l && l.name) || ''), unit: l && l.unit === 'kg' ? 'kg' : 'pc', price: Math.max(0, num(l && l.price)), grams: Math.max(0, num(l && l.grams)), qty: Math.max(0, Math.round(num(l && l.qty))), disc: Math.max(0, num(l && l.disc)) };
       if (l && l.desc) x.desc = String(l.desc).slice(0, 300); if (l && num(l.orig) > 0) x.orig = num(l.orig);   // company documents: second line and list price before discount
+      if (l && Array.isArray(l.box) && l.box.length) x.box = l.box.slice(0, 12).map(b => ({ pid: safeId(b && b.pid), name: String((b && b.name) || '').slice(0, 80), g: Math.max(0, num(b && b.g)) }));   // make your own: the chocolate of each line, grams per line
       return x;
     });
     o.terms = String(o.terms == null ? '' : o.terms).slice(0, 3000);

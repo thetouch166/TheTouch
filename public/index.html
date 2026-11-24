@@ -280,6 +280,7 @@ footer li{list-style:none;margin-bottom:10px}footer a:hover{color:var(--gold)}
 .ci{display:grid;grid-template-columns:78px 1fr auto;gap:14px;padding:18px 0;border-bottom:1px solid var(--line)}
 .ci img{width:78px;height:78px;object-fit:cover;background:var(--cream);mix-blend-mode:multiply}
 .ci .n{font-family:var(--serif);font-size:17px;line-height:1.2}
+.ci .bx{font-size:12px;line-height:1.5;color:var(--mute);margin-top:3px}.ci .bx a{color:var(--bur);text-decoration:underline;text-underline-offset:3px;white-space:nowrap;display:inline-block;padding:4px 0}
 .ci .m{font-size:11.5px;color:var(--mute);margin:3px 0 8px}
 .ci .q{display:inline-flex;align-items:center;border:1px solid var(--line);height:30px}
 .ci .q button{width:28px;height:100%}.ci .q span{min-width:22px;text-align:center;font-size:12px}
@@ -911,6 +912,9 @@ const Cart={
   key(pid,grams){return pid+'|'+(grams||0)},
   add(p,qty,grams){qty=qty||1;const k=this.key(p.id,grams);const f=this.items.find(i=>i.k===k);
     if(f)f.qty+=qty;else this.items.push({k,pid:p.id,name:p.name,img:p.img,unit:p.unit,price:p.price,grams:p.unit==='kg'?grams:0,qty});this.save()},
+  // a "make your own" box: one bag line, the chocolate of every line kept with it (the same choice again adds one more box)
+  addBox(c,picks,price){const k='myo|'+picks.map(p=>p.id).join('.');const f=this.items.find(i=>i.k===k);
+    if(f)f.qty+=1;else this.items.push({k,pid:'myo',name:c.name+' (make your own)',img:'img/about/box-open.jpg',unit:'pc',price,grams:0,qty:1,box:picks.map(p=>({pid:p.id,name:p.name,g:U.r2(c.grams/c.lines)}))});this.save()},
   set(k,q){const f=this.items.find(i=>i.k===k);if(!f)return;f.qty=q;if(q<=0)this.items=this.items.filter(i=>i.k!==k);this.save()},
   clear(){this.items=[];this.save()},
   count(){return this.items.reduce((a,i)=>a+i.qty,0)},
@@ -1120,13 +1124,16 @@ function pageProduct(id){
 }
 
 function renderCartBadge(){const n=Cart.count();const b=$('#cartCount');b.textContent=n;b.classList.toggle('hidden',!n)}
+/* a box made by the customer: what is inside, in few words ("Kunafah ×2, Macadamia"), and the way back to change it */
+const boxShort=i=>{const m=new Map();(i.box||[]).forEach(b=>m.set(b.name,(m.get(b.name)||0)+1));return [...m].map(([n,c])=>c>1?n+' ×'+c:n).join(', ')};
+function editBox(k){const it=Cart.items.find(x=>x.k===k);if(!it||!it.box)return;try{sessionStorage.setItem('tt_myo',JSON.stringify(it.box.map(b=>b.pid)));sessionStorage.setItem('tt_myo_edit',k)}catch(e){}closeDrawers()}
 function renderCart(){if(typeof PRODUCTS!=='undefined'&&PRODUCTS.length)syncCart();
   const body=$('#cartBody');if(!body)return;
   if(!Cart.items.length){body.innerHTML=`<div class="empty"><div class="h3">Your bag is empty</div><p style="margin-bottom:26px">Discover our handcrafted collections.</p><a class="btn btn-dark" href="/shop/all" onclick="closeDrawers()">Shop now</a></div>`;return}
   const sub=Cart.subtotal();const left=S.freeDeliveryOver-sub;
   body.innerHTML=`
    <div class="prog">${left>0?`Add <b>${money(left)}</b> for complimentary Abu Dhabi delivery`:'You qualify for complimentary Abu Dhabi delivery ✦'}<i><b style="width:${Math.min(100,sub/S.freeDeliveryOver*100)}%"></b></i></div>
-   <div class="cart-items">${Cart.items.map(i=>`<div class="ci"><img src="${U.esc(i.img)}" alt=""><div><div class="n">${U.esc(i.name)}</div><div class="m">${i.unit==='kg'?U.qtyLabel(i)+' · ':''}${money(i.unit==='kg'?i.price*i.grams/1000:i.price)}</div>
+   <div class="cart-items">${Cart.items.map(i=>`<div class="ci"><img src="${U.esc(i.img)}" alt=""><div><div class="n">${U.esc(i.name)}</div>${i.box?`<div class="bx">${U.esc(boxShort(i))} <a href="/make-your-own" onclick="editBox('${i.k}')">Change</a></div>`:''}<div class="m">${i.unit==='kg'?U.qtyLabel(i)+' · ':''}${money(i.unit==='kg'?i.price*i.grams/1000:i.price)}</div>
      <div class="q"><button aria-label="${i.qty>1?'Decrease quantity':'Remove item'}" onclick="Cart.set('${i.k}',${i.qty-1})">−</button><span>${i.qty}</span><button aria-label="Increase quantity" onclick="Cart.set('${i.k}',${i.qty+1})">+</button></div></div>
      <div><div class="p">${money(U.lineTotal(i))}</div><button class="rm" onclick="Cart.set('${i.k}',0)">Remove</button></div></div>`).join('')}</div>
    <div class="cart-foot"><div class="r t"><span>Subtotal <small style="font-weight:400;color:var(--mute);font-size:12px">(${Cart.count()} ${Cart.count()===1?'item':'items'})</small></span><span>${money(sub)}</span></div>
@@ -1138,7 +1145,10 @@ const payName=(k,mode)=>mode==='pickup'&&k==='cod'?'Cash at pick-up':mode==='pic
 const PAYDESC={delivery:{cod:'Pay in cash when your order arrives.',card_on_delivery:'Our driver brings a card machine.',link:'We send you a secure card payment link on WhatsApp to confirm.',card_online:'Pay securely by card now on our payment page.'},
   pickup:{cod:'Pay in cash when you collect at the boutique.',card_on_delivery:'Pay by card when you collect at the boutique.',link:'We send you a secure card payment link on WhatsApp to confirm.',card_online:'Pay securely by card now on our payment page.'}};
 const dxbNow=()=>{try{return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Dubai'}))}catch(e){return new Date()}};
-function syncCart(){let changed=false,removed=[];Cart.items=Cart.items.filter(it=>{const p=byId(it.pid);if(!p||p.active===false||p.web===false){removed.push(it.name);return false}if(it.price!==p.price||it.name!==p.name||it.img!==p.img){it.price=p.price;it.name=p.name;it.img=p.img;changed=true}return true});if(removed.length||changed){localStorage.setItem('tt_cart',JSON.stringify(Cart.items));renderCartBadge()}if(removed.length)toast(U.esc(removed.join(', '))+' is no longer available and was removed from your bag');return changed||removed.length}
+function syncCart(){let changed=false,removed=[];const mc=TT.myoCfg(),offer=mc.on?myoList(mc):[];Cart.items=Cart.items.filter(it=>{
+  if(it.pid==='myo'){const ps=(it.box||[]).map(b=>offer.find(p=>p.id===b.pid));   // a made box stays while the page is open and every chosen chocolate is still offered; its price follows the admin
+    if(!mc.on||ps.length!==mc.lines||ps.some(p=>!p)){removed.push(it.name);return false}const pr=TT.myoPrice(mc,ps.map(p=>p.price));if(it.price!==pr){it.price=pr;changed=true}return true}
+  const p=byId(it.pid);if(!p||p.active===false||p.web===false){removed.push(it.name);return false}if(it.price!==p.price||it.name!==p.name||it.img!==p.img){it.price=p.price;it.name=p.name;it.img=p.img;changed=true}return true});if(removed.length||changed){localStorage.setItem('tt_cart',JSON.stringify(Cart.items));renderCartBadge()}if(removed.length)toast(U.esc(removed.join(', '))+' is no longer available and was removed from your bag');return changed||removed.length}
 function pageCheckout(){syncCart();
   if(!Cart.items.length){go('/shop/all',true);return}
   const em=Object.keys(S.delivery||{});const st=JSON.parse(localStorage.getItem('tt_cust')||'{}');
@@ -1186,7 +1196,7 @@ function pageCheckout(){syncCart();
   const f=$('#cof');
   const tot=()=>{const sub=Cart.subtotal();const del=mode==='pickup'?0:TT.deliveryFee(f.emirate.value,sub);const t=U.r2(sub+del);return{sub,del,t,vat:U.vatPart(t,S.vatRate)}};
   const draw=()=>{const x=tot();
-    $('#sumItems').innerHTML=Cart.items.map(i=>`<div class="li"><img src="${U.esc(i.img)}" alt=""><div>${U.esc(i.name)}<small>${i.unit==='kg'?U.qtyLabel(i)+' × ':'× '}${i.qty}</small></div><div>${money(U.lineTotal(i))}</div></div>`).join('');
+    $('#sumItems').innerHTML=Cart.items.map(i=>`<div class="li"><img src="${U.esc(i.img)}" alt=""><div>${U.esc(i.name)}${i.box?'<small>'+U.esc(boxShort(i))+'</small>':''}<small>${i.unit==='kg'?U.qtyLabel(i)+' × ':'× '}${i.qty}</small></div><div>${money(U.lineTotal(i))}</div></div>`).join('');
     $('#sumTot').innerHTML=`<div class="r"><span>Subtotal</span><span>${money(x.sub)}</span></div><div class="r"><span>${mode==='pickup'?'Boutique pick-up':'Delivery'}</span><span>${x.del?money(x.del):'Complimentary'}</span></div><div class="r t"><span>Total</span><span>${money(x.t)}</span></div><div class="r v"><span>Includes VAT (${S.vatRate}%)</span><span>${money(x.vat)}</span></div>`};
   draw();
   f.emirate.onchange=draw;
@@ -1198,7 +1208,7 @@ function pageCheckout(){syncCart();
   $('#slots').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;slot=b.dataset.s;$('#slots').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
   $('#pay').onchange=e=>{pay=e.target.value;$('#place').textContent=placeLabel();$('#pay').querySelectorAll('label').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked))};
   f.onsubmit=async e=>{e.preventDefault();
-    {const over=[];const m={};Cart.items.forEach(x=>{m[x.pid]=(m[x.pid]||0)+(x.unit==='kg'?x.grams/1000:1)*x.qty});Object.keys(m).forEach(id=>{const p=byId(id);if(p&&p.stock!=null&&m[id]>p.stock+1e-9)over.push(p.name+' (only '+(p.unit==='kg'?U.r2(p.stock)+' kg':p.stock+' pcs')+' available)')});if(over.length){toast('Please reduce: '+U.esc(over.join(', ')));return}}
+    {const over=[];const m={};Cart.items.forEach(x=>{if(x.box){x.box.forEach(b=>{m[b.pid]=(m[b.pid]||0)+(b.g||0)/1000*x.qty});return}m[x.pid]=(m[x.pid]||0)+(x.unit==='kg'?x.grams/1000:1)*x.qty});Object.keys(m).forEach(id=>{const p=byId(id);if(p&&p.stock!=null&&m[id]>p.stock+1e-9)over.push(p.name+' (only '+(p.unit==='kg'?U.r2(p.stock)+' kg':p.stock+' pcs')+' available)')});if(over.length){toast('Please reduce: '+U.esc(over.join(', ')));return}}
     const need=['name','phone'].concat(mode==='delivery'?['area','address']:[]).concat(['date']);let bad=false;
     need.forEach(n=>{const el=f[n];const er=!el.value.trim()||(n==='phone'&&!/^\+?[\d\s()-]{9,16}$/.test(el.value.trim()))||(n==='date'&&el.value<el.min);el.closest('.fld').classList.toggle('err',er);if(er)bad=true});
     if(bad){toast('Please complete the highlighted fields');f.querySelector('.err input,.err select').focus();return}
@@ -1208,7 +1218,7 @@ function pageCheckout(){syncCart();
       customer:{name:f.name.value.trim(),phone:f.phone.value.trim(),email:f.email.value.trim()},
       fulfil:mode,emirate:mode==='delivery'?f.emirate.value:'',area:f.area.value.trim(),address:mode==='delivery'?f.address.value.trim():'',
       date:f.date.value,slot,gift:{to:f.giftTo.value.trim(),phone:f.giftPhone.value.trim(),msg:f.giftMsg.value.trim()},notes:f.notes.value.trim(),
-      items:Cart.items.map(i=>({pid:i.pid,name:i.name,unit:i.unit,price:i.price,grams:i.grams,qty:i.qty,disc:0})),
+      items:Cart.items.map(i=>Object.assign({pid:i.pid,name:i.name,unit:i.unit,price:i.price,grams:i.grams,qty:i.qty,disc:0},i.box?{box:i.box}:{})),
       subtotal:x.sub,discount:0,delivery:x.del,total:x.t,vat:x.vat,payment:{method:pay,paid:false},stockApplied:false,key:U.key()};
     localStorage.setItem('tt_cust',JSON.stringify({name:order.customer.name,phone:order.customer.phone,email:order.customer.email,emirate:f.emirate.value,area:order.area,address:f.address.value}));
     let saved=true;try{await DB.put('orders',order)}catch(err){console.error(err);saved=false}
@@ -1241,7 +1251,7 @@ function fmtDay(d){if(!d)return'';const x=new Date(d+'T12:00:00');return isNaN(x
 /* the order as a WhatsApp message to the boutique (WhatsApp shows *bold* and _italic_; the link opens the order with its invoice) */
 function waOrderText(o){
   const line='┈┈┈┈┈┈┈┈┈┈┈┈┈┈',L=['✦ *THE TOUCH* ✦','_New order_  *'+o.no+'*',line];
-  o.items.forEach(i=>L.push('▫️ *'+i.qty+' ×* '+i.name+(i.unit==='kg'?' ('+U.qtyLabel(i)+')':''),'      '+money(U.lineTotal(i))));
+  o.items.forEach(i=>{L.push('▫️ *'+i.qty+' ×* '+i.name+(i.unit==='kg'?' ('+U.qtyLabel(i)+')':''));if(i.box)L.push('      '+U.boxText(i));L.push('      '+money(U.lineTotal(i)))});
   L.push(line);
   if(o.items.length>1||o.delivery)L.push('Subtotal: '+money(o.subtotal));
   if(o.fulfil!=='pickup')L.push('Delivery: '+(o.delivery?money(o.delivery):'Complimentary'));
@@ -1262,7 +1272,7 @@ function invoiceHTML(o,receipt){if(o.company&&o.company.name)return TT.docHTML(r
    <div class="im"><div><small>From</small><b>${U.esc(S.storeName||'The Touch')}</b><br>${U.esc(S.address)}<br>${U.esc(S.phone)}${S.trn?'<br>TRN '+U.esc(S.trn):''}</div>
     <div><small>${receipt?'Received from':'Billed to'}</small>${co?`<b>${U.esc(co.name)}</b>${co.address?'<br>'+U.esc(co.address):''}${co.trn?'<br>TRN '+U.esc(co.trn):''}${co.contact?'<br>Attn. '+U.esc(co.contact):''}`:`<b>${U.esc((o.customer&&o.customer.name)||'Client')}</b>${o.customer&&o.customer.phone?'<br>'+U.esc(o.customer.phone):''}`}</div>
     <div><small>${o.fulfil==='pickup'?'Boutique pick-up':o.fulfil==='delivery'?'Delivery':'Order'}</small>${[where,when].filter(Boolean).join('<br>')||'—'}</div></div>
-   <table><thead><tr><th>Description</th><th class="c">Qty</th><th class="r">Amount</th></tr></thead><tbody>${o.items.map(i=>`<tr><td>${U.esc(i.name)}<i>${money(i.price)}${i.unit==='kg'?' / kg':' each'}${i.disc?' · less '+money(i.disc):''}</i></td><td class="c">${i.unit==='kg'?U.qtyLabel(i)+(i.qty>1?' × '+i.qty:''):i.qty}</td><td class="r">${money(U.lineTotal(i))}</td></tr>`).join('')}</tbody></table>
+   <table><thead><tr><th>Description</th><th class="c">Qty</th><th class="r">Amount</th></tr></thead><tbody>${o.items.map(i=>`<tr><td>${U.esc(i.name)}${i.box?'<i>'+U.esc(U.boxText(i))+'</i>':''}<i>${money(i.price)}${i.unit==='kg'?' / kg':' each'}${i.disc?' · less '+money(i.disc):''}</i></td><td class="c">${i.unit==='kg'?U.qtyLabel(i)+(i.qty>1?' × '+i.qty:''):i.qty}</td><td class="r">${money(U.lineTotal(i))}</td></tr>`).join('')}</tbody></table>
    <div class="tw"><span class="ipay ${cancelled?'off':p.paid?'paid':''}">${cancelled?'Cancelled':p.paid?'Paid · '+U.esc(payName(p.method,o.fulfil)):o.canPay?'Awaiting payment':'Awaiting payment · '+U.esc(payName(p.method,o.fulfil))}</span>
     <div class="tot">${row('Subtotal',money(o.subtotal))}${o.discount?row('Discount','− '+money(o.discount)):''}${o.fulfil==='delivery'?row('Delivery',o.delivery?money(o.delivery):'Complimentary'):''}${row('Net (excl. VAT)',money(U.r2(o.total-o.vat)))}${row('VAT '+S.vatRate+'%',money(o.vat))}<div class="g"><span>Total</span><span>${money(o.total)}</span></div></div></div>
    ${receipt&&p.paid?`<div class="rcp"><div><small>Amount received</small><b>${money(o.total)}</b></div><div><small>Date</small>${p.paidAt?dmy(p.paidAt):'—'}</div><div><small>Method</small>${U.esc(payName(p.method,o.fulfil))}</div><div><small>Reference</small>${U.esc(o.paidRef||p.ref||'—')}</div></div>`:''}
@@ -1539,7 +1549,9 @@ function pageMyo(){
     $m('#mdone').innerHTML=`<div class="mnow" style="margin-top:22px">Your box is ready</div><ol>${sel.map((id,i)=>{const p=P(id);return `<li><i>${i+1}</i><img src="${U.esc(p.img)}" alt=""><b>${U.esc(p.name)}</b></li>`}).join('')}</ol>
       <button class="btn btn-dark" id="madd">Add my box to the bag · ${money(price())}</button><button class="again" id="mopen">Open the box and change it</button>`;
     setTimeout(()=>{if(location.pathname!==here)return;$m('#mbox').classList.add('closed');const y=$m('.myo-stage').getBoundingClientRect().top+window.scrollY-110;if(Math.abs(window.scrollY-y)>60)window.scrollTo({top:Math.max(0,y),behavior:'smooth'})},600);
-    $m('#madd').onclick=()=>toast('Preview: the order is connected after you approve this design.');
+    $m('#madd').onclick=()=>{const ps=sel.map(P);if(ps.some(p=>!p))return;
+      try{const ek=sessionStorage.getItem('tt_myo_edit');if(ek){Cart.items=Cart.items.filter(i=>i.k!==ek);sessionStorage.removeItem('tt_myo_edit')}}catch(e){}   // a box opened from the bag to be changed replaces itself
+      Cart.addBox(c,ps,price());toast('Your box is in the bag ✓');openDrawer('cart')};
     $m('#mopen').onclick=()=>{done=false;swap=false;$m('#mbox').classList.remove('closed');$m('#myo').classList.remove('done');act=0;swap=true;state()}};
   const settle=()=>{busy=true;setTimeout(()=>{busy=false;if(location.pathname===here&&nextEmpty()<0&&!done)finish()},c.per*55+700)};
   const add=id=>{if(busy||done)return;if(uses(id)>=c.maxSame&&!(swap&&sel[act]===id)){toast('This chocolate already fills '+c.maxSame+' '+(c.maxSame===1?'line':'lines'));return}

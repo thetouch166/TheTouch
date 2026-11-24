@@ -57,9 +57,13 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
   with the monogram), the story block (`.hstory`: the profile quote `STATEMENT` lights up word by word, `paintStmt`), the box invitation (`.hmyo`, only
   while Make your own is open). The About page (`pageAbout`, classes `ab-…`) follows the company profile; its pictures are in `img/about/`.
 - **Make your own box** (`/make-your-own`, `pageMyo`; settings `settings.myo`, read through `TT.myoCfg()`, price by `TT.myoPrice(c, prices)`: by weight, per kg or
-  fixed, all set on the admin screen "Own box", `renderMyo`). The customer fills the box line by line; **putting the box in the bag is not built yet**, so
-  the page is closed (`myo.on` must be exactly `true`, the admin switch is disabled). Open it only together with: the box as a bag line, the chosen lines on
-  the order / invoice / WhatsApp text / admin order, stock per chosen chocolate, and the price rebuilt on the server for card payment.
+  fixed, all set on the admin screen "Own box", `renderMyo`; closed until `myo.on` is exactly `true`). The customer fills the box line by line and adds it
+  to the bag as ONE line: `{pid:'myo', unit:'pc', price, qty, box:[{pid,name,g}]}` (one `box` entry per line of the box, `g` = grams of that line;
+  `Cart.addBox`, "Change" in the bag = `editBox`). `syncCart` re-prices it and drops it when the page is closed or a chosen chocolate is gone. The lines
+  travel with the order (`cleanOrder` keeps `box`, `U.boxText(l)` = "1 Kunafah · 2 …") and are shown in the checkout summary, the customer invoice, the
+  WhatsApp text, the admin order + new-order pop-up (`boxList`), receipt, A4 invoice and the shop's e-mail. Stock: `applyStock` takes each line's chocolate
+  by its grams. Card payment: `priceOrder` in the API rebuilds the price with its own `myoCfg` / `myoPrice` (keep them the same as store.js) and refuses a
+  box with another price or with a chocolate that is not offered. Test: `python tests/myo_test.py <folder>` (same servers as pay_test).
 - Admin → Products: the cards (`#pkpi`) include "In the shop" = kg of loose chocolate + boxed pieces, and `#psum` totals the list on screen (kg, pieces, value
   at selling price). Studio product pictures (white ground, caption cut off) go in `public/img/` so the website blends them into the cream (`isPhoto`).
 - New-order alert in the admin: pop-up with the order + sound (`orderAlert`, `showAlert`, `chime`, `ringStart`), settings per device in
