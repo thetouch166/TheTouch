@@ -458,7 +458,7 @@ body.sbar-on .toast{bottom:96px}
 .qbox.done{border-color:#b9d3bd;background:#eef6ef}.qbox.done h3{color:#2f6b3a}.qbox.off{border-color:#e3c5c9;background:#fbeeef}.qbox.off h3{color:#8a1c2b}
 .invc .ft{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);text-align:center;color:var(--mute);font-size:12px}.invc .ft em{display:block;font-family:var(--serif);font-size:18px;color:var(--bur);margin-bottom:4px}
 @media(max-width:640px){.invc{padding:30px 20px 26px;margin-top:34px}.invc .im{grid-template-columns:1fr;gap:16px}.invc .ih img{height:50px}.invc .ih .t b{font-size:24px}.invc .tot{min-width:0;width:100%}.invc .ipay{white-space:normal}.invc .c{padding-left:8px;padding-right:8px}}
-@media print{body.pinv>*:not(main){display:none!important}body.pinv{background:#fff}body.pinv .ok{padding:0;max-width:none}body.pinv .ok>*:not(.invc){display:none!important}body.pinv .invc{border:0;box-shadow:none;margin:0;padding:6mm 2mm}}
+@media print{body.pinv>*:not(main){display:none!important}body.pinv{background:#fff}body.pinv .ok{padding:0;max-width:none}body.pinv .ok>*:not(.invc):not(.tdoc){display:none!important}body.pinv .invc{border:0;box-shadow:none;margin:0;padding:6mm 2mm}}
 /* policy pages */
 .legal{max-width:760px;margin:0 auto;padding:0 0 30px}
 .legal h2{font-family:var(--serif);font-size:26px;font-weight:500;color:var(--bur);margin:40px 0 12px}
@@ -903,7 +903,8 @@ function waOrderText(o){
   const u=orderUrl(o);if(u)L.push('','Order & invoice:',u);
   return L.join('\n')}
 /* the invoice the customer sees on the order page (and prints / saves as PDF) */
-function invoiceHTML(o,receipt){const p=o.payment||{};const cancelled=o.status==='cancelled';const co=o.company&&o.company.name?o.company:null;   // receipt: the paid version, titled "Receipt"
+function invoiceHTML(o,receipt){if(o.company&&o.company.name)return TT.docHTML(receipt?'receipt':'invoice',o,S,{bank:o.bank,ref:o.paidRef});   // a company invoice: the boutique's own document layout (store.js)
+  const p=o.payment||{};const cancelled=o.status==='cancelled';const co=o.company&&o.company.name?o.company:null;   // receipt: the paid version, titled "Receipt"
   const dmy=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
   const row=(k,v)=>'<div><span>'+k+'</span><span>'+v+'</span></div>';
   const where=o.fulfil==='pickup'?'':U.esc([o.area,o.emirate].filter(Boolean).join(', '));const when=U.esc([fmtDay(o.date),o.slot].filter(Boolean).join(' · '));
@@ -917,18 +918,7 @@ function invoiceHTML(o,receipt){const p=o.payment||{};const cancelled=o.status==
    ${receipt&&p.paid?`<div class="rcp"><div><small>Amount received</small><b>${money(o.total)}</b></div><div><small>Date</small>${p.paidAt?dmy(p.paidAt):'—'}</div><div><small>Method</small>${U.esc(payName(p.method,o.fulfil))}</div><div><small>Reference</small>${U.esc(o.paidRef||p.ref||'—')}</div></div>`:''}
    <div class="ft"><em>${U.esc(S.receiptFooter||'Thank you for choosing The Touch')}</em>thetouchchocolate.com${S.instagram?' · @'+U.esc(S.instagram):''}</div></div>`}
 /* a company's quotation, as the company sees it on /quote/<no>?k=<key> */
-function quoteHTML(q){const c=q.company||{},row=(k,v)=>'<div><span>'+k+'</span><span>'+v+'</span></div>';
-  const dmy=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-  const tag={sent:['Awaiting your approval',''],approved:['Approved','paid'],invoiced:['Approved · invoiced','paid'],declined:['Declined','off'],expired:['Expired','off']}[q.status]||['',''];
-  return `<div class="invc" id="invc"><div class="ih"><img src="img/logo-burgundy.png" alt="The Touch"><div class="t"><b>Quotation</b><span>No. ${U.esc(q.no)}</span><span>${dmy(q.created||Date.now())}</span>${q.validUntil?'<span>Valid until '+U.esc(fmtDay(q.validUntil))+'</span>':''}</div></div>
-   <div class="im"><div><small>From</small><b>${U.esc(S.storeName||'The Touch')}</b><br>${U.esc(S.address)}<br>${U.esc(S.phone)}${S.trn?'<br>TRN '+U.esc(S.trn):''}</div>
-    <div><small>Prepared for</small><b>${U.esc(c.name||'')}</b>${c.address?'<br>'+U.esc(c.address):''}${c.trn?'<br>TRN '+U.esc(c.trn):''}${c.contact?'<br>Attn. '+U.esc(c.contact):''}</div>
-    <div><small>${q.fulfil==='pickup'?'Boutique pick-up':'Delivery'}</small>${q.date?U.esc(fmtDay(q.date)):'Date to be agreed'}${q.subject?'<small style="margin-top:12px">Subject</small>'+U.esc(q.subject):''}</div></div>
-   <table><thead><tr><th>Description</th><th class="c">Qty</th><th class="r">Amount</th></tr></thead><tbody>${q.items.map(i=>`<tr><td>${U.esc(i.name)}<i>${money(i.price)}${i.unit==='kg'?' / kg':' each'}${i.disc?' · less '+money(i.disc):''}</i></td><td class="c">${i.unit==='kg'?U.qtyLabel(i)+(i.qty>1?' × '+i.qty:''):i.qty}</td><td class="r">${money(U.lineTotal(i))}</td></tr>`).join('')}</tbody></table>
-   <div class="tw"><span class="ipay ${tag[1]}">${tag[0]}</span>
-    <div class="tot">${row('Subtotal',money(q.subtotal))}${q.discount?row('Discount','− '+money(q.discount)):''}${q.fulfil==='delivery'?row('Delivery',q.delivery?money(q.delivery):'Complimentary'):''}${row('Net (excl. VAT)',money(U.r2(q.total-q.vat)))}${row('VAT '+S.vatRate+'%',money(q.vat))}<div class="g"><span>Total</span><span>${money(q.total)}</span></div></div></div>
-   ${q.notes?'<div class="qn"><small>Notes</small>'+U.esc(q.notes)+'</div>':''}${q.terms?'<div class="qn"><small>Terms</small>'+U.esc(q.terms)+'</div>':''}
-   <div class="ft"><em>${U.esc(S.receiptFooter||'Thank you for choosing The Touch')}</em>thetouchchocolate.com${S.instagram?' · @'+U.esc(S.instagram):''}</div></div>`}
+function quoteHTML(q){return TT.docHTML('quotation',q,S,{bank:q.bank})}   // the boutique's own document layout (store.js)
 /* quotation page: the company reads it and approves or declines it here; after the boutique makes the invoice it leads to the invoice */
 async function pageQuote(no){
   const qs=new URLSearchParams(location.search),k=/^[A-Za-z0-9]{16,40}$/.test(qs.get('k')||'')?qs.get('k'):'',here=location.pathname,api=window.TT_API;

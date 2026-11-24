@@ -280,17 +280,17 @@ table.t tr:hover td{background:var(--soft2)}
 .grid2 .full{grid-column:1/-1}
 .qbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
 .qbar .seg{min-width:250px}.qbar .inp{flex:1;min-width:180px}
-.qlh,.qline{display:grid;grid-template-columns:minmax(0,1fr) 78px 86px 112px 108px 36px;gap:8px;align-items:center}
+.qlh,.qline{display:grid;grid-template-columns:minmax(0,1fr) 70px 72px 96px 72px 108px 36px;gap:8px;align-items:center}
 .qlh{margin-top:20px;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
-.qline{margin-top:8px}
+.qline{margin-top:10px;padding-bottom:10px;border-bottom:1px solid var(--hair)}
 .qline .inp{height:42px;padding:0 10px}.qline .lt{text-align:end;font-size:13px;white-space:nowrap}.qline .x{width:34px;height:34px}
+.qline .lt small{display:block;font-weight:500;font-size:10.5px;color:var(--mute)}
+.qline .ds{grid-column:1/-2;height:36px;font-size:12.5px}
 .qsum{margin-top:18px;margin-inline-start:auto;max-width:320px;font-size:13px}
 .qsum div{display:flex;justify-content:space-between;gap:20px;padding:5px 0;color:var(--slate)}
 .qsum .g{border-top:1.5px solid var(--line);margin-top:6px;padding-top:10px;font-size:18px;font-weight:700;color:var(--hd)}
-@media(max-width:700px){.qlh{display:none}.qline{grid-template-columns:1fr 1fr 1fr 36px;padding:10px 0;border-bottom:1px solid var(--hair)}.qline .nm{grid-column:1/-1}.qline .lt{grid-column:1/4;grid-row:3;text-align:start}.qline .x{grid-row:2;grid-column:4}.qbar .seg{min-width:0;width:100%}.qbar .btn{flex:1}}
-.inv4 .nt{margin-top:6mm;font-size:8.5pt;color:#5a4f4a;white-space:pre-line}
-.inv4 .sig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10mm;margin-top:18mm}
-.inv4 .sig div{border-top:.8pt solid #2a2228;padding-top:2mm;font-size:7pt;letter-spacing:.16em;text-transform:uppercase;color:#857873}
+@media(max-width:700px){.qlh{display:none}.qline{grid-template-columns:1fr 1fr 1fr 36px}.qline .nm{grid-column:1/-1;grid-row:1}.qline .un{grid-row:2;grid-column:1}.qline .nn{grid-row:2;grid-column:2}.qline .pr{grid-row:2;grid-column:3}.qline .x{grid-row:2;grid-column:4}.qline .dp{grid-row:3;grid-column:1}.qline .lt{grid-row:3;grid-column:2/5}.qline .ds{grid-row:4;grid-column:1/-1}.qbar .seg{min-width:0;width:100%}.qbar .btn{flex:1}}
+/* end quotations */
 /* new-order alert pop-up */
 .mbox.nal{width:min(640px,100%)}
 .mbox.nal .mh{background:linear-gradient(135deg,#55091a,#40050e);border-bottom:2px solid var(--gold)}
@@ -599,6 +599,7 @@ const LOC=LANG==='ar'?'ar-AE-u-nu-latn':'en-GB';
 function setLang(l){try{localStorage.setItem('tt_lang',l)}catch(e){}try{saveT()}catch(e){}location.reload()}
 const AR={
  // quotations for companies
+ 'Company documents':'مستندات الشركات','Legal company name (top of the documents)':'الاسم القانوني للشركة (أعلى المستندات)','Payment terms (filled in on a new quotation)':'شروط الدفع (تُضاف لكل عرض سعر جديد)','Payment terms':'شروط الدفع','Quotation numbers continue from':'ترقيم عروض الأسعار يبدأ من','Invoice numbers continue from':'ترقيم الفواتير يبدأ من','Bank account title':'اسم الحساب البنكي','Account number':'رقم الحساب','Bank':'البنك','Branch code / branch name':'رمز الفرع / اسم الفرع','List price':'السعر الأصلي','Disc. %':'الخصم %',
  'Quotations':'عروض الأسعار','Quotes':'العروض','Companies':'الشركات','Company':'الشركة','+ Company':'+ شركة','+ New quotation':'+ عرض سعر جديد','+ New company':'+ شركة جديدة','+ Quotation':'+ عرض سعر','New quotation':'عرض سعر جديد','Edit quotation':'تعديل عرض السعر','New company':'شركة جديدة','Edit company':'تعديل الشركة','Awaiting approval':'بانتظار الموافقة','Approved · to invoice':'موافق عليها · للفوترة','Invoiced · not paid':'مفوترة · غير مدفوعة','Paid company invoices':'فواتير شركات مدفوعة','Draft':'مسودة','Sent · awaiting approval':'أُرسل · بانتظار الموافقة','Approved · make the invoice':'موافق عليه · أنشئ الفاتورة','Declined':'مرفوض','Invoiced':'تمت الفوترة','Expired':'منتهي الصلاحية','Quotation':'عرض السعر','Valid until':'صالح حتى','Company name':'اسم الشركة','TRN (tax number)':'الرقم الضريبي','Contact person':'الشخص المسؤول','Mobile / WhatsApp':'الجوال / واتساب','Notes (only you see them)':'ملاحظات (تظهر لك فقط)','Save company':'حفظ الشركة','Subject (what it is for)':'الموضوع','Item':'البند','Unit':'الوحدة','Unit price':'سعر الوحدة','+ Add a line':'+ إضافة بند','Hand-over':'التسليم','Delivery fee AED':'رسوم التوصيل (درهم)','Discount AED':'الخصم (درهم)','Delivery / event date':'تاريخ التوصيل / المناسبة','Notes for the company':'ملاحظات للشركة','Terms':'الشروط','Save draft':'حفظ كمسودة','Save & send →':'حفظ وإرسال ←','Duplicate':'نسخ','🖨 Print / PDF':'🖨 طباعة / PDF','Send to company →':'إرسال للشركة ←','Send again':'إرسال مرة أخرى','Mark approved':'تأكيد الموافقة','Create invoice →':'إنشاء الفاتورة ←','Open invoice':'فتح الفاتورة','Send invoice':'إرسال الفاتورة','🖨 Receipt A4':'🖨 إيصال A4','🖨 Invoice A4':'🖨 فاتورة A4','Link for the company':'رابط الشركة','Approved by (name)':'تمت الموافقة من (الاسم)','PO number (optional)':'رقم أمر الشراء (اختياري)','Company invoice':'فاتورة شركة','Approved by the company':'موافقة الشركة','Invoice not paid':'الفاتورة غير مدفوعة','Invoice paid':'الفاتورة مدفوعة',
  // navigation & titles
  'Home':'الرئيسية','POS':'نقطة البيع','Orders':'الطلبات','Products':'المنتجات','Reports':'التقارير','Clients':'العملاء','Events':'المناسبات','Settings':'الإعدادات','Lock':'قفل','More':'المزيد',
@@ -1249,7 +1250,7 @@ function receiptText(o){const L=[`*The Touch* — ${invTitle()} ${o.no}`,invDate
   L.push(`*Total: ${money(o.total)}* (incl. VAT ${money(o.vat)})`,((o.payment||{}).paid?'Paid · ':'Payment: ')+payName(o));
   if(o.fulfil&&o.fulfil!=='instore')L.push(`${fulfilLabel(o)}: ${niceDate(o.date)} ${o.slot||''}`.trim());
   L.push('',S.receiptFooter);if(S.instagram)L.push('@'+S.instagram);return L.join('\n')}
-function printHTML(h,a4){$('#printArea').innerHTML=h;$('#pgsz').textContent=a4?'@page{size:A4;margin:12mm 14mm}':'@page{size:80mm auto;margin:3mm}';const img=$('#printArea img');const go=()=>setTimeout(()=>{try{window.print()}catch(e){}},80);if(img&&!img.complete){img.onload=go;img.onerror=go}else go()}
+function printHTML(h,a4){$('#printArea').innerHTML=h;$('#pgsz').textContent=a4?(h.indexOf('class="tdoc"')>=0?'@page{size:A4;margin:9mm 10mm}':'@page{size:A4;margin:12mm 14mm}'):'@page{size:80mm auto;margin:3mm}';/* company documents carry their own page frame: smaller margins */const img=$('#printArea img');const go=()=>setTimeout(()=>{try{window.print()}catch(e){}},80);if(img&&!img.complete){img.onload=go;img.onerror=go}else go()}
 function printReceipt(o){printHTML(receiptHTML(o))}
 
 /* =================== invoice: branded image (WhatsApp / download) + A4 print / PDF =================== */
@@ -1298,7 +1299,8 @@ async function invoiceCanvas(o){
     y+=8;font(400,20);txt(['@'+S.instagram,'thetouchchocolate.com'].join('   ·   '),W/2,y,'center',IV.mute);y+=70;
     if(draw){x.fillStyle=IV.gold;x.fillRect(0,y,W,3);x.fillStyle=IV.bur;x.fillRect(0,y+3,W,12)}return y+15};
   H=Math.ceil(run(false));c.width=W;c.height=H;run(true);return c}
-function invoiceA4(o,receipt){const p=o.payment||{},co=o.company;   // receipt: the paid version, titled "Receipt"
+function invoiceA4(o,receipt){if(o.company)return TT.docHTML(receipt?'receipt':'invoice',o,S,{bank:S.bank});   // a company invoice: the boutique's own document layout (TT.docHTML in store.js)
+  const p=o.payment||{},co=o.company;   // receipt: the paid version, titled "Receipt"
   return `<div class="inv4"><div class="top"><img src="img/logo-burgundy.png" alt="The Touch"><div><h1>${receipt?'Receipt':invTitle()}</h1><div class="no">${receipt?'For invoice ':''}${esc(o.no)}</div></div></div>
    <div class="meta"><div><div class="lb">From</div><b>${esc(S.storeName||'The Touch')}</b><br>${esc(S.address)}<br>${esc(S.phone)}${S.email?'<br>'+esc(S.email):''}${S.trn?'<br>TRN '+esc(S.trn):''}</div>
     <div><div class="lb">${receipt?'Received from':'Billed to'}</div>${co?`<b>${esc(co.name)}</b>${co.address?'<br>'+esc(co.address):''}${co.trn?'<br>TRN '+esc(co.trn):''}${co.contact?'<br>Attn. '+esc(co.contact):''}`:`<b>${esc(o.customer.name||'Walk-in client')}</b>${o.customer.phone?'<br>'+esc(o.customer.phone):''}${o.customer.email?'<br>'+esc(o.customer.email):''}`}</div>
@@ -1723,10 +1725,13 @@ function renderEvents(){
    paid here) and prints a receipt. Prices are VAT-inclusive like everywhere else. */
 let QUOTES=[],COMPANIES=[],quoteSeen=null,qWatch=false,qTab='quotes',qQ='';
 const QST={draft:['Draft','#9a8f8a'],sent:['Sent · awaiting approval','#cd9754'],approved:['Approved · make the invoice','#2f6b3a'],declined:['Declined','#8a1c2b'],invoiced:['Invoiced','#3b3d50'],expired:['Expired','#857873']};
-const DEF_TERMS='Prices are in AED and include 5% VAT. This quotation is valid until the date shown. The order is confirmed when the quotation is approved; payment is due on receipt of the invoice.';
+/* document numbers the way the boutique writes them: quotation 2026-005, invoice INV-2026-001 (continuing from Settings → Company documents) */
+function nextDocNo(kind){const y=new Date().getFullYear(),pre=kind==='quote'?y+'-':'INV-'+y+'-';
+  const used=(kind==='quote'?QUOTES.map(q=>q.no):ORDERS.filter(o=>o.channel==='b2b').map(o=>o.no)).map(n=>{n=String(n||'');return n.startsWith(pre)&&/^\d+$/.test(n.slice(pre.length))?+n.slice(pre.length):0});
+  return pre+String(Math.max(+(kind==='quote'?S.quoteStart:S.invoiceStart)||1,Math.max(0,...used)+1)).padStart(3,'0')}
 function chIc(o){return o.channel==='web'?'🌐':o.channel==='b2b'?'🏢':'🏬'}
 function cleanQuote(q){if(!q||!q.id)return null;const t=(v,n)=>String(v==null?'':v).slice(0,n||300),sid=v=>String(v==null?'':v).replace(/[^A-Za-z0-9_\-]/g,'').slice(0,64),c=q.company||{},num=v=>{v=+v;return isFinite(v)?v:0};
-  const items=(Array.isArray(q.items)?q.items:[]).slice(0,100).map(l=>{l=l||{};return {pid:sid(l.pid),name:t(l.name,200),unit:l.unit==='kg'?'kg':'pc',price:Math.max(0,num(l.price)),grams:Math.max(0,num(l.grams)),qty:Math.max(0,Math.round(num(l.qty))),disc:Math.max(0,num(l.disc))}});
+  const items=(Array.isArray(q.items)?q.items:[]).slice(0,100).map(l=>{l=l||{};const x={pid:sid(l.pid),name:t(l.name,200),unit:l.unit==='kg'?'kg':'pc',price:Math.max(0,num(l.price)),grams:Math.max(0,num(l.grams)),qty:Math.max(0,Math.round(num(l.qty))),disc:Math.max(0,num(l.disc))};if(l.desc)x.desc=t(l.desc,300);if(num(l.orig)>0)x.orig=num(l.orig);return x});
   return Object.assign({},q,{id:sid(q.id),no:sid(q.no),created:num(q.created),status:['draft','sent','approved','declined','invoiced'].includes(q.status)?q.status:'draft',
     company:{id:sid(c.id),name:t(c.name,200),trn:t(c.trn,40),address:t(c.address,400),contact:t(c.contact,120),phone:t(c.phone,40),email:t(c.email,160)},items,
     subject:t(q.subject,200),notes:t(q.notes,2000),terms:t(q.terms,3000),date:/^\d{4}-\d\d-\d\d$/.test(q.date||'')?q.date:'',validUntil:/^\d{4}-\d\d-\d\d$/.test(q.validUntil||'')?q.validUntil:'',
@@ -1798,17 +1803,18 @@ function companyForm(c,after){const isNew=!c;c=c||{id:'',name:'',trn:'',address:
   return m}
 
 function quoteForm(q,companyId){
-  q=q?JSON.parse(JSON.stringify(q)):{id:'',no:'',status:'draft',company:{},subject:'',items:[],discount:0,delivery:0,fulfil:'delivery',date:'',validUntil:localISO(new Date(Date.now()+14*864e5)),notes:'',terms:S.quoteTerms||DEF_TERMS};
-  let coId=companyId||(q.company&&q.company.id)||'';const blank=()=>({pid:'',name:'',unit:'pc',price:0,n:1});
-  const lines=(q.items||[]).length?q.items.map(l=>({pid:l.pid||'',name:l.name,unit:l.unit==='kg'?'kg':'pc',price:+l.price||0,n:l.unit==='kg'?U.r2(l.grams*l.qty/1000):l.qty})):[blank()];
+  q=q?JSON.parse(JSON.stringify(q)):{id:'',no:'',status:'draft',company:{},subject:'',items:[],discount:0,delivery:0,fulfil:'delivery',date:'',validUntil:localISO(new Date(Date.now()+14*864e5)),notes:'',terms:S.payTerms||'100% on advance.'};
+  // a line in the form: list = price before discount, dp = discount %, n = pieces or kilos; the unit price on the document is list less dp
+  let coId=companyId||(q.company&&q.company.id)||'';const blank=()=>({pid:'',name:'',desc:'',unit:'pc',list:0,dp:0,n:1}),net=l=>U.r2(l.list*(1-Math.min(100,Math.max(0,l.dp))/100));
+  const lines=(q.items||[]).length?q.items.map(l=>{const pr=+l.price||0,or=+l.orig>pr?+l.orig:pr;return {pid:l.pid||'',name:l.name,desc:l.desc||'',unit:l.unit==='kg'?'kg':'pc',list:or,dp:or>pr?Math.round((1-pr/or)*1000)/10:0,n:l.unit==='kg'?U.r2(l.grams*l.qty/1000):l.qty}}):[blank()];
   const cat=PRODUCTS.filter(p=>p.active!==false).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
   const m=modal(`<div class="mh"><h3>${q.id?'Edit quotation':'New quotation'}${q.no?' · <span data-en>'+esc(q.no)+'</span>':''}</h3><button class="x" data-close aria-label="Close">×</button></div>
    <div class="mb"><div class="grid2">
      <div class="fld full"><label>Company</label><div style="display:flex;gap:8px"><select id="q_co" style="flex:1"></select><button class="btn b-line" id="q_conew" type="button" style="height:46px">+ New company</button></div></div>
      <div class="fld full"><label>Subject (what it is for)</label><input id="q_subject" value="${esc(q.subject||'')}" maxlength="200" placeholder="e.g. National Day gifts, 120 boxes"></div></div>
-    <div class="qlh"><span>Item</span><span>Unit</span><span>Qty</span><span>Unit price</span><span style="text-align:end">Total</span><span></span></div>
+    <div class="qlh"><span>Item</span><span>Unit</span><span>Qty</span><span>List price</span><span>Disc. %</span><span style="text-align:end">Total</span><span></span></div>
     <div id="q_lines"></div><datalist id="q_prods">${cat.map(p=>`<option value="${esc(p.name)}">`).join('')}</datalist>
-    <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap"><button class="btn b-line b-sm" id="q_add" type="button">+ Add a line</button><span class="small muted">Type a name, or pick a product from the list. Prices include VAT.</span></div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap"><button class="btn b-line b-sm" id="q_add" type="button">+ Add a line</button><span class="small muted">Type a name, or pick a product from the list. A discount % shows the original price on the document.</span></div>
     <div class="grid2" style="margin-top:18px">
      <div class="fld"><label>Hand-over</label><select id="q_fulfil"><option value="delivery" ${q.fulfil!=='pickup'?'selected':''}>Delivery</option><option value="pickup" ${q.fulfil==='pickup'?'selected':''}>Boutique pick-up</option></select></div>
      <div class="fld"><label>Delivery fee AED</label><input id="q_delivery" type="number" inputmode="decimal" min="0" step="any" value="${+q.delivery||0}"></div>
@@ -1816,21 +1822,24 @@ function quoteForm(q,companyId){
      <div class="fld"><label>Delivery / event date</label><input id="q_date" type="date" value="${esc(q.date||'')}"></div>
      <div class="fld"><label>Valid until</label><input id="q_valid" type="date" value="${esc(q.validUntil||'')}"></div>
      <div class="fld full"><label>Notes for the company</label><textarea id="q_notes" maxlength="2000">${esc(q.notes||'')}</textarea></div>
-     <div class="fld full"><label>Terms</label><textarea id="q_terms" maxlength="3000">${esc(q.terms||'')}</textarea></div></div>
+     <div class="fld full"><label>Payment terms</label><input id="q_terms" maxlength="300" value="${esc(q.terms||'')}"></div></div>
     <div class="qsum" id="q_sum"></div></div>
    <div class="mf"><button class="btn b-line" data-close>Cancel</button><button class="btn b-line" id="q_save">Save draft</button><button class="btn b-dark" id="q_send" style="min-width:150px">Save &amp; send →</button></div>`,'wide qedit');
   const g=id=>m.querySelector('#'+id),v=id=>g(id).value.trim();
   const coOpts=()=>{g('q_co').innerHTML='<option value="">Choose a company…</option>'+COMPANIES.map(c=>`<option value="${c.id}" ${c.id===coId?'selected':''}>${esc(c.name)}</option>`).join('')};
-  const items=()=>lines.filter(l=>String(l.name).trim()&&l.n>0).map(l=>l.unit==='kg'?{pid:l.pid,name:String(l.name).trim().slice(0,200),unit:'kg',price:U.r2(l.price),grams:Math.round(l.n*1000),qty:1,disc:0}:{pid:l.pid,name:String(l.name).trim().slice(0,200),unit:'pc',price:U.r2(l.price),grams:0,qty:Math.max(1,Math.round(l.n)),disc:0});
+  const items=()=>lines.filter(l=>String(l.name).trim()&&l.n>0).map(l=>{const x=l.unit==='kg'?{pid:l.pid,name:String(l.name).trim().slice(0,200),unit:'kg',price:net(l),grams:Math.round(l.n*1000),qty:1,disc:0}:{pid:l.pid,name:String(l.name).trim().slice(0,200),unit:'pc',price:net(l),grams:0,qty:Math.max(1,Math.round(l.n)),disc:0};
+    if(String(l.desc||'').trim())x.desc=String(l.desc).trim().slice(0,300);if(l.dp>0&&l.list>x.price)x.orig=U.r2(l.list);return x});
   const sums=()=>{const fulfil=g('q_fulfil').value,discount=Math.max(0,U.r2(+g('q_discount').value||0)),delivery=fulfil==='delivery'?Math.max(0,U.r2(+g('q_delivery').value||0)):0,it=items();return Object.assign({items:it,discount,delivery,fulfil},qSums(it,discount,delivery,fulfil))};
   const drawSum=()=>{const s=sums();g('q_delivery').closest('.fld').style.visibility=s.fulfil==='delivery'?'':'hidden';
     g('q_sum').innerHTML=`<div><span>Subtotal</span><span>${money(s.subtotal)}</span></div>${s.discount?`<div><span>Discount</span><span>− ${money(s.discount)}</span></div>`:''}${s.fulfil==='delivery'?`<div><span>Delivery</span><span>${s.delivery?money(s.delivery):'Free'}</span></div>`:''}<div><span>VAT ${S.vatRate}% (included)</span><span>${money(s.vat)}</span></div><div class="g"><span>Total</span><span>${money(s.total)}</span></div>`;
-    m.querySelectorAll('.qline').forEach(r=>{const l=lines[+r.dataset.i];if(l)r.querySelector('.lt').textContent=money(U.r2(l.price*(l.unit==='kg'?l.n:Math.max(0,Math.round(l.n)))))})};
-  const drawLines=()=>{g('q_lines').innerHTML=lines.map((l,i)=>`<div class="qline" data-i="${i}"><input class="inp nm" list="q_prods" placeholder="Item or service" value="${esc(l.name)}" maxlength="200" aria-label="Item"><select class="inp un" aria-label="Unit"><option value="pc" ${l.unit==='pc'?'selected':''}>pcs</option><option value="kg" ${l.unit==='kg'?'selected':''}>kg</option></select><input class="inp nn" type="number" inputmode="decimal" min="0" step="any" value="${l.n}" aria-label="Quantity"><input class="inp pr" type="number" inputmode="decimal" min="0" step="any" value="${l.price}" aria-label="Unit price"><b class="lt"></b><button class="x rm" type="button" aria-label="Remove line">×</button></div>`).join('');drawSum()};
+    m.querySelectorAll('.qline').forEach(r=>{const l=lines[+r.dataset.i];if(l)r.querySelector('.lt').innerHTML=money(U.r2(net(l)*(l.unit==='kg'?l.n:Math.max(0,Math.round(l.n)))))+(l.dp>0&&l.list>0?'<small>'+money(net(l))+(l.unit==='kg'?' / kg':' each')+'</small>':'')})};
+  const drawLines=()=>{g('q_lines').innerHTML=lines.map((l,i)=>`<div class="qline" data-i="${i}"><input class="inp nm" list="q_prods" placeholder="Item or service" value="${esc(l.name)}" maxlength="200" aria-label="Item"><select class="inp un" aria-label="Unit"><option value="pc" ${l.unit==='pc'?'selected':''}>pcs</option><option value="kg" ${l.unit==='kg'?'selected':''}>kg</option></select><input class="inp nn" type="number" inputmode="decimal" min="0" step="any" value="${l.n}" aria-label="Quantity"><input class="inp pr" type="number" inputmode="decimal" min="0" step="any" value="${l.list}" aria-label="List price"><input class="inp dp" type="number" inputmode="decimal" min="0" max="100" step="any" value="${l.dp||''}" placeholder="0" aria-label="Discount %"><b class="lt"></b><button class="x rm" type="button" aria-label="Remove line">×</button><input class="inp ds" placeholder="Description on the document (optional), e.g. Premium Belgian chocolates – 1205 g" value="${esc(l.desc||'')}" maxlength="300" aria-label="Description"></div>`).join('');drawSum()};
   g('q_lines').addEventListener('input',e=>{const r=e.target.closest('.qline');if(!r)return;const l=lines[+r.dataset.i],c=e.target.classList;
-    if(c.contains('nm')){l.name=e.target.value;const p=cat.find(x=>x.name===l.name.trim());if(p){if(l.pid!==p.id){l.pid=p.id;l.unit=p.unit==='kg'?'kg':'pc';l.price=+p.price||0;r.querySelector('.un').value=l.unit;r.querySelector('.pr').value=l.price}}else l.pid=''}
+    if(c.contains('nm')){l.name=e.target.value;const p=cat.find(x=>x.name===l.name.trim());if(p){if(l.pid!==p.id){l.pid=p.id;l.unit=p.unit==='kg'?'kg':'pc';l.list=+p.price||0;r.querySelector('.un').value=l.unit;r.querySelector('.pr').value=l.list}}else l.pid=''}
     else if(c.contains('nn'))l.n=Math.max(0,+e.target.value||0);
-    else if(c.contains('pr'))l.price=Math.max(0,+e.target.value||0);
+    else if(c.contains('pr'))l.list=Math.max(0,+e.target.value||0);
+    else if(c.contains('dp'))l.dp=Math.min(100,Math.max(0,+e.target.value||0));
+    else if(c.contains('ds'))l.desc=e.target.value;
     else if(c.contains('un'))l.unit=e.target.value==='kg'?'kg':'pc';
     drawSum()});
   g('q_lines').addEventListener('change',e=>{const r=e.target.closest('.qline');if(r&&e.target.classList.contains('un')){lines[+r.dataset.i].unit=e.target.value==='kg'?'kg':'pc';drawSum()}});
@@ -1842,7 +1851,7 @@ function quoteForm(q,companyId){
   const save=async send=>{const co=COMPANIES.find(c=>c.id===coId);if(!co){toast('Choose the company first');g('q_co').focus();return}
     const s=sums();if(!s.items.length){toast('Add at least one item with a quantity');return}if(!(s.total>0)){toast('The total must be more than zero');return}
     const valid=g('q_valid').value;if(send&&valid&&valid<todayISO()){toast('“Valid until” is in the past');g('q_valid').focus();return}
-    const doc=Object.assign({},q,s,{id:q.id||U.uid('q'),no:q.no||U.orderNo('Q'),key:q.key||U.key(),created:q.created||Date.now(),updated:Date.now(),by:(DB.me&&DB.me.email)||q.by||'',
+    const doc=Object.assign({},q,s,{id:q.id||U.uid('q'),no:q.no||nextDocNo('quote'),key:q.key||U.key(),created:q.created||Date.now(),updated:Date.now(),by:(DB.me&&DB.me.email)||q.by||'',
       company:{id:co.id,name:co.name,trn:co.trn||'',address:co.address||'',contact:co.contact||'',phone:co.phone||'',email:co.email||''},
       subject:v('q_subject').slice(0,200),date:g('q_date').value,validUntil:valid,notes:v('q_notes').slice(0,2000),terms:v('q_terms').slice(0,3000),status:send?'sent':'draft'});
     delete doc.approval;delete doc.declined;if(send)doc.sentAt=Date.now();
@@ -1886,7 +1895,7 @@ function openQuote(id){const q=QUOTES.find(x=>x.id===id);if(!q)return;const s=qS
     ${o?`<div class="giftbox">🧾 Invoice <b data-en>${esc(o.no)}</b> · ${o.status==='cancelled'?'<b style="color:var(--bad)">Cancelled</b>':paid?'<b style="color:var(--ok)">Paid</b> · '+payName(o):'<b style="color:var(--warn)">Not paid yet</b>'}</div>`:''}
     <dl class="kv" style="margin-top:16px"><dt>Company</dt><dd>${[c.contact,c.phone,c.email].filter(Boolean).map(esc).join(' · ')||'—'}${c.trn?'<br>TRN <span data-en>'+esc(c.trn)+'</span>':''}${c.address?'<br>'+esc(c.address):''}</dd>
      <dt>Hand-over</dt><dd>${q.fulfil==='pickup'?'Boutique pick-up':'Delivery'}${q.date?' · <b>'+qDay(q.date)+'</b>':''}</dd><dt>Valid until</dt><dd>${q.validUntil?qDay(q.validUntil):'—'}</dd>${q.notes?`<dt>Notes</dt><dd>${esc(q.notes)}</dd>`:''}</dl>
-    <div style="margin-top:16px">${q.items.map(l=>`<div class="it"><div><b style="font-weight:600">${esc(l.name)}</b><div class="small muted">${l.unit==='kg'?U.qtyLabel(l)+' @ '+money(l.price)+'/kg':money(l.price)} × ${l.qty}</div></div><div style="font-weight:600">${money(U.lineTotal(l))}</div></div>`).join('')}
+    <div style="margin-top:16px">${q.items.map(l=>`<div class="it"><div><b style="font-weight:600">${esc(l.name)}</b><div class="small muted">${l.desc?esc(l.desc)+'<br>':''}${l.unit==='kg'?U.qtyLabel(l)+' @ '+money(l.price)+'/kg':money(l.price)} × ${l.qty}${l.orig>l.price?' · list '+money(l.orig)+', '+(Math.round((1-l.price/l.orig)*1000)/10)+'% off':''}</div></div><div style="font-weight:600">${money(U.lineTotal(l))}</div></div>`).join('')}
      <div class="it"><span class="muted">Subtotal</span><span>${money(q.subtotal)}</span></div>${q.discount?`<div class="it"><span class="muted">Discount</span><span>−${money(q.discount)}</span></div>`:''}${q.fulfil==='delivery'?`<div class="it"><span class="muted">Delivery</span><span>${q.delivery?money(q.delivery):'Free'}</span></div>`:''}
      <div class="it" style="font-weight:700;font-size:16px;border:0"><span>Total <span class="small muted" style="font-weight:500">incl. VAT ${money(q.vat)}</span></span><span>${money(q.total)}</span></div></div></div>
    <div class="mf">${acts}</div>`,'wide');
@@ -1919,7 +1928,7 @@ async function quoteToInvoice(q){
   const old=qInvoice(q);if(old&&old.status!=='cancelled'){openOrder(old.id);return}
   if(!(await ask('Create the invoice?',`An invoice for <b>${money(q.total)}</b> is made for <b>${esc(q.company.name)}</b> from quotation <span data-en>${esc(q.no)}</span>. Stock is taken for the catalogue items.`,'Create invoice')))return;
   const a=q.approval||{},c=q.company;
-  const o={id:U.uid('o'),no:U.orderNo('INV'),channel:'b2b',status:'new',created:Date.now(),customer:{name:c.contact||c.name,phone:c.phone||'',email:c.email||''},
+  const o={id:U.uid('o'),no:nextDocNo('invoice'),terms:q.terms||'',channel:'b2b',status:'new',created:Date.now(),customer:{name:c.contact||c.name,phone:c.phone||'',email:c.email||''},
     company:{id:c.id,name:c.name,trn:c.trn,address:c.address,contact:c.contact,phone:c.phone,email:c.email},quoteNo:q.no,quoteId:q.id,po:a.po||'',
     fulfil:q.fulfil,emirate:'',area:'',address:q.fulfil==='delivery'?(c.address||''):'',date:q.date||'',slot:'',gift:{to:'',phone:'',msg:''},notes:[q.subject,q.notes].filter(Boolean).join(' — ').slice(0,1000),
     items:q.items.map(l=>Object.assign({},l)),subtotal:q.subtotal,discount:q.discount,delivery:q.delivery,total:q.total,vat:q.vat,payment:{method:'link',paid:false},stockApplied:false,cashier:(SHIFT&&SHIFT.cashier)||'',key:U.key()};
@@ -1935,18 +1944,8 @@ async function invoiceSend(o){const cur=ORDERS.find(x=>x.id===o.id);if(cur)o=cur
   const text=['Dear '+(c.contact||o.customer.name||c.name||'client')+',','','Please find your invoice *'+o.no+'* from *The Touch*'+(o.quoteNo?' (quotation '+o.quoteNo+(o.po?', PO '+o.po:'')+')':'')+'.','Total: *'+money(o.total)+'* (VAT included)','',card?'You can see the invoice and pay securely by card here:':'You can see and print the invoice here:',url].concat(card?['','After payment the same page gives you the receipt.']:[],['','*The Touch* ✦']).join('\n');
   return shareModal('Send invoice · <span data-en>'+esc(o.no)+'</span>',c.name||o.customer.name||'',o.total,'Link for the company',url,
     card?'The company opens the link, sees the invoice and pays by card. The invoice turns to Paid here by itself, and the same page gives them the receipt.':'The page shows the invoice to read and print. When the money arrives, press “Mark as paid” on the invoice: the company’s page then shows the receipt.',text,{phone:c.phone||o.customer.phone,email:c.email||o.customer.email})}
-function quoteA4(q){const c=q.company,a=q.approval||{},st=qState(q);
-  return `<div class="inv4"><div class="top"><img src="img/logo-burgundy.png" alt="The Touch"><div><h1>Quotation</h1><div class="no">${esc(q.no)}</div></div></div>
-   <div class="meta"><div><div class="lb">From</div><b>${esc(S.storeName||'The Touch')}</b><br>${esc(S.address)}<br>${esc(S.phone)}${S.email?'<br>'+esc(S.email):''}${S.trn?'<br>TRN '+esc(S.trn):''}</div>
-    <div><div class="lb">Prepared for</div><b>${esc(c.name)}</b>${c.address?'<br>'+esc(c.address):''}${c.trn?'<br>TRN '+esc(c.trn):''}${c.contact?'<br>Attn. '+esc(c.contact):''}${c.phone?'<br>'+esc(c.phone):''}</div>
-    <div><div class="lb">Date</div>${qDay(localISO(new Date(q.created||Date.now())))}${q.validUntil?`<div class="lb" style="margin-top:3mm">Valid until</div>${qDay(q.validUntil)}`:''}<div class="lb" style="margin-top:3mm">${q.fulfil==='pickup'?'Boutique pick-up':'Delivery'}</div>${q.date?qDay(q.date):'Date to be agreed'}</div></div>
-   ${q.subject?`<div style="margin:-3mm 0 6mm"><span class="lb">Subject</span><br><b>${esc(q.subject)}</b></div>`:''}
-   <table><thead><tr><th>Description</th><th class="r">Amount</th></tr></thead><tbody>${invItems(q).map(l=>`<tr><td><b>${esc(l.n)}</b><div class="d">${esc(l.d)}</div></td><td class="r">${l.a}</td></tr>`).join('')}</tbody></table>
-   <div class="tw"><div class="pay ${st==='approved'||st==='invoiced'?'ok':''}">${st==='approved'||st==='invoiced'?'Approved'+(a.name?' · '+esc(a.name):'')+(a.po?' · PO '+esc(a.po):''):st==='declined'?'Declined':st==='expired'?'Expired':'Quotation'}</div>
-    <div class="tot">${invTotals(q).map(([k,v])=>`<div><span>${k}</span><span>${v}</span></div>`).join('')}<div class="grand"><span>Total</span><span>${money(q.total)}</span></div><div class="vi">VAT inclusive</div></div></div>
-   ${q.notes?`<div class="nt"><div class="lb">Notes</div>${esc(q.notes)}</div>`:''}${q.terms?`<div class="nt"><div class="lb">Terms</div>${esc(q.terms)}</div>`:''}
-   ${st==='approved'||st==='invoiced'?'':'<div class="sig"><div>Approved by (name)</div><div>Signature &amp; stamp</div><div>Date</div></div>'}
-   <div class="foot"><i>${esc(S.receiptFooter)}</i><br>@${esc(S.instagram)} · thetouchchocolate.com</div></div>`}
+/* the printed quotation: the same document the company sees on its page (TT.docHTML in store.js) */
+function quoteA4(q){return TT.docHTML('quotation',q,S,{bank:S.bank})}
 
 /* =================== SETTINGS =================== */
 function renderSettings(){
@@ -1967,6 +1966,18 @@ function renderSettings(){
    <div class="card sec own"><h4>Boutique</h4><div class="grid2">
      ${[['storeName','Store name'],['phone','Phone'],['whatsapp','WhatsApp number for orders (e.g. 9715…)'],['instagram','Instagram'],['email','Email'],['trn','VAT TRN (printed on receipts)'],['address','Address'],['vatRate','VAT %'],['announcement','Website announcement bar'],['receiptFooter','Receipt footer']].map(([k,l])=>`<div class="fld ${['announcement','receiptFooter','address'].includes(k)?'full':''}"><label>${l}</label><input data-k="${k}" value="${esc(S[k]==null?'':S[k])}"></div>`).join('')}
    </div></div>
+   <div class="card sec own"><h4>Company documents <small>quotation, invoice and receipt for companies</small></h4><div class="grid2">
+     <div class="fld full"><label>Legal company name (top of the documents)</label><input data-k="legalName" value="${esc(S.legalName||'')}"></div>
+     <div class="fld full"><label>Payment terms (filled in on a new quotation)</label><input data-k="payTerms" value="${esc(S.payTerms||'')}"></div>
+     <div class="fld"><label>Quotation numbers continue from</label><input type="number" min="1" data-k="quoteStart" value="${+S.quoteStart||1}"></div>
+     <div class="fld"><label>Invoice numbers continue from</label><input type="number" min="1" data-k="invoiceStart" value="${+S.invoiceStart||1}"></div>
+     <div class="fld full"><label>Bank account title</label><input data-b="title" data-en value="${esc((S.bank||{}).title||'')}"></div>
+     <div class="fld"><label>IBAN</label><input data-b="iban" data-en value="${esc((S.bank||{}).iban||'')}"></div>
+     <div class="fld"><label>Account number</label><input data-b="account" data-en value="${esc((S.bank||{}).account||'')}"></div>
+     <div class="fld"><label>BIC / SWIFT</label><input data-b="swift" data-en value="${esc((S.bank||{}).swift||'')}"></div>
+     <div class="fld"><label>Bank</label><input data-b="bank" data-en value="${esc((S.bank||{}).bank||'')}"></div>
+     <div class="fld full"><label>Branch code / branch name</label><input data-b="branch" data-en value="${esc((S.bank||{}).branch||'')}"></div></div>
+     <p class="small muted" style="margin-top:12px;line-height:1.6">The bank details are printed on company quotations and invoices only. They are not shown anywhere else on the website.</p></div>
    <div class="card sec own"><h4>Delivery</h4><div class="grid3">${Object.keys(d).map(e=>`<div class="fld"><label>${e} (AED)</label><input type="number" data-d="${e}" value="${d[e]}"></div>`).join('')}
      <div class="fld"><label>Free delivery over (AED)</label><input type="number" data-k="freeDeliveryOver" value="${S.freeDeliveryOver}"></div><div class="fld"><label>Same-day cut-off (hour)</label><input type="number" data-k="sameDayCutoff" value="${S.sameDayCutoff}"></div></div>
      <div class="fld" style="margin-top:14px"><label>Online payment options</label><div class="chips" id="pmeth">${['card_online','cod','card_on_delivery','link'].map(k=>`<button class="chip ${(S.onlinePayments||[]).includes(k)?'on':''}" data-p="${k}">${TT.payLabel(k)}</button>`).join('')}</div></div></div>
@@ -1979,9 +1990,10 @@ function renderSettings(){
   $('#lgseg').onclick=e=>{const b=e.target.closest('[data-l]');if(b&&b.dataset.l!==LANG)setLang(b.dataset.l)};
   if(DB.mode==='live')drawStaff();
   $('#thseg').onclick=e=>{const b=e.target.closest('[data-t]');if(b)setTheme(b.dataset.t)};
-  const sbar=$('#sbar');$('#view .setw').oninput=e=>{if(e.target.closest('[data-k],[data-d]')){sbar.classList.add('dirty');sbar.querySelector('.msg').textContent='Unsaved changes'}};
+  const sbar=$('#sbar');$('#view .setw').oninput=e=>{if(e.target.closest('[data-k],[data-d],[data-b]')){sbar.classList.add('dirty');sbar.querySelector('.msg').textContent='Unsaved changes'}};
   $('#pmeth').onclick=e=>{const b=e.target.closest('.chip');if(b){b.classList.toggle('on');sbar.classList.add('dirty');sbar.querySelector('.msg').textContent='Unsaved changes'}};
-  $('#ssave').onclick=async()=>{const n=Object.assign({},S);$$('#view [data-k]').forEach(i=>{const k=i.dataset.k;n[k]=['vatRate','freeDeliveryOver','sameDayCutoff'].includes(k)?+i.value:i.value.trim()});
+  $('#ssave').onclick=async()=>{const n=Object.assign({},S);$$('#view [data-k]').forEach(i=>{const k=i.dataset.k;n[k]=['vatRate','freeDeliveryOver','sameDayCutoff','quoteStart','invoiceStart'].includes(k)?+i.value:i.value.trim()});
+    n.bank={};$$('#view [data-b]').forEach(i=>n.bank[i.dataset.b]=i.value.trim());n.quoteStart=Math.max(1,Math.round(n.quoteStart)||1);n.invoiceStart=Math.max(1,Math.round(n.invoiceStart)||1);
     n.delivery={};$$('#view [data-d]').forEach(i=>n.delivery[i.dataset.d]=+i.value||0);n.onlinePayments=$$('#pmeth .chip.on').map(b=>b.dataset.p);if(!n.onlinePayments.length)n.onlinePayments=['cod'];
     if(DB.mode==='local'&&!/^\d{4}$/.test(n.pin)){toast('PIN must be 4 digits');return}n.whatsapp=String(n.whatsapp).replace(/\D/g,'');
     await DB.put('settings',Object.assign(n,{id:'main'}));S=n;TT.settings=n;sbar.classList.remove('dirty');sbar.querySelector('.msg').textContent='All changes saved';toast('Settings saved ✓')};

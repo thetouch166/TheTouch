@@ -192,7 +192,7 @@ function publicCreateOk(col, d) {
 /* edge cache for the website's product list + settings (purged when staff save) */
 const cacheKey = (origin, col) => new Request(origin + '/api/db/' + col + '?edge=1');
 async function purge(origin, col) { try { await caches.default.delete(cacheKey(origin, col)); } catch (e) { } }
-const publicDoc = (col, d) => { if (col === 'settings') delete d.pin; return d; };
+const publicDoc = (col, d) => { if (col === 'settings') { delete d.pin; delete d.bank; } return d; };   // bank details: only on a company's own quotation / invoice page
 
 /* "something new happened" signal for admin screens in a background tab: they ask GET /api/ping (no database, so the
    database can sleep) and only load the changes when this time moves. Written when a website order / enquiry arrives
@@ -222,12 +222,14 @@ async function orderView(env, db, no, url) {
   const o = await orderByNo(db, String(no || ''), String(url.searchParams.get('k') || ''));
   if (!o) return err(404, 'Order not found');
   const p = o.payment || {}, n = v => Number(v) || 0;
+  const b2b = o.channel === 'b2b' ? (await getDoc(db, 'settings', 'main')) || {} : null;   // a company invoice also shows the bank details
   return json({
+    bank: b2b && b2b.bank && typeof b2b.bank === 'object' ? b2b.bank : null, terms: String(o.terms || '').slice(0, 3000),
     no: o.no, created: n(o.created), status: o.status, channel: o.channel, fulfil: o.fulfil, emirate: o.emirate || '', area: o.area || '', date: o.date || '', slot: o.slot || '',
     customer: { name: String((o.customer || {}).name || '') },
     company: o.company && o.company.name ? { name: String(o.company.name).slice(0, 200), trn: String(o.company.trn || '').slice(0, 40), address: String(o.company.address || '').slice(0, 400), contact: String(o.company.contact || '').slice(0, 120) } : null,
     po: String(o.po || '').slice(0, 60), quoteNo: String(o.quoteNo || '').slice(0, 40), paidRef: p.paid === true ? String(p.ref || '').slice(0, 80) : '',
-    items: (Array.isArray(o.items) ? o.items : []).slice(0, 100).map(l => ({ name: String(l.name || ''), unit: l.unit === 'kg' ? 'kg' : 'pc', price: n(l.price), grams: n(l.grams), qty: n(l.qty), disc: n(l.disc) })),
+    items: (Array.isArray(o.items) ? o.items : []).slice(0, 100).map(l => ({ name: String(l.name || ''), desc: String(l.desc || '').slice(0, 300), unit: l.unit === 'kg' ? 'kg' : 'pc', price: n(l.price), orig: n(l.orig), grams: n(l.grams), qty: n(l.qty), disc: n(l.disc) })),
     subtotal: n(o.subtotal), discount: n(o.discount), delivery: n(o.delivery), total: n(o.total), vat: n(o.vat),
     payment: { method: p.method, paid: p.paid === true, paidAt: n(p.paidAt) }, canPay: payable(env, o)
   });
@@ -253,10 +255,12 @@ async function quoteApi(ctx, db, no, op, url) {
   if (M === 'GET' && !op) {
     const c = q.company || {}, a = q.approval || {}; let invoice = null;
     if (q.orderId && ID.test(String(q.orderId))) { const o = await getDoc(db, 'orders', String(q.orderId)); if (o && o.status !== 'cancelled' && KEY.test(o.key || '')) invoice = { no: o.no, k: o.key, paid: !!(o.payment && o.payment.paid) }; }
+    const st = (await getDoc(db, 'settings', 'main')) || {};
     return json({
+      bank: st.bank && typeof st.bank === 'object' ? st.bank : null,
       no: q.no, created: n(q.created), status: quoteState(q), validUntil: t(q.validUntil, 10), subject: t(q.subject, 200),
       company: { name: t(c.name, 200), trn: t(c.trn, 40), address: t(c.address, 400), contact: t(c.contact, 120) },
-      items: (Array.isArray(q.items) ? q.items : []).slice(0, 100).map(l => ({ name: t(l.name), unit: l.unit === 'kg' ? 'kg' : 'pc', price: n(l.price), grams: n(l.grams), qty: n(l.qty), disc: n(l.disc) })),
+      items: (Array.isArray(q.items) ? q.items : []).slice(0, 100).map(l => ({ name: t(l.name), desc: t(l.desc), unit: l.unit === 'kg' ? 'kg' : 'pc', price: n(l.price), orig: n(l.orig), grams: n(l.grams), qty: n(l.qty), disc: n(l.disc) })),
       subtotal: n(q.subtotal), discount: n(q.discount), delivery: n(q.delivery), total: n(q.total), vat: n(q.vat),
       fulfil: q.fulfil === 'pickup' ? 'pickup' : 'delivery', date: t(q.date, 10), notes: t(q.notes, 2000), terms: t(q.terms, 3000),
       approval: a.at ? { at: n(a.at), name: t(a.name, 120), po: t(a.po, 60) } : null, invoice

@@ -18,7 +18,12 @@ def api(method, path, body=None, token=None):
         try: return e.code, json.loads(e.read().decode() or '{}')
         except Exception: return e.code, {}
 own = api('POST', '/api/login', {'email': 'owner@thetouch.ae', 'pass': 'secret123'})[1]['token']
-T = str(int(time.time()))[-6:]; CO = 'Falcon Trading LLC ' + T; made = {'quotes': [], 'orders': [], 'companies': []}
+T = str(int(time.time()))[-6:]; CO = 'Falcon Trading LLC ' + T; made = {'quotes': [], 'orders': [], 'companies': []}; YEAR = time.strftime('%Y')
+# made-up bank details for the documents (the real ones live only in the shop's settings, never in this repository)
+BANK = {'title': 'TEST BOUTIQUE LLC', 'iban': 'AE000000000000000000001', 'account': '0000000000001', 'swift': 'TESTAEAAXXX', 'bank': 'TEST BANK', 'branch': '001 / TEST STREET'}
+s0 = api('GET', '/api/db/settings/main', token=own)[1]; bank0, qs0 = s0.get('bank'), s0.get('quoteStart')
+api('PATCH', '/api/db/settings/main', {'bank': BANK, 'quoteStart': 5}, own)
+check('bank details are not in the public copy of the settings', 'bank' not in api('GET', '/api/db/settings/main')[1] and BANK['iban'] not in json.dumps(api('GET', '/api/db/settings')[1]))
 
 # 1. rules: quotations and companies are for the owner only
 check('public cannot list quotations or companies', api('GET', '/api/db/quotes')[0] == 401 and api('GET', '/api/db/companies')[0] == 401)
@@ -55,17 +60,19 @@ with sync_playwright() as pw:
     a.fill('.qline:nth-child(1) .nm', P['name']); a.wait_for_timeout(200)
     filled = a.input_value('.qline:nth-child(1) .pr'); unit = a.input_value('.qline:nth-child(1) .un')
     check('picking a product fills its price and unit', abs(float(filled) - float(P['price'])) < 0.001 and unit == ('kg' if P.get('unit') == 'kg' else 'pc'), f'{filled} {unit}')
-    a.fill('.qline:nth-child(1) .nn', '2')
+    a.fill('.qline:nth-child(1) .nn', '2'); a.fill('.qline:nth-child(1) .dp', '20'); a.fill('.qline:nth-child(1) .ds', 'Premium Belgian chocolates, gift wrapped')
     a.click('#q_add'); a.fill('.qline:nth-child(2) .nm', 'Gold ribbon with company logo'); a.fill('.qline:nth-child(2) .nn', '40'); a.fill('.qline:nth-child(2) .pr', '5')
     a.fill('#q_discount', '10'); a.fill('#q_delivery', '25'); a.fill('#q_notes', 'Delivery to the head office reception.')
-    want = round(float(P['price']) * 2 + 200 - 10 + 25, 2)
+    NET = round(float(P['price']) * 0.8, 2); want = round(NET * 2 + 200 - 10 + 25, 2)   # 20% off the first line
+    check('amount in words', a.evaluate("[1288,92.5,1000000,0,110,2015.05].map(TT.U.words).join('|')") == 'One Thousand Two Hundred Eighty-Eight|Ninety-Two and Fifty Fils|One Million|Zero|One Hundred Ten|Two Thousand Fifteen and Five Fils', a.evaluate("[1288,92.5,1000000,0,110,2015.05].map(TT.U.words).join('|')"))
     shown = a.inner_text('#q_sum .g'); check('form total = lines − discount + delivery', f'{want:,.2f}'.rstrip('0').rstrip('.') in shown.replace('AED', '').strip() or f'{want:,.0f}' in shown, f'{shown} / {want}')
     a.screenshot(path=out + '/quote-form.png')
     a.click('#q_send'); a.wait_for_selector('#shu'); link = a.input_value('#shu')
-    check('sending gives the company a private link', '/quote/Q' in link and '?k=' in link, link)
+    check('sending gives the company a private link, numbered the boutique\'s way', f'/quote/{YEAR}-005?k=' in link, link)
     a.screenshot(path=out + '/quote-send.png'); a.evaluate("document.querySelectorAll('.modal [data-close]').forEach(b=>b.click())"); a.wait_for_timeout(500)
     q = [x for x in api('GET', '/api/db/quotes', token=own)[1]['rows'] if x.get('company', {}).get('name') == CO][0]; made['quotes'].append(q['id'])
-    check('quotation saved as sent with the right totals', q['status'] == 'sent' and abs(q['total'] - want) < 0.01 and len(q['items']) == 2 and abs(q['subtotal'] - (float(P['price']) * 2 + 200)) < 0.01, json.dumps({k: q[k] for k in ('status', 'subtotal', 'discount', 'delivery', 'total', 'vat')}))
+    check('quotation saved as sent with the right totals', q['status'] == 'sent' and abs(q['total'] - want) < 0.01 and len(q['items']) == 2 and abs(q['subtotal'] - (NET * 2 + 200)) < 0.01, json.dumps({k: q[k] for k in ('status', 'subtotal', 'discount', 'delivery', 'total', 'vat')}))
+    check('discounted line keeps its list price and description; payment terms filled in', abs(q['items'][0]['price'] - NET) < 0.001 and abs(q['items'][0].get('orig', 0) - float(P['price'])) < 0.001 and q['items'][0].get('desc') == 'Premium Belgian chocolates, gift wrapped' and 'orig' not in q['items'][1] and q.get('terms') == '100% on advance.', json.dumps(q['items'][0]) + ' ' + str(q.get('terms')))
     check('list shows it as awaiting approval', 'awaiting approval' in a.inner_text('#view').lower())
 
     # 4. the company's page
@@ -77,6 +84,10 @@ with sync_playwright() as pw:
     c.goto(link); c.wait_for_selector('#qaGo', timeout=30000)
     txt = c.inner_text('main')
     check('company sees its quotation: name, items, total', CO in txt and 'Gold ribbon with company logo' in txt and 'National Day gifts' in txt and 'Quotation' in txt, txt[:160].replace('\n', ' '))
+    doc = c.inner_text('#invc')
+    check('document in the boutique\'s layout: legal name, number, date, table, words, terms', 'The Touch Planners For Chocolates and Sweets' in doc and f'Quotation Number: {YEAR}-005' in doc and 'Currency: AED' in doc and 'Total Amount' in doc and 'Amount in words: AED ' + c.evaluate("TT.U.words(%s)" % want) + ' Only' in doc and 'Payment Terms:' in doc and '100% on advance.' in doc and 'To: Mariam Al Falasi' in doc, doc[:260].replace('\n', ' '))
+    check('discount note and description on the line', 'Original price: AED ' + f"{float(P['price']):,.2f}" + ' · 20% discount applied' in doc and 'Premium Belgian chocolates, gift wrapped' in doc)
+    check('bank account details on the quotation', 'Bank Account Details' in doc and 'IBAN : ' + BANK['iban'] in doc and 'Account Title : TEST BOUTIQUE LLC' in doc and 'BIC / SWIFT : TESTAEAAXXX' in doc)
     c.screenshot(path=out + '/quote-company-page.png', full_page=True)
     c.click('#qaGo'); c.wait_for_timeout(400)
     check('approval needs a name', api('GET', f'/api/quote/{no}?k={k}')[1]['status'] == 'sent')
@@ -93,7 +104,7 @@ with sync_playwright() as pw:
     check('quotation shows who approved and the PO', 'Mariam Al Falasi' in a.inner_text('.modal') and 'PO-7781' in a.inner_text('.modal'))
     a.screenshot(path=out + '/quote-open-approved.png')
     a.click('#qo_inv'); a.click('#ay'); a.wait_for_selector('#shu', timeout=30000); inv = a.input_value('#shu')
-    check('invoice link is the company\'s order page', '/order/INV' in inv and '?k=' in inv, inv)
+    check('invoice link is the company\'s order page, numbered INV-year-number', f'/order/INV-{YEAR}-0' in inv and '?k=' in inv, inv)
     a.screenshot(path=out + '/quote-invoice-send.png'); a.evaluate("document.querySelectorAll('.modal [data-close]').forEach(b=>b.click())"); a.wait_for_timeout(1500)
     q2 = api('GET', '/api/db/quotes/' + q['id'], token=own)[1]; o = api('GET', '/api/db/orders/' + q2.get('orderId', 'x'), token=own)[1]; made['orders'].append(o.get('id'))
     check('invoice order: company, PO, quotation number, same total, confirmed, stock taken', q2['status'] == 'invoiced' and o.get('channel') == 'b2b' and o['company']['name'] == CO and o['po'] == 'PO-7781' and o['quoteNo'] == no and abs(o['total'] - want) < 0.01 and o['status'] == 'confirmed' and o.get('stockApplied') is True, json.dumps({k2: o.get(k2) for k2 in ('channel', 'po', 'quoteNo', 'total', 'status', 'stockApplied')}))
@@ -104,12 +115,13 @@ with sync_playwright() as pw:
     c.goto(inv); c.wait_for_selector('#invc', timeout=30000); c.wait_for_selector('#payNow', timeout=30000)
     it = c.inner_text('#invc')
     check('invoice shows the company, TRN, PO and quotation number', CO in it and '100123456700003' in it and 'PO-7781' in it and no in it and 'Invoice' in it, it[:200].replace('\n', ' '))
+    check('invoice in the same layout with words, terms and bank details', 'Invoice Number: INV-' in it and 'Amount in words: AED' in it and 'Payment Terms:' in it and 'Bank Account Details' in it and BANK['iban'] in it and 'discount applied' in it, it[-330:].replace('\n', ' '))
     c.screenshot(path=out + '/quote-invoice-page.png', full_page=True)
     c.click('#payNow'); c.wait_for_url(lambda u: 'paid=1' in u, timeout=40000); c.wait_for_function("/Payment received/.test((document.querySelector('#payBox')||{}).textContent||'')", timeout=30000)
     c.wait_for_selector('#rcPrint', timeout=30000)   # the order itself arrives a moment after the payment is confirmed
     check('paid by card: page confirms and offers the receipt', c.locator('#rcPrint').count() == 1 and 'paid' in c.inner_text('#invc').lower(), c.inner_text('#invc')[-200:].replace('\n', ' '))
     c.evaluate("window.print=()=>{}"); c.click('#rcPrint'); c.wait_for_timeout(300); rtxt = c.inner_text('#invc')   # the page swaps in the receipt version for printing
-    check('receipt version: "Receipt", received from the company, amount, method', 'Receipt' in rtxt and 'received from' in rtxt.lower() and 'amount received' in rtxt.lower() and CO in rtxt, rtxt[:160].replace('\n', ' '))
+    check('receipt version: "Receipt", the company, payment received with date and method', 'Receipt' in rtxt and 'Receipt for Invoice: INV-' in rtxt and 'Payment received: AED' in rtxt and 'Card online' in rtxt and CO in rtxt and 'Bank Account Details' not in rtxt, rtxt[:160].replace('\n', ' '))
     c.screenshot(path=out + '/quote-receipt.png', full_page=True)
     c.goto(link); c.wait_for_selector('#qBox .btn', timeout=30000)
     check('quotation page now leads to the paid invoice and receipt', 'receipt' in c.inner_text('#qBox').lower() and '/order/INV' in c.get_attribute('#qBox .btn', 'href'), c.inner_text('#qBox').replace('\n', ' ')[:120])
@@ -122,7 +134,13 @@ with sync_playwright() as pw:
     a.evaluate("openOrder('%s')" % o['id']); a.wait_for_selector('[data-rca4]')
     check('order window: company row, Invoice A4 and Receipt A4', 'Company invoice' in a.inner_text('.modal') and CO in a.inner_text('.modal') and a.locator('[data-inva4]').count() == 1)
     r4 = a.evaluate("invoiceA4(ORDERS.find(o=>o.id==='%s'),true)" % o['id']); i4 = a.evaluate("invoiceA4(ORDERS.find(o=>o.id==='%s'))" % o['id']); q4 = a.evaluate("quoteA4(QUOTES.find(q=>q.id==='%s'))" % q['id'])
-    check('A4 documents: receipt, invoice with company block, quotation', 'Receipt' in r4 and 'Amount received' in r4 and 'Received from' in r4 and 'Billed to' in i4 and CO in i4 and 'PO-7781' in i4 and 'Quotation' in q4 and 'Prepared for' in q4)
+    check('A4 documents from the admin: receipt, invoice and quotation in the same layout', 'Receipt' in r4 and 'Payment received:' in r4 and 'Invoice Number:' in i4 and CO in i4 and 'PO-7781' in i4 and 'Bank Account Details' in i4 and BANK['iban'] in i4 and 'PAID' in i4 and 'Quotation Number:' in q4 and 'Amount in words:' in q4 and 'The Touch Planners' in q4 and 'logo-gold.png' in q4)
+    a.evaluate("window.print=()=>{}")   # the real printed pages, saved as PDF to look at
+    a.evaluate("printHTML(quoteA4(QUOTES.find(q=>q.id==='%s')),true)" % q['id']); a.wait_for_timeout(700); a.pdf(path=out + '/quote-a4.pdf', prefer_css_page_size=True, print_background=True)
+    a.evaluate("printHTML(invoiceA4(ORDERS.find(o=>o.id==='%s')),true)" % o['id']); a.wait_for_timeout(700); a.pdf(path=out + '/invoice-a4.pdf', prefer_css_page_size=True, print_background=True)
+    a.evaluate("go('settings')"); a.wait_for_selector('[data-b=iban]')
+    check('Settings has the company documents card with the bank details', a.input_value('[data-b=iban]') == BANK['iban'] and a.input_value('[data-k=legalName]').startswith('The Touch Planners') and a.input_value('[data-k=quoteStart]') == '5')
+    a.screenshot(path=out + '/quote-settings.png', full_page=True)
     a.evaluate("document.querySelectorAll('.modal [data-close]').forEach(b=>b.click())")
 
     # 8. decline and expiry (documents written by the owner, answered through the public link)
@@ -150,4 +168,5 @@ for i in made['quotes']: api('DELETE', '/api/db/quotes/' + i, token=own)
 for c2 in api('GET', '/api/db/companies', token=own)[1].get('rows', []):
     if c2.get('name') == CO: api('DELETE', '/api/db/companies/' + c2['id'], token=own)
 if stock0 is not None: api('PATCH', '/api/db/products/' + P['id'], {'stock': stock0}, own)
+api('PATCH', '/api/db/settings/main', {'bank': bank0 or {}, 'quoteStart': qs0 or 1}, own)
 print('ALL PASS' if ok else 'SOME FAILED')

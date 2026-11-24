@@ -42,6 +42,11 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
   quotation has a private page `/quote/<no>?k=<key>` (`pageQuote`; API `GET /api/quote/<no>?k=`, `POST /api/quote/<no>/approve|decline?k=`, once only).
   "Create invoice" turns an approved quotation into an order with `channel:'b2b'`, `company`, `quoteNo`, `po` (number `INV…`), which is sent and paid
   like a payment link; the paid order page offers "Print / save receipt" (`invoiceHTML(o,true)`; admin `invoiceA4(o,true)`).
+  All three company documents use the boutique's own layout (the client's Word sample): **`TT.docHTML(kind, doc, settings, {bank})` + `TT.DOC_CSS` in
+  `js/store.js`** — one renderer for the admin print and the company's pages (class names start with `td` so the site's styles cannot touch them).
+  Legal name, payment terms, numbering (`quoteStart`, `invoiceStart` → `2026-005`, `INV-2026-001`, `nextDocNo`) and the bank details are edited in
+  Admin → Settings → Company documents. `settings.bank` is removed from the public copy of the settings (`publicDoc`) and reaches a company only
+  through its own quotation / invoice page. Never put real bank details in the code or the tests.
 - New-order alert in the admin: pop-up with the order + sound (`orderAlert`, `showAlert`, `chime`, `ringStart`), settings per device in
   localStorage `tt_alert` (Settings → New-order alert). In a background tab the admin asks `GET /api/ping` every 20 s (KV key `sys:ping`,
   no database) and syncs only when it moved, so alerts keep working while the database can sleep.
@@ -96,7 +101,7 @@ tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live agains
   — `unit:'kg'` → price per kg, stock in kg, sold by grams.
 - **order**: `{id, no, channel:'web'|'pos'|'b2b' (b2b = company invoice: also `company:{id,name,trn,address,contact,phone,email}`, `quoteNo`, `quoteId`, `po`), status:'new'|'confirmed'|'preparing'|'ready'|'completed'|'cancelled',
   created, customer:{name,phone,email}, fulfil:'instore'|'pickup'|'delivery', emirate, area, address, date, slot,
-  gift:{to,phone,msg}, notes, items:[{pid,name,unit,price,grams,qty,disc}], subtotal, discount, delivery, total, vat,
+  gift:{to,phone,msg}, notes, items:[{pid,name,unit,price,grams,qty,disc, desc?, orig?}] (desc = second line, orig = list price before a discount; company documents), subtotal, discount, delivery, total, vat,
   payment:{method, paid, cash, card, other, tendered, change, ref, paidAt, paidShift, linkTotal, linkAt, linkBy}, stockApplied, cashier, shiftId, key}`
 - **quote**: `{id, no:'Q…', status:'draft'|'sent'|'approved'|'declined'|'invoiced' (shown as expired when sent and past `validUntil`), created, key, company:{…},
   subject, items:[order lines], subtotal, discount, delivery, total, vat, fulfil:'delivery'|'pickup', date, validUntil, notes, terms, sentAt,

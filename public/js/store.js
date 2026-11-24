@@ -83,7 +83,12 @@
     announcement: 'Complimentary delivery across Abu Dhabi on orders above AED 300 · Same-day delivery before 2 PM',
     receiptFooter: 'Thank you for choosing The Touch — Where Luxury Finds Its Flavor',
     pin: '1234',
-    onlinePayments: ['cod', 'card_on_delivery', 'link']
+    onlinePayments: ['cod', 'card_on_delivery', 'link'],
+    // company documents (quotation / invoice / receipt). The bank details (settings.bank) are entered in Admin → Settings and
+    // stay in the database: they are never part of this file or of the public copy of the settings.
+    legalName: 'The Touch Planners For Chocolates and Sweets LLC–SPC',
+    payTerms: '100% on advance.',
+    quoteStart: 1, invoiceStart: 1
   };
 
   /* ---------------- Utils ---------------- */
@@ -302,7 +307,12 @@
     o.customer = Object.assign({ name: '', phone: '', email: '' }, o.customer || {});
     o.gift = Object.assign({ to: '', phone: '', msg: '' }, o.gift || {});
     o.fulfil = ['instore', 'pickup', 'delivery'].includes(o.fulfil) ? o.fulfil : (o.channel === 'pos' ? 'instore' : 'delivery');
-    o.items = (Array.isArray(o.items) ? o.items : []).slice(0, 100).map(l => ({ pid: safeId(l && l.pid), name: String((l && l.name) || ''), unit: l && l.unit === 'kg' ? 'kg' : 'pc', price: Math.max(0, num(l && l.price)), grams: Math.max(0, num(l && l.grams)), qty: Math.max(0, Math.round(num(l && l.qty))), disc: Math.max(0, num(l && l.disc)) }));
+    o.items = (Array.isArray(o.items) ? o.items : []).slice(0, 100).map(l => {
+      const x = { pid: safeId(l && l.pid), name: String((l && l.name) || ''), unit: l && l.unit === 'kg' ? 'kg' : 'pc', price: Math.max(0, num(l && l.price)), grams: Math.max(0, num(l && l.grams)), qty: Math.max(0, Math.round(num(l && l.qty))), disc: Math.max(0, num(l && l.disc)) };
+      if (l && l.desc) x.desc = String(l.desc).slice(0, 300); if (l && num(l.orig) > 0) x.orig = num(l.orig);   // company documents: second line and list price before discount
+      return x;
+    });
+    o.terms = String(o.terms == null ? '' : o.terms).slice(0, 3000);
     ['subtotal', 'discount', 'delivery', 'total', 'vat'].forEach(k => o[k] = num(o[k]));
     const p = o.payment = Object.assign({}, o.payment || {});
     p.method = METHODS.includes(p.method) ? p.method : 'cod'; p.paid = p.paid === true;
@@ -313,5 +323,91 @@
     }
     return o;
   };
+  /* ---------- company documents: quotation / invoice / receipt in the boutique's own layout ----------
+     One renderer for the admin (print / PDF) and for the company's own pages on the website, so both always look the same.
+     d = a quotation or a company order (same line shape); opt.bank = bank details (kept in the settings, never in the
+     public copy of them); opt.ref = payment reference when the order's own is not there. */
+  const ONES = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  const TENS = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  const below1000 = n => { let s = ''; if (n >= 100) { s = ONES[Math.floor(n / 100)] + ' Hundred'; n %= 100; if (n) s += ' '; } if (n >= 20) s += TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : ''); else if (n > 0) s += ONES[n]; return s; };
+  U.words = function (amount) {   // 1288 → "One Thousand Two Hundred Eighty-Eight" · 92.5 → "Ninety-Two and Fifty Fils"
+    const cents = Math.round((Number(amount) || 0) * 100); let n = Math.floor(cents / 100); const fils = cents % 100, parts = [], big = ['', ' Thousand', ' Million', ' Billion'];
+    if (!n) parts.push('Zero');
+    for (let i = 0; n > 0; i++) { const c = n % 1000; if (c) parts.unshift(below1000(c) + big[i]); n = Math.floor(n / 1000); }
+    return parts.join(' ') + (fils ? ' and ' + below1000(fils) + ' Fils' : '');
+  };
+  U.dmy = function (t) {   // 23/11/2026 from a time or a yyyy-mm-dd date
+    if (typeof t === 'string' && /^\d{4}-\d\d-\d\d$/.test(t)) { const p = t.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+    const d = new Date(Number(t) || Date.now()), p = n => String(n).padStart(2, '0'); return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear();
+  };
+  U.f2 = n => (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  TT.DOC_CSS = `
+.tdoc{position:relative;background:#fff;color:#161616;font-family:Montserrat,'Segoe UI',Arial,sans-serif;font-size:13px;line-height:1.5;border:1px solid #1c1c1c;padding:0 0 24px;margin:44px auto 0;text-align:left;font-variant-numeric:lining-nums;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.tdoc,.tdoc *{box-sizing:border-box}
+.tdoc .tdh{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:22px 40px 14px 34px;border-bottom:2.5px solid #1c1c1c}
+.tdoc .tdco{text-align:center;max-width:312px}
+.tdoc .tdco b{display:block;font-size:17px;font-weight:700;line-height:1.4;margin-bottom:9px;color:#111}
+.tdoc .tdco span{display:block;font-size:13.5px;color:#222}
+.tdoc .tdh img{height:84px;width:auto;flex:none}
+.tdoc h2{font:700 19px/1.3 Montserrat,'Segoe UI',Arial,sans-serif;text-align:center;text-decoration:underline;text-underline-offset:4px;margin:22px 0 16px;color:#111;letter-spacing:0;text-transform:none}
+.tdoc .tdstamp{position:absolute;right:44px;top:138px;border:2px solid #2f6b3a;color:#2f6b3a;font-weight:700;letter-spacing:.22em;padding:5px 14px 5px 17px;font-size:13px;transform:rotate(-6deg);border-radius:4px;background:rgba(255,255,255,.85)}
+.tdoc .tdm{display:grid;grid-template-columns:1.05fr 1fr;gap:24px;padding:0 40px 20px 74px}
+.tdoc .tdm p{margin:0 0 8px;font-size:14px;color:#161616}.tdoc .tdm p.tds{font-size:11.5px;color:#333}.tdoc .tdm b{font-weight:700}
+.tdoc table{width:calc(100% - 8px);margin:0 4px;border-collapse:collapse;font-size:13.5px;table-layout:fixed}
+.tdoc th{background:#5a392b;color:#fff;font-weight:700;padding:11px 6px;border:1px solid #1c1c1c;text-align:center;font-size:13.5px;line-height:1.3;letter-spacing:0;text-transform:none;position:static}
+.tdoc td{border:1px solid #1c1c1c;padding:10px 9px;vertical-align:middle;background:#fff;color:#161616}
+.tdoc tbody.tdi tr:nth-child(odd) td{background:#f6efe8}
+.tdoc td.tdc{text-align:center}
+.tdoc td b{display:block;font-size:15px;font-weight:700;color:#111}
+.tdoc td span{display:block;margin-top:5px}
+.tdoc td i{display:block;font-style:normal;font-size:11px;color:#666;margin-top:5px}
+.tdoc tr.tdsub td{font-weight:500;padding:8px 9px}.tdoc tr.tdsub td:first-child{text-align:right}
+.tdoc tr.tdtot td{background:#d2d0cf;font-weight:700;font-size:15px}.tdoc tr.tdtot td:first-child{text-align:center}
+.tdoc tr.tdw td{font-size:13.5px}.tdoc tr.tdw b{display:inline;font-size:inherit}.tdoc tr.tdw u{font-weight:700}
+.tdoc .tdsg{display:grid;grid-template-columns:1fr 1fr;gap:30px;padding:26px 60px 0;font-weight:700;font-size:12.5px;text-align:center;min-height:118px;line-height:1.9}
+.tdoc .tdbk{margin:4px 60px 0;padding-top:16px;border-top:1px solid #d9d2c8;break-inside:avoid;page-break-inside:avoid}
+.tdoc .tdbk h3{font:700 13.5px/1.3 Montserrat,'Segoe UI',Arial,sans-serif;text-decoration:underline;text-underline-offset:3px;margin:0 0 10px;color:#111;letter-spacing:0;text-transform:none}
+.tdoc .tdbk p{margin:0 0 6px 40px;font-size:13px;color:#161616}
+.tdoc .tdf{margin-top:20px;text-align:center;font-size:11px;color:#8a7f79}
+@media(max-width:640px){.tdoc{font-size:12px;margin-top:30px}.tdoc .tdh{padding:16px 14px 12px;gap:10px}.tdoc .tdco b{font-size:13.5px;margin-bottom:6px}.tdoc .tdco span{font-size:11.5px}.tdoc .tdh img{height:50px}.tdoc h2{font-size:17px;margin:16px 0 12px}
+ .tdoc .tdm{grid-template-columns:1fr;gap:4px;padding:0 16px 14px}.tdoc .tdm p{font-size:12.5px;margin-bottom:5px}.tdoc table{font-size:11.5px}.tdoc th{font-size:10px;padding:8px 2px}.tdoc td{padding:8px 5px}.tdoc td b{font-size:12.5px}
+ .tdoc tr.tdtot td{font-size:12.5px}.tdoc tr.tdw td{font-size:12px}.tdoc .tdsg{padding:20px 14px 0;gap:14px;min-height:90px;font-size:11px}.tdoc .tdbk{margin:4px 16px 0}.tdoc .tdbk p{margin-left:0;font-size:12px;word-break:break-word}.tdoc .tdstamp{right:12px;top:92px;font-size:11px;padding:3px 9px 3px 11px}}
+@media print{.tdoc{margin:0;font-size:10pt;padding-bottom:4mm}.tdoc .tdh{padding:4.5mm 10mm 3mm 9mm}.tdoc .tdh img{height:17.5mm}.tdoc .tdco b{margin-bottom:1.6mm}.tdoc h2{margin:4mm 0 3mm}.tdoc .tdm{padding-bottom:3.5mm}.tdoc .tdm p{margin-bottom:1.3mm}.tdoc td{padding:1.9mm 2.4mm}.tdoc th{padding:2.2mm 1.5mm}.tdoc td span,.tdoc td i{margin-top:.9mm}.tdoc .tdsg{min-height:21mm;padding-top:5mm}.tdoc .tdbk{padding-top:3mm}.tdoc .tdbk h3{margin-bottom:2mm}.tdoc .tdbk p{margin-bottom:.9mm}.tdoc .tdf{margin-top:3mm}.tdoc .tdstamp{top:28mm}}`;
+  TT.docHTML = function (kind, d, S, opt) {   // kind: 'quotation' | 'invoice' | 'receipt'
+    opt = opt || {}; S = S || TT.settings; const e = U.esc, f2 = U.f2, c = d.company || {}, p = d.payment || {};
+    const isQ = kind === 'quotation', rc = kind === 'receipt', paid = !isQ && p.paid === true, legal = S.legalName || S.storeName || 'The Touch';
+    const title = isQ ? 'Quotation' : rc ? 'Receipt' : (S.trn ? 'Tax Invoice' : 'Invoice');
+    const meta = [[isQ ? 'Quotation Number' : rc ? 'Receipt for Invoice' : 'Invoice Number', d.no], ['Date', U.dmy(rc && p.paidAt ? p.paidAt : d.created)], ['Currency', 'AED']];
+    if (isQ && d.validUntil) meta.push(['Valid Until', U.dmy(d.validUntil)]);
+    if (!isQ && d.quoteNo) meta.push(['Quotation Number', d.quoteNo]);
+    if (!isQ && d.po) meta.push(['PO Number', d.po]);
+    const lines = Array.isArray(d.items) ? d.items : [], allPc = lines.length > 0 && lines.every(l => l.unit !== 'kg');
+    const note = l => { const o = Number(l.orig) || 0; return o > l.price + 0.004 ? 'Original price: AED ' + f2(o) + ' · ' + (Math.round((1 - l.price / o) * 1000) / 10) + '% discount applied' : ''; };
+    const rows = lines.map((l, i) => `<tr><td class="tdc">${i + 1}</td><td><b>${e(l.name)}</b>${l.desc ? '<span>' + e(l.desc) + '</span>' : ''}${note(l) ? '<i>' + note(l) + '</i>' : ''}</td><td class="tdc">${l.unit === 'kg' ? U.r2(l.grams * l.qty / 1000) + ' kg' : l.qty}</td><td class="tdc">${f2(l.price)}${l.unit === 'kg' ? '<i>per kg</i>' : ''}</td><td class="tdc">${f2(U.lineTotal(l))}</td></tr>`).join('');
+    const disc = Number(d.discount) || 0, deliv = d.fulfil === 'delivery' ? Number(d.delivery) || 0 : 0, extra = [];
+    if (disc || deliv) extra.push(['Subtotal', f2(d.subtotal)]);
+    if (disc) extra.push(['Discount', '− ' + f2(disc)]);
+    if (deliv) extra.push(['Delivery', f2(deliv)]);
+    if (S.trn) extra.push(['Total excluding VAT', f2(U.r2(d.total - d.vat))], ['VAT ' + (S.vatRate == null ? 5 : S.vatRate) + '%', f2(d.vat)]);
+    const terms = d.terms || S.payTerms || '', b = opt.bank || {}, ref = opt.ref || p.ref || '';
+    const bank = [['Account Title', b.title], ['IBAN', b.iban], ['Account Number', b.account], ['BIC / SWIFT', b.swift], ['Bank', b.bank], ['Branch Code / Branch Name', b.branch]].filter(x => x[1]);
+    return `<div class="tdoc" id="invc"><div class="tdh"><div class="tdco"><b>${e(legal)}</b><span>${e(S.address || 'Abu Dhabi, United Arab Emirates')}</span><span>Tel: ${e(S.phone || '')}</span>${S.trn ? '<span>TRN: ' + e(S.trn) + '</span>' : ''}</div><img src="img/logo-gold.png" alt="The Touch"></div>
+<h2>${title}</h2>${paid ? '<div class="tdstamp">PAID</div>' : ''}
+<div class="tdm"><div><p><b>To:</b> ${e(c.contact || c.name || (d.customer || {}).name || '')}</p>${c.contact && c.name ? '<p>' + e(c.name) + '</p>' : ''}${c.address ? '<p class="tds">' + e(c.address) + '</p>' : ''}${c.trn ? '<p class="tds">TRN: ' + e(c.trn) + '</p>' : ''}${isQ && d.subject ? '<p class="tds"><b>Subject:</b> ' + e(d.subject) + '</p>' : ''}</div>
+ <div>${meta.map(([k, v]) => '<p><b>' + k + ':</b> ' + e(v) + '</p>').join('')}</div></div>
+<table><colgroup><col style="width:6.5%"><col><col style="width:12%"><col style="width:15%"><col style="width:18%"></colgroup>
+ <thead><tr><th>#</th><th>Description</th><th>QTY</th><th>Unit Price<br>(AED)</th><th>Total Amount<br>(AED)</th></tr></thead>
+ <tbody class="tdi">${rows}</tbody>
+ <tbody>${extra.map(([k, v]) => '<tr class="tdsub"><td colspan="4">' + k + '</td><td class="tdc">' + v + '</td></tr>').join('')}
+  <tr class="tdtot"><td colspan="2">Total${S.trn ? ' (including VAT)' : ''}</td><td class="tdc">${allPc ? lines.reduce((a, l) => a + l.qty, 0) : ''}</td><td></td><td class="tdc">${f2(d.total)}</td></tr>
+  <tr class="tdw"><td colspan="5"><b>Amount in words:</b> AED ${U.words(d.total)} Only</td></tr>
+  ${paid ? `<tr class="tdw"><td colspan="5"><b>Payment received:</b> AED ${f2(d.total)} on ${U.dmy(p.paidAt || Date.now())} · ${e(TT.payLabel(p.method))}${ref ? ' · Ref. ' + e(ref) : ''}</td></tr>` : terms ? `<tr class="tdw"><td colspan="5"><u>Payment Terms:</u>&nbsp; ${e(terms)}</td></tr>` : ''}
+  ${isQ && d.notes ? '<tr class="tdw"><td colspan="5"><b>Notes:</b> ' + e(d.notes) + '</td></tr>' : ''}</tbody></table>
+<div class="tdsg"><div>${e(legal)}</div><div>${e(c.name || '')}</div></div>
+${bank.length && !rc ? '<div class="tdbk"><h3>Bank Account Details</h3>' + bank.map(([k, v]) => '<p>' + k + ' : ' + e(v) + '</p>').join('') + '</div>' : ''}
+<div class="tdf">thetouchchocolate.com${S.instagram ? ' · @' + e(S.instagram) : ''}</div></div>`;
+  };
+  try { const st = document.createElement('style'); st.textContent = TT.DOC_CSS; document.head.appendChild(st); } catch (e) { }
+
   window.TT = TT;
 })();
