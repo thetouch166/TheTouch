@@ -103,7 +103,7 @@ a{color:inherit}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--bg);border-radius:11px;padding:4px;gap:4px}
 .seg button{height:36px;border-radius:8px;font-size:12px;font-weight:600;color:var(--slate);transition:all .15s}
 .seg button.on{background:var(--card);color:var(--hd);box-shadow:0 1px 4px rgba(57,38,31,.12)}
-body.cashier .rail button[data-v=reports],body.cashier .rail button[data-v=customers],body.cashier .rail button[data-v=quotes],body.cashier .own,body.cashier [data-ed],body.cashier #padd,body.cashier #ptable .switch,body.cashier .qa .ownb{display:none!important}
+body.cashier .rail button[data-v=reports],body.cashier .rail button[data-v=customers],body.cashier .rail button[data-v=quotes],body.cashier .rail button[data-v=myo],body.cashier .own,body.cashier [data-ed],body.cashier #padd,body.cashier #ptable .switch,body.cashier .qa .ownb{display:none!important}
 .lshow{display:flex;align-items:center;gap:8px;justify-content:center;margin:2px 0 12px;font-size:12px;color:#c9b29a;cursor:pointer}.lshow input{width:16px;height:16px;accent-color:#cd9754}
 .pwrow{display:flex;gap:8px}.pwrow input{flex:1;min-width:0}
 .tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;color:#fff;white-space:nowrap}
@@ -276,6 +276,35 @@ table.t tr:hover td{background:var(--soft2)}
 @keyframes fi{from{opacity:0}}
 .mbox{background:var(--card);border-radius:20px;width:min(520px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden;animation:pu .2s;box-shadow:0 30px 80px rgba(20,6,9,.35)}
 .mbox.wide{width:min(860px,100%)}
+/* make your own box: its own screen */
+.myp{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:18px;align-items:start;max-width:1280px}
+.myp-main{display:grid;gap:16px}
+.myp-side{position:sticky;top:0}
+.myp-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.myon{display:flex;align-items:center;gap:12px;cursor:pointer}.myon input{width:22px;height:22px;accent-color:var(--acc);flex:none}
+.myon b{display:block;font-size:14.5px}.myon small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+.myp-ch{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.mytiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.mytile{position:relative;border:1.5px solid var(--line);border-radius:14px;padding:8px 8px 10px;cursor:pointer;background:var(--card);transition:border-color .15s,transform .15s,box-shadow .15s,opacity .15s;opacity:.6}
+.mytile .ph{position:relative;aspect-ratio:4/3;border-radius:9px;background:#f7f2ec;overflow:hidden;display:grid;place-items:center;margin-bottom:8px}
+.mytile .ph img{width:90%;height:90%;object-fit:contain;mix-blend-mode:multiply}
+.mytile b{display:block;font-size:12.5px;font-weight:600;line-height:1.3}.mytile small{display:block;font-size:11px;color:var(--mute);margin-top:2px}
+.mytile .tk{position:absolute;top:6px;inset-inline-start:6px;width:24px;height:24px;border-radius:50%;background:#fff;border:1.5px solid #d8cbb8;color:transparent;display:grid;place-items:center;font-size:13px;font-weight:700}
+.mytile.on{opacity:1;border-color:var(--acc);box-shadow:0 6px 18px rgba(57,38,31,.1)}
+.mytile.on .tk{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+.mytile:hover{transform:translateY(-2px)}
+.mytile.off{cursor:not-allowed;opacity:.38}
+.mytile .star{position:absolute;top:2px;inset-inline-end:2px;width:34px;height:34px;font-size:18px;color:#cfc3b3;display:grid;place-items:center;border-radius:50%;transition:color .15s,transform .15s}
+.mytile .star.on{color:var(--gold)}.mytile .star:hover{transform:scale(1.2)}
+.mypbox{--lines:9;display:grid;grid-template-columns:repeat(var(--lines),1fr);margin:12px 0 14px;padding:9px;border-radius:6px;background:linear-gradient(165deg,#523229,#34201b);box-shadow:0 14px 26px rgba(40,18,10,.25);direction:ltr}
+.mypbox{overflow:hidden}
+.mypbox .ml{min-width:0;display:grid;gap:2px;padding:4px 2px;background:linear-gradient(90deg,#dcbd86,#f4e4c2 46%,#e6cb99);border-left:2px solid #9a6f35}
+.mypbox .ml:first-child{border-left:0}
+.mypbox i{display:block;aspect-ratio:1/.84;position:relative}
+.mypbox img{position:absolute;left:-20%;top:-20%;width:140%;height:140%;object-fit:contain;mix-blend-mode:multiply}
+.myres{padding:14px 16px;border-radius:12px;background:var(--tint);border:1px solid var(--tintb);font-size:12.5px;line-height:1.7;display:flex;flex-direction:column}
+.myres .big{font-size:26px;font-weight:700;color:var(--hd);line-height:1.3}
+@media(max-width:1100px){.myp{grid-template-columns:1fr}.myp-side{position:static;order:-1}}
 /* occasions manager */
 .ocrow{display:grid;grid-template-columns:auto 52px minmax(0,1.2fr) minmax(0,1fr) auto auto 34px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--hair)}
 .ocrow .mv{display:flex;flex-direction:column;gap:3px}.ocrow .mv .x{width:28px;height:22px;font-size:12px;border-radius:6px}
@@ -457,6 +486,10 @@ table.t tr:hover td{background:var(--soft2)}
 .ptop{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center}.ptop #pq{flex:1;min-width:200px}
 .ptools{display:flex;gap:8px;flex-wrap:wrap}
 .kpis.ks .kpi{padding:14px 18px}.kpis.ks .v{font-size:23px;margin-top:6px}
+.kpis.k5{grid-template-columns:repeat(5,1fr)}.kpi .v small{font-size:.55em;font-weight:600;color:var(--mute)}
+.psum{font-size:13px;color:var(--mute);margin:0 2px 12px}.psum b{color:var(--ink);font-weight:700}
+@media(max-width:1200px){.kpis.k5{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1000px){.kpis.k5{grid-template-columns:1fr 1fr}.kpis.k5 .kpi:last-child{grid-column:1/-1}}
 @media(max-width:760px){.kpis.ks{gap:8px}.kpis.ks .kpi{padding:12px 14px}.kpis.ks .v{font-size:19px;margin-top:4px}.kpis.ks .s{font-size:10.5px}}
 .kbtn{text-align:start;cursor:pointer;transition:border-color .15s,box-shadow .15s}.kbtn:hover{border-color:var(--gold)}.kbtn.on{border-color:var(--acc);box-shadow:0 0 0 3px rgba(64,5,14,.08)}
 .stk .sv{width:auto!important;min-width:70px;padding:0 6px;font-weight:600;font-size:13px;text-decoration:underline;text-decoration-color:var(--tintb);text-underline-offset:4px}
@@ -575,6 +608,7 @@ table.t tr:hover td{background:var(--soft2)}
     <button data-v="reports"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Reports</button>
     <button data-v="customers"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 100-6M22 20c0-3-2-5-5-5"/></svg>Clients</button>
 <button data-v="quotes"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h4"/></svg>Quotes<span class="dot hidden" id="qDot">0</span></button>
+<button data-v="myo"><svg viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Own box</button>
     <button data-v="events"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.8z"/></svg>Events<span class="dot hidden" id="evDot">0</span></button>
     <div class="sp"></div>
     <button data-v="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Settings</button>
@@ -615,6 +649,9 @@ const LANG=(()=>{try{return localStorage.getItem('tt_lang')==='ar'?'ar':'en'}cat
 const LOC=LANG==='ar'?'ar-AE-u-nu-latn':'en-GB';
 function setLang(l){try{localStorage.setItem('tt_lang',l)}catch(e){}try{saveT()}catch(e){}location.reload()}
 const AR={
+ // make your own box
+ 'Own box':'علبتك','How the customer sees it':'كما يراها العميل','Not saved yet':'لم يُحفظ بعد','Open on the website ↗':'فتح على الموقع ↗',
+ 'Make your own':'اصنع علبتك','Make your own box':'اصنع علبتك','The box':'العلبة','The price':'السعر','The words':'النصوص','By weight':'حسب الوزن','Price per kg':'سعر الكيلو','Fixed price':'سعر ثابت','Box name':'اسم العلبة','Weight (kg)':'الوزن (كجم)','Lines in the box':'عدد الصفوف','Pieces in each line':'القطع في كل صف','The chocolates to choose from':'الشوكولاتة المتاحة للاختيار','View on the website ↗':'عرض على الموقع ↗',
  // occasions, contact page
  'Occasions':'المناسبات','+ Add occasion':'+ إضافة مناسبة','Save occasions':'حفظ المناسبات','Show':'إظهار','Opening hours (contact page)':'ساعات العمل (صفحة التواصل)','Google Maps link (contact page, optional)':'رابط خرائط جوجل (اختياري)','Enquiries & Messages':'الطلبات والرسائل','Message':'الرسالة',
  // quotations for companies
@@ -674,7 +711,7 @@ const AR={
  'Could not draw the invoice image — use Print / PDF.':'تعذّر إنشاء صورة الفاتورة — استخدم الطباعة / PDF.',
  // products & stock
  'Search products…':'ابحث عن منتج…','History':'السجل','Stock list':'قائمة المخزون','Count sheet':'ورقة الجرد','Products':'المنتجات','on sale':'معروض للبيع','Restock soon':'أعد التخزين قريباً','All above alert level':'الكل فوق حد التنبيه',
- 'Out of stock':'نفد من المخزون','View':'عرض','Everything available':'كل المنتجات متوفرة','Stock value':'قيمة المخزون','At selling price':'بسعر البيع','Product':'المنتج','Category':'الفئة','Price':'السعر','Stock':'المخزون','On sale':'معروض للبيع',
+ 'Out of stock':'نفد من المخزون','View':'عرض','Everything available':'كل المنتجات متوفرة','Stock value':'قيمة المخزون','At selling price':'بسعر البيع','In the shop':'في المتجر الآن','boxed pieces':'قطعة معلّبة','Ordering from this page is being connected. Set the box, the price and the chocolates now: the switch opens when it is ready.':'يجري ربط الطلب من هذه الصفحة. جهّزي العلبة والسعر والشوكولاتة الآن، وسيُفتح الزر عند الجاهزية.','In this list':'في هذه القائمة','worth':'بقيمة','products':'منتج','Product':'المنتج','Category':'الفئة','Price':'السعر','Stock':'المخزون','On sale':'معروض للبيع',
  'Show password':'إظهار كلمة المرور','Signed in as':'تم تسجيل الدخول باسم','Owner':'المالك','Cashier':'كاشير','Access':'الصلاحية','Last sign-in':'آخر دخول','Never':'لم يدخل بعد','Add a person':'إضافة شخص','Change my password':'تغيير كلمة المرور','New person':'شخص جديد','Edit person':'تعديل الشخص','New password':'كلمة مرور جديدة','Generate':'توليد','Remove':'حذف','Current password':'كلمة المرور الحالية','Repeat the new password':'أعد كلمة المرور الجديدة','Change password':'تغيير كلمة المرور','Password changed ✓':'تم تغيير كلمة المرور ✓','The two passwords are not the same':'كلمتا المرور غير متطابقتين','Remove this person?':'حذف هذا الشخص؟','Removed':'تم الحذف','Developer login':'دخول المطوّر','Could not load the staff list.':'تعذّر تحميل قائمة الموظفين.','Leave empty to keep the current password':'اتركه فارغاً للإبقاء على كلمة المرور الحالية',
  'Owner: everything. Cashier: sales, orders, shifts and stock counts — not prices, products, reports, clients or settings.':'المالك: كل شيء. الكاشير: المبيعات والطلبات والورديات وجرد المخزون فقط — دون الأسعار والمنتجات والتقارير والعملاء والإعدادات.',
  'At least 8 characters, with letters and numbers. Write it down for this person — it is not shown again.':'8 أحرف على الأقل، بحروف وأرقام. دوّنها لهذا الشخص — لن تظهر مرة أخرى.',
@@ -860,7 +897,7 @@ $('#emailUI').onsubmit=async e=>{e.preventDefault();$('#lerr').textContent='';co
 async function lock(){if(DB.mode!=='local'){saveT();await DB.signOut();location.reload();return}sessionStorage.removeItem('tt_admin');pin='';drawDots();$('#lerr').textContent='';$('#login').classList.remove('hidden')}
 $('#lockBtn').onclick=lock;
 let started=false;
-const CASHIER=()=>DB.role==='cashier';const NOCASH=['reports','customers','quotes'];   // screens a cashier cannot open
+const CASHIER=()=>DB.role==='cashier';const NOCASH=['reports','customers','quotes','myo'];   // screens a cashier cannot open
 async function unlock(){$('#login').classList.add('hidden');document.body.classList.toggle('cashier',CASHIER());if(started){watchQuotes();return}started=true;await startData();watchQuotes();go(VIEW);if(!SHIFT)setTimeout(()=>openShiftModal(),300)}
 
 /* =================== data =================== */
@@ -922,10 +959,10 @@ function sampleOrder(){const p=PRODUCTS.find(x=>x.active!==false&&x.web!==false&
     items:[{pid:p.id,name:p.name,unit:'pc',price:+p.price||0,qty:1}],subtotal:+p.price||0,discount:0,delivery:0,total:+p.price||0,vat:U.vatPart(+p.price||0,S.vatRate),payment:{method:'cod',paid:false}})}
 
 /* =================== router =================== */
-const TITLES={home:'Good day',pos:'Point of Sale',orders:'Orders',products:'Products & Stock',reports:'Reports',customers:'Clients',events:'Enquiries & Messages',quotes:'Quotations',settings:'Settings'};
+const TITLES={home:'Good day',pos:'Point of Sale',orders:'Orders',products:'Products & Stock',reports:'Reports',customers:'Clients',events:'Enquiries & Messages',quotes:'Quotations',myo:'Make your own box',settings:'Settings'};
 $('#rail').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(b)go(b.dataset.v)});
 /* phone: secondary sections live in a "More" sheet */
-const MORE=['reports','customers','events','quotes','settings'];
+const MORE=['reports','customers','events','quotes','myo','settings'];
 function closeMore(){const s=$('#moreSheet');if(s)s.remove()}
 function syncMoreDot(){const n=+$('#evDot').textContent||0;$('#moreDot').textContent=n;$('#moreDot').classList.toggle('hidden',!n||$('#evDot').classList.contains('hidden'))}
 $('#moreBtn').onclick=()=>{if($('#moreSheet')){closeMore();return}
@@ -939,7 +976,7 @@ $('#moreBtn').onclick=()=>{if($('#moreSheet')){closeMore();return}
   s.onclick=e=>{const b=e.target.closest('[data-mv]');if(b){closeMore();go(b.dataset.mv);return}if(e.target.closest('[data-lock]')){closeMore();lock();return}if(e.target.closest('[data-lang]')){closeMore();setLang(LANG==='ar'?'en':'ar');return}if(e.target.closest('[data-theme]')){closeMore();setTheme(isDark()?'light':'dark');return}if(e.target.closest('a'))closeMore();else if(e.target===s)closeMore()};
   document.body.appendChild(s)};
 function go(v){if(CASHIER()&&NOCASH.includes(v))v='pos';VIEW=v;closeMore();$$('#rail button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('#moreBtn').classList.toggle('on',MORE.includes(v));$('#vtitle').textContent=TITLES[v];const view=$('#view');view.className='view'+(v==='pos'?' pos':'');view.scrollTop=0;view.onclick=null;view.onchange=null;
-  ({home:renderHome,pos:renderPOS,orders:renderOrders,products:renderProducts,reports:renderReports,customers:renderCustomers,events:renderEvents,quotes:renderQuotes,settings:renderSettings})[v]()}
+  ({home:renderHome,pos:renderPOS,orders:renderOrders,products:renderProducts,reports:renderReports,customers:renderCustomers,events:renderEvents,quotes:renderQuotes,myo:renderMyo,settings:renderSettings})[v]()}
 
 /* =================== HOME / DASHBOARD =================== */
 function renderHome(){
@@ -1474,20 +1511,25 @@ async function setStatus(o,s){
 let pQ='',pCat='all';
 function renderProducts(){
   const view=$('#view');
-  if(!view.querySelector('#ptable')){view.innerHTML=`<div class="ptop"><input class="inp" id="pq" placeholder="Search products…" value="${esc(pQ)}"><div class="ptools"><button class="btn b-line" id="phist">History</button><button class="btn b-line" id="pcsv">⬇ Stock list</button><button class="btn b-line" id="pcount">🖨 Count sheet</button><button class="btn b-line own" id="pocc">Occasions</button><button class="btn b-dark" id="padd">＋ Add product</button></div></div>
-    <div class="kpis ks" id="pkpi"></div><div class="chips" id="pcats" style="margin-bottom:14px"></div><div class="card" style="overflow:auto"><table class="t ptbl" id="ptable"></table></div>`;
-    $('#pq').oninput=e=>{pQ=e.target.value;renderProducts()};$('#padd').onclick=()=>productModal();$('#pocc').onclick=()=>occasionsModal();
+  if(!view.querySelector('#ptable')){view.innerHTML=`<div class="ptop"><input class="inp" id="pq" placeholder="Search products…" value="${esc(pQ)}"><div class="ptools"><button class="btn b-line" id="phist">History</button><button class="btn b-line" id="pcsv">⬇ Stock list</button><button class="btn b-line" id="pcount">🖨 Count sheet</button><button class="btn b-line own" id="pmyo">Make your own</button><button class="btn b-line own" id="pocc">Occasions</button><button class="btn b-dark" id="padd">＋ Add product</button></div></div>
+    <div class="kpis ks k5" id="pkpi"></div><div class="chips" id="pcats" style="margin-bottom:10px"></div><div class="psum" id="psum"></div><div class="card" style="overflow:auto"><table class="t ptbl" id="ptable"></table></div>`;
+    $('#pq').oninput=e=>{pQ=e.target.value;renderProducts()};$('#padd').onclick=()=>productModal();$('#pocc').onclick=()=>occasionsModal();$('#pmyo').onclick=()=>go('myo');
     $('#phist').onclick=()=>stockHistory();$('#pcsv').onclick=stockCSV;$('#pcount').onclick=countSheet;
     $('#pkpi').onclick=e=>{const b=e.target.closest('[data-f]');if(b){pCat=pCat===b.dataset.f?'all':b.dataset.f;renderProducts()}}}
   const st=p=>+p.stock||0;const lowN=PRODUCTS.filter(p=>isLow(p)&&st(p)>0).length,outN=PRODUCTS.filter(p=>st(p)<=0).length;
   const val=Math.round(PRODUCTS.reduce((a,p)=>a+Math.max(0,st(p))*(+p.price||0),0));
+  // what is physically in the shop: loose chocolates in kg, boxed items in pieces (hidden products count too: they are still on the shelf)
+  const tot=l=>({kg:U.r2(l.reduce((a,p)=>a+(p.unit==='kg'?Math.max(0,st(p)):0),0)),pc:l.reduce((a,p)=>a+(p.unit==='kg'?0:Math.max(0,st(p))),0),val:Math.round(l.reduce((a,p)=>a+Math.max(0,st(p))*(+p.price||0),0))});
+  const num=v=>(+v).toLocaleString('en-US',{maximumFractionDigits:2}),all=tot(PRODUCTS);
   $('#pkpi').innerHTML=`<div class="card kpi"><div class="l">Products</div><div class="v">${PRODUCTS.length}</div><div class="s">${PRODUCTS.filter(p=>p.active!==false).length} on sale</div></div>
     <button class="card kpi kbtn ${pCat==='low'?'on':''}" data-f="low"><div class="l">Low stock</div><div class="v" style="color:${lowN?'var(--warn)':'inherit'}">${lowN}</div><div class="s">${lowN?'Restock soon ›':'All above alert level'}</div></button>
     <button class="card kpi kbtn ${pCat==='out'?'on':''}" data-f="out"><div class="l">Out of stock</div><div class="v" style="color:${outN?'var(--bad)':'inherit'}">${outN}</div><div class="s">${outN?'View ›':'Everything available'}</div></button>
+    <div class="card kpi"><div class="l">In the shop</div><div class="v">${num(all.kg)} <small>kg</small></div><div class="s">${num(all.pc)} <span>boxed pieces</span></div></div>
     <div class="card kpi"><div class="l">Stock value</div><div class="v">${money(val)}</div><div class="s">At selling price</div></div>`;
   $('#pcats').innerHTML=[{id:'all',name:'All'},{id:'low',name:'⚠ Low stock'},{id:'out',name:'Out of stock'}].concat(TT.CATS).map(c=>`<button class="chip ${pCat===c.id?'on':''}" data-c="${c.id}">${c.name}</button>`).join('');
   $('#pcats').onclick=e=>{const b=e.target.closest('.chip');if(b){pCat=b.dataset.c;renderProducts()}};
   const q=pQ.toLowerCase();const list=PRODUCTS.filter(p=>(pCat==='all'||(pCat==='low'?isLow(p):pCat==='out'?st(p)<=0:p.cat===pCat))&&(!q||(p.name+' '+(p.sku||'')).toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name));
+  {const t=tot(list);$('#psum').innerHTML=`<span>In this list</span> <b>${list.length}</b> <span>products</span> ·<b>${num(t.kg)} kg</b>${t.pc?` · <b>${num(t.pc)}</b> <span>pcs</span>`:''} · <span>worth</span> <b>${money(t.val)}</b>`}
   $('#ptable').innerHTML=`<thead><tr><th></th><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>On sale</th><th></th></tr></thead><tbody>${list.map(p=>`<tr class="${p.active===false?'off':''}"><td style="width:62px"><img class="pthumb" src="${esc(p.img)}" alt=""></td><td><b>${esc(pn(p))}</b>${p.featured?' <span class="tag" style="background:var(--gold)">Signature</span>':''}<div class="small muted">${esc(p.sku||'')} · ${p.unit==='kg'?'by weight':'per piece'}</div></td><td class="small">${esc(TT.catName(p.cat))}</td>
      <td class="pr"><b>${money(p.price)}</b><span class="small muted">${p.unit==='kg'?' /kg':''}</span></td>
      <td class="stc"><div class="stk ${st(p)<=0?'out':isLow(p)?'low':''}"><button data-sm="${p.id}" aria-label="Less stock" ${st(p)<=0?'disabled':''}>−</button><button class="sv" data-st="${p.id}" title="Receive, count or remove stock">${fmtStock(p)}</button><button data-sp="${p.id}" aria-label="More stock">+</button></div></td>
@@ -1737,6 +1779,77 @@ function renderEvents(){
     <div style="display:flex;gap:8px;align-items:center"><select class="inp evst s-${esc(e.status)}" data-id="${e.id}" aria-label="Enquiry status">${ES.map(s=>`<option value="${s}" ${e.status===s?'selected':''}>${s}</option>`).join('')}</select><a class="btn b-line b-sm" style="height:38px" target="_blank" rel="noopener" href="${waLink(e.phone,'Dear '+e.name+(/^Message/.test(e.type)?', thank you for your message to The Touch. ':', thank you for your '+e.type+' enquiry with The Touch. '))}">WhatsApp</a></div></div>
     <div class="kv" style="margin-top:12px">${/^Message/.test(e.type)?`<dt>Message</dt><dd style="line-height:1.55">${esc(e.msg||'')}</dd>`:`<dt>Event date</dt><dd><b>${fmtD(e.date)}</b></dd><dt>Guests / pieces</dt><dd>${esc(e.guests||'—')}</dd><dt>Budget</dt><dd>${bud(e.budget)}</dd>${e.msg?`<dt>Vision</dt><dd style="line-height:1.55">${esc(e.msg)}</dd>`:''}`}</div></div>`).join('')}</div>`:'<div class="card empty">✦<br><br>Wedding, corporate and celebration enquiries from the website appear here.</div>';
   $('#view').onchange=async e=>{const s=e.target.closest('select[data-id]');if(s){s.className='inp evst s-'+s.value;await DB.patch('enquiries',s.dataset.id,{status:s.value});toast('Enquiry marked as '+s.value)}};
+}
+
+/* =================== MAKE YOUR OWN BOX (its own screen) =================== */
+/* settings.myo holds everything the customer sees on /make-your-own: the box (weight, lines, pieces per line), how its price
+   is worked out (by weight, per kg or fixed: TT.myoPrice in store.js, the same sum the website uses), the words, and the
+   chocolates offered. Loose chocolates can be offered here even when they are "boutique only" in the shop. The right side
+   shows the box and the price as they will look, while you type. */
+function renderMyo(){
+  TT.settings=S;const c=TT.myoCfg();let mode=c.mode,q='';
+  const all=PRODUCTS.filter(p=>p.active!==false&&p.unit==='kg').slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  const hasPhoto=p=>!!p.img&&!/monogram/.test(p.img),inStock=p=>!(p.stock!=null&&p.stock<=0);
+  const items=new Set(c.items.length?c.items:all.filter(hasPhoto).map(p=>p.id)),fav=new Set(c.favourites);
+  const view=$('#view');
+  view.innerHTML=`<div class="myp">
+   <div class="myp-main">
+    <div class="card sec myp-top"><label class="myon"><input type="checkbox" id="my_on" ${c.on?'checked':''} disabled><span><b>Show “Make your own” on the website</b><small>Ordering from this page is being connected. Set the box, the price and the chocolates now: the switch opens when it is ready.</small></span></label>
+      <a class="btn b-line b-sm" target="_blank" rel="noopener" href="${SITE()}/make-your-own">Open on the website ↗</a></div>
+    <div class="card sec"><h4>The box</h4><div class="grid2" style="margin-top:14px">
+      <div class="fld"><label>Box name</label><input id="my_name" value="${esc(c.name)}" maxlength="60"></div>
+      <div class="fld"><label>Weight (kg)</label><input id="my_kg" type="number" inputmode="decimal" min="0.1" step="0.05" value="${U.r2(c.grams/1000)}"></div>
+      <div class="fld"><label>Lines in the box</label><input id="my_lines" type="number" inputmode="numeric" min="1" max="12" value="${c.lines}"></div>
+      <div class="fld"><label>Pieces in each line</label><input id="my_per" type="number" inputmode="numeric" min="3" max="10" value="${c.per}"></div>
+      <div class="fld full"><label>Lines that may hold the same chocolate</label><input id="my_max" type="number" inputmode="numeric" min="1" max="12" value="${c.maxSame}"></div></div></div>
+    <div class="card sec"><h4>The price</h4>
+      <div class="seg" id="my_mode" style="margin-top:14px"><button type="button" data-m="weight">By weight</button><button type="button" data-m="kg">Price per kg</button><button type="button" data-m="fixed">Fixed price</button></div>
+      <p class="small muted" id="my_how" style="margin:10px 0 12px;line-height:1.6"></p>
+      <div class="grid2">
+       <div class="fld" id="my_fkg"><label>Price per kg for this box (AED)</label><input id="my_kgprice" type="number" inputmode="decimal" min="0" step="any" value="${c.kgPrice||''}"></div>
+       <div class="fld" id="my_ffix"><label>Price of the box (AED)</label><input id="my_price" type="number" inputmode="decimal" min="0" step="any" value="${c.price||''}"></div>
+       <div class="fld" id="my_ffee"><label>Box and packaging, added on top (AED)</label><input id="my_fee" type="number" inputmode="decimal" min="0" step="any" value="${c.fee||''}" placeholder="0"></div>
+       <div class="fld" id="my_fround"><label>Round the price</label><select id="my_round"><option value="0">Exact</option><option value="1">Up to a whole dirham</option><option value="5">Up to the next 5</option><option value="10">Up to the next 10</option></select></div></div></div>
+    <div class="card sec"><h4>The words</h4>
+      <div class="fld" style="margin-top:14px"><label>Title</label><input id="my_title" value="${esc(c.title)}" maxlength="80"></div>
+      <div class="fld" style="margin-top:12px"><label>Text under the title</label><textarea id="my_intro" maxlength="300">${esc(c.intro)}</textarea></div></div>
+    <div class="card sec"><div class="myp-ch"><div><h4>The chocolates to choose from</h4><p class="small muted" style="margin-top:4px;line-height:1.6">Tap a chocolate to offer it. The star marks the ones used by “Fill the rest for me”.</p></div>
+       <input class="inp" id="my_q" placeholder="Search…" style="max-width:220px"></div>
+      <div class="mytiles" id="my_list"></div></div>
+   </div>
+   <aside class="myp-side"><div class="card sec">
+      <div class="small muted" style="letter-spacing:.08em;text-transform:uppercase;font-weight:600">How the customer sees it</div>
+      <div class="mypbox" id="my_box"></div>
+      <div class="myres" id="my_res"></div>
+      <button class="btn b-dark" id="my_save" style="width:100%;margin-top:14px;height:50px">Save</button>
+      <div class="small muted" id="my_msg" style="text-align:center;margin-top:8px;min-height:18px"></div></div></aside></div>`;
+  const g=id=>view.querySelector('#'+id),num=(id,d)=>{const v=+g(id).value;return isFinite(v)&&g(id).value!==''?v:d};g('my_round').value=String(c.round);
+  const read=()=>{const lines=Math.min(12,Math.max(1,Math.round(num('my_lines',9))));return {on:g('my_on').checked,title:g('my_title').value.trim().slice(0,80)||'Make your own box',intro:g('my_intro').value.trim().slice(0,300),name:g('my_name').value.trim().slice(0,60)||'Signature box',
+    grams:Math.round(Math.min(10,Math.max(.1,num('my_kg',1.1)))*1000),lines,per:Math.min(10,Math.max(3,Math.round(num('my_per',7)))),mode,kgPrice:Math.max(0,num('my_kgprice',0)),price:Math.max(0,num('my_price',0)),fee:Math.max(0,num('my_fee',0)),round:+g('my_round').value||0,
+    maxSame:Math.min(lines,Math.max(1,Math.round(num('my_max',lines)))),items:all.filter(p=>hasPhoto(p)&&items.has(p.id)).map(p=>p.id),favourites:all.filter(p=>fav.has(p.id)&&items.has(p.id)).map(p=>p.id)}};
+  const tiles=()=>{const k=q.trim().toLowerCase();g('my_list').innerHTML=all.filter(p=>!k||(p.name+' '+(p.ar||'')).toLowerCase().includes(k)).map(p=>{const ok=hasPhoto(p),on=ok&&items.has(p.id);
+    return `<div class="mytile${on?' on':''}${ok?'':' off'}" data-p="${esc(p.id)}" role="checkbox" aria-checked="${on}" tabindex="0"><div class="ph"><img src="${esc(p.img||'img/monogram-flat.png')}" alt="" loading="lazy"><span class="tk">✓</span>${ok?`<button type="button" class="star${fav.has(p.id)?' on':''}" data-f="${esc(p.id)}" aria-label="Favourite">★</button>`:''}</div>
+      <b>${esc(p.name)}</b><small>${money(p.price)} / kg · ${ok?(inStock(p)?fmtStock(p):'<span style="color:var(--bad)">out of stock</span>'):'<span style="color:var(--warn)">add a photo first</span>'}</small></div>`}).join('')||'<div class="empty" style="grid-column:1/-1">No chocolate sold by weight matches.</div>'};
+  const draw=()=>{const x=read(),kg=U.r2(x.grams/1000),off=all.filter(p=>x.items.includes(p.id)),pr=off.map(p=>+p.price||0);
+    view.querySelectorAll('#my_mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
+    g('my_fkg').style.display=mode==='kg'?'':'none';g('my_ffix').style.display=mode==='fixed'?'':'none';g('my_ffee').style.display=mode==='fixed'?'none':'';g('my_fround').style.display=mode==='fixed'?'none':'';
+    g('my_how').textContent=mode==='weight'?'Each line is charged at its own chocolate’s price per kg, so the price follows your product prices by itself.':mode==='kg'?'One price per kg for the whole box, whatever chocolates are chosen.':'One price for the box, whatever chocolates are chosen.';
+    const lo=pr.length?Math.min(...pr):0,hi=pr.length?Math.max(...pr):0,p1=TT.myoPrice(x,Array(x.lines).fill(lo)),p2=TT.myoPrice(x,Array(x.lines).fill(hi)),worth=U.r2(lo*kg),worth2=U.r2(hi*kg);
+    const sums=mode==='weight'?`${kg} kg × ${lo===hi?money(lo):money(lo)+' to '+money(hi)} per kg`+(x.fee?' + '+money(x.fee)+' box':''):mode==='kg'?`${kg} kg × ${money(x.kgPrice)} per kg`+(x.fee?' + '+money(x.fee)+' box':''):'one price for the box';
+    const diff=mode==='weight'?'':(()=>{const d=U.r2(p1-worth2);return `<span class="muted" style="margin-top:6px">The chocolates alone are worth ${lo===hi?money(worth):money(worth)+' to '+money(worth2)} at today’s prices: this box is ${d>=0?money(d)+' above':'<b style="color:var(--bad)">'+money(-d)+' below</b>'} that.</span>`})();
+    g('my_res').innerHTML=!off.length?'<b style="color:var(--bad)">Offer at least one chocolate with a photo.</b>':(mode!=='weight'&&!p1?'<b style="color:var(--bad)">Enter the price.</b>':`<span class="muted">${esc(x.name)} · the customer pays</span><b class="big">${p1===p2?money(p1):money(p1)+' to '+money(p2)}</b><span class="muted">${sums}${x.round&&mode!=='fixed'?' · rounded up':''}</span><span class="muted">${x.lines} lines × ${x.per} = ${x.lines*x.per} pieces · about ${Math.round(x.grams/x.lines)} g a line · ${off.length} ${off.length===1?'chocolate':'chocolates'} offered</span>${diff}`);
+    const show=(x.favourites.length?x.favourites:x.items).map(id=>all.find(p=>p.id===id)).filter(Boolean);
+    g('my_box').style.setProperty('--lines',x.lines);g('my_box').innerHTML=Array.from({length:x.lines},(_,i)=>{const p=show.length?show[i%show.length]:null;return `<div class="ml">${Array.from({length:x.per},()=>`<i>${p?`<img src="${esc(p.img)}" alt="">`:''}</i>`).join('')}</div>`}).join('');
+    g('my_msg').textContent='Not saved yet'};
+  view.querySelector('.myp-main').addEventListener('input',e=>{if(e.target.id==='my_q'){q=e.target.value;tiles();return}draw()});
+  g('my_mode').onclick=e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;draw()}};
+  const flip=id=>{const p=all.find(x=>x.id===id);if(!p||!hasPhoto(p))return;if(items.has(id)){items.delete(id);fav.delete(id)}else items.add(id);tiles();draw()};
+  g('my_list').addEventListener('click',e=>{const s2=e.target.closest('.star');if(s2){e.stopPropagation();const id=s2.dataset.f;if(fav.has(id))fav.delete(id);else{fav.add(id);items.add(id)}tiles();draw();return}const t=e.target.closest('.mytile');if(t)flip(t.dataset.p)});
+  g('my_list').addEventListener('keydown',e=>{const t=e.target.closest('.mytile');if(t&&(e.key===' '||e.key==='Enter')){e.preventDefault();flip(t.dataset.p)}});
+  g('my_save').onclick=async()=>{const x=read();if(!x.items.length){toast('Offer at least one chocolate');return}if(x.mode==='kg'&&!x.kgPrice){toast('Enter the price per kg');g('my_kgprice').focus();return}if(x.mode==='fixed'&&!x.price){toast('Enter the price of the box');g('my_price').focus();return}
+    const b=g('my_save');b.disabled=true;try{await DB.patch('settings','main',{myo:x})}catch(e){b.disabled=false;toast(esc(e.message||'Could not save'),true);return}
+    S=Object.assign({},S,{myo:x});TT.settings=S;b.disabled=false;g('my_msg').textContent='Saved ✓ The website follows within a minute.';toast('Make your own saved ✓')};
+  tiles();draw();g('my_msg').textContent='';
 }
 
 /* =================== OCCASIONS (website: Shop by occasion) =================== */

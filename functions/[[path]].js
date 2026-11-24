@@ -22,6 +22,7 @@ const CATS = {
 };
 const PAGES = {
   about: ['About The Touch', 'The Touch is a luxury chocolate boutique in Abu Dhabi. Chocolate that says what words sometimes cannot: our story, our craft and how we work.'],
+  'make-your-own': ['Make Your Own Chocolate Box', 'Build your own box of The Touch chocolates: choose a chocolate for every line and we lay it by hand, close the lid and tie the ribbon.'],
   contact: ['Contact The Touch', 'Visit, call or message The Touch chocolate boutique in Abu Dhabi. WhatsApp, phone, email and a form for orders, corporate gifting and events.'],
   occasions: ['Chocolate Gifts by Occasion', 'Choose a chocolate gift by occasion: birthdays, new born, weddings, Ramadan, Eid, National Day and more, delivered across the UAE.'],
   events: ['Weddings, Corporate Gifting & Events', 'Bespoke chocolate arrangements for weddings, corporate gifting, baby receptions and Eid. Tell us about your occasion and receive a proposal within 24 hours.'],

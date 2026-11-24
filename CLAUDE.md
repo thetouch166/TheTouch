@@ -52,6 +52,16 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
   product form): `settings.occasions [{id,name,ar,img,desc,on}]` + `product.occasions [ids]`, read through `TT.occasions()`. Pages `/occasions`,
   `/occasion/<id>` (an occasion without products shows a note and the most loved pieces), `/about` (old `/story` still works), `/contact` (details +
   a message form saved in `enquiries` with `type:'Message · …'`, listed in Admin → Events, now titled Enquiries & Messages; `settings.hours`, `settings.mapUrl`).
+- Header since 24 Nov: Home · Shop · Occasions (· Make your own when it is open) left of the logo (`#nav`), About · Contact right of it (`#nav2`).
+  Home page under the hero: occasion tiles (`.hocc`; a tile shows the photo set in the admin or a real product photo, otherwise the dark silk card
+  with the monogram), the story block (`.hstory`: the profile quote `STATEMENT` lights up word by word, `paintStmt`), the box invitation (`.hmyo`, only
+  while Make your own is open). The About page (`pageAbout`, classes `ab-…`) follows the company profile; its pictures are in `img/about/`.
+- **Make your own box** (`/make-your-own`, `pageMyo`; settings `settings.myo`, read through `TT.myoCfg()`, price by `TT.myoPrice(c, prices)`: by weight, per kg or
+  fixed, all set on the admin screen "Own box", `renderMyo`). The customer fills the box line by line; **putting the box in the bag is not built yet**, so
+  the page is closed (`myo.on` must be exactly `true`, the admin switch is disabled). Open it only together with: the box as a bag line, the chosen lines on
+  the order / invoice / WhatsApp text / admin order, stock per chosen chocolate, and the price rebuilt on the server for card payment.
+- Admin → Products: the cards (`#pkpi`) include "In the shop" = kg of loose chocolate + boxed pieces, and `#psum` totals the list on screen (kg, pieces, value
+  at selling price). Studio product pictures (white ground, caption cut off) go in `public/img/` so the website blends them into the cream (`isPhoto`).
 - New-order alert in the admin: pop-up with the order + sound (`orderAlert`, `showAlert`, `chime`, `ringStart`), settings per device in
   localStorage `tt_alert` (Settings → New-order alert). In a background tab the admin asks `GET /api/ping` every 20 s (KV key `sys:ping`,
   no database) and syncs only when it moved, so alerts keep working while the database can sleep.

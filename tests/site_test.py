@@ -50,11 +50,12 @@ with sync_playwright() as pw:
     # 2. the website follows
     w = b.new_context(viewport={'width': 1440, 'height': 900}).new_page(); w.on('pageerror', lambda e: errs.append('web: ' + str(e)[:200]))
     w.goto(B + '/'); w.wait_for_selector('#nav .nd'); w.wait_for_timeout(1500)
-    nav = w.evaluate("[...document.querySelectorAll('#nav > a, #nav .nd > a')].map(a=>a.textContent.trim())")
+    nav = w.evaluate("[...document.querySelectorAll('#nav > a, #nav .nd > a, #nav2 > a')].map(a=>a.textContent.trim()).filter(t=>t!=='Make your own')")
     check('header: Home, Shop, Occasions, About, Contact', nav == ['Home', 'Shop', 'Occasions', 'About', 'Contact'], str(nav))
     menu = w.evaluate("[...document.querySelectorAll('#nav .nd:nth-of-type(2) .ndp a:not(.all)')].map(a=>a.firstChild.textContent.trim())")
     check('Occasions menu: the new one is there, the hidden one is not', NAME in menu and hidden not in menu, str(menu))
     check('home page shows the occasions', w.locator('.occs .occ').count() >= 3 and NAME in w.inner_text('.occs'))
+    check('home page tells the story under the occasions', w.locator('.hocc + .hstory .st span').count() >= 8 and w.locator('.hstory a[href="/about"]').count() == 1)
     w.hover('#nav .nd >> nth=1'); w.wait_for_timeout(500); w.click(f'#nav .ndp a[href="/occasion/{oid}"]'); w.wait_for_selector('.phead h1'); w.wait_for_timeout(600)
     check('occasion page lists exactly its products', w.inner_text('.phead h1') == NAME and w.locator('.grid .card').count() == 3 and NAME in w.title(), f"{w.locator('.grid .card').count()} · {w.title()}")
     w.screenshot(path=out + '/site-occasion-page.png')
@@ -68,7 +69,7 @@ with sync_playwright() as pw:
     check('sitemap lists the new pages', all(x in urllib.request.urlopen(B + '/sitemap.xml').read().decode() for x in ('/about<', '/contact<', '/occasions<', '/occasion/' + oid + '<')))
 
     # 3. about + contact
-    w.goto(B + '/story'); w.wait_for_selector('.doing'); check('About page (old /story address too) with its four doors', w.locator('.doing a').count() == 4 and 'About' in w.title())
+    w.goto(B + '/story'); w.wait_for_selector('.ab-cover'); check('About page (old /story address too) with the chapters of the company profile', w.locator('.ab > section').count() >= 10 and 'About' in w.title(), str(w.locator('.ab > section').count()))
     w.goto(B + '/contact'); w.wait_for_selector('#ctf'); w.click('#ctSend'); w.wait_for_timeout(300)
     check('contact form asks for name, mobile and message', w.locator('#ctf .fld.err').count() == 3)
     w.fill('#ct_name', 'Layla Test ' + T); w.fill('#ct_phone', '0501234567'); w.fill('#ct_email', 'layla@example.com'); w.select_option('#ct_about', 'Gifts for a company'); w.fill('#ct_msg', 'We need 60 boxes for our team.')
@@ -77,6 +78,9 @@ with sync_playwright() as pw:
     check('message is saved for the boutique', len(enq) == 1 and enq[0]['type'] == 'Message · Gifts for a company' and enq[0]['email'] == 'layla@example.com' and enq[0]['status'] == 'new', json.dumps(enq[:1])[:200])
     a.wait_for_function("ENQ.some(e=>e.name==='Layla Test %s')" % T, timeout=30000); a.evaluate("go('events')"); a.wait_for_timeout(500)
     check('admin lists the message with its text and email', 'Layla Test ' + T in a.inner_text('#view') and 'We need 60 boxes' in a.inner_text('#view') and 'layla@example.com' in a.inner_text('#view') and a.inner_text('#vtitle') == 'Enquiries & Messages')
+
+    a.evaluate("document.querySelectorAll('#modalRoot [data-close]').forEach(b=>b.click());go('products')"); a.wait_for_selector('#psum'); a.wait_for_timeout(500)
+    check('admin shows how many kg are in the shop, and for the list on screen', a.locator('#pkpi .kpi').count() == 5 and 'kg' in a.inner_text('#pkpi') and 'In this list' in a.inner_text('#psum') and 'kg' in a.inner_text('#psum'), a.inner_text('#psum'))
 
     # 4. checkout still works and has its new summary
     w.goto(B + '/p/' + prods[0]['id']); w.wait_for_timeout(1200); w.click('#add'); w.wait_for_timeout(400); w.goto(B + '/checkout'); w.wait_for_selector('#place')

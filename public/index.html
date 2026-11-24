@@ -103,20 +103,29 @@ header.top.sc .hbar .logo img{height:38px}
   .c2{width:30vw;left:-8vw;bottom:1vw}.c5{width:27vw;right:-6vw;bottom:4vw}.c3{display:none}}
 .fade{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease),transform 1s var(--ease)}.fade.in{opacity:1;transform:none}
 
-/* brand statement = the boutique wall: champagne linen, brass lettering with a soft backlight halo.
-   Words fill from a faint ghost to brass as you scroll (JS: "ambient background" → paintStmt) */
-.stmt{--brass:linear-gradient(180deg,#a7773a 0%,#7c5020 52%,#5f3b15 100%);color:#6b4419;text-align:center;padding:clamp(84px,10vw,148px) 0;position:relative;overflow:hidden;isolation:isolate;
-  background:repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px),repeating-linear-gradient(0deg,rgba(110,78,40,.016) 0 1px,transparent 1px 4px),radial-gradient(130% 95% at 50% 40%,#f0e4d0 0%,#e5d4b9 50%,#d6c09e 100%)}
-.stmt:before{content:'';position:absolute;z-index:-1;left:50%;top:50%;width:min(1100px,130vw);height:72%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(255,247,232,.85),rgba(255,247,232,.35) 55%,rgba(255,247,232,0));pointer-events:none}
-.stmt:after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(124,80,32,.35),transparent)}
-.stmt .rule{display:block;width:1px;height:clamp(56px,7vw,92px);margin:0 auto clamp(36px,4.4vw,56px);background:linear-gradient(#8a5a26,rgba(138,90,38,0));transform-origin:top;transform:scaleY(var(--p,1))}
-.st{font-family:var(--serif);font-weight:500;font-size:clamp(28px,4.1vw,56px);line-height:1.26;max-width:20em;margin:0 auto clamp(40px,4.4vw,56px);text-wrap:balance}
-.st span{background:var(--brass);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
-.st.js span{opacity:.24;transition:opacity .7s var(--ease)}
+/* home story: a photo from the company profile beside the house's own sentence. Its words fill from a faint ghost to cream as
+   you scroll and the gold rule draws across (JS: "ambient background" → paintStmt) */
+.hstory{display:grid;grid-template-columns:1.05fr 1fr;min-height:min(84vh,780px);background:#150a09}
+.hstory .im{background:#2a1a12 center/cover no-repeat;min-height:380px}
+.hstory .tx{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(48px,7vw,120px) clamp(24px,7vw,120px);color:#e9dccb}
+.hstory .mono{width:54px;margin-bottom:26px}
+.st{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(30px,3.3vw,52px);line-height:1.16;color:#fbf3e6;max-width:13em;text-wrap:balance}
+.st.js span{opacity:.22;transition:opacity .7s var(--ease)}
 .st.js span.on{opacity:1}
-.stmt .link{color:#5f3b15;display:inline-flex;align-items:center;min-height:44px;border-bottom:0;text-decoration:underline;text-decoration-color:#a7773a;text-decoration-thickness:1px;text-underline-offset:7px;transition:color .3s var(--ease)}
-.stmt .link:hover{color:var(--bur)}
-@media(max-width:700px){.st{line-height:1.3}.stmt:before{height:80%}}
+.hstory .rule{display:block;width:92px;height:1px;background:var(--gold);margin:28px 0;transform-origin:left;transform:scaleX(var(--p,1))}
+.hstory p{color:#c9b8a6;font-weight:300;font-size:17px;line-height:1.8;max-width:440px}
+.hstory .more{display:inline-flex;align-items:center;min-height:44px;margin-top:18px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:500;color:#e9cf9a;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:8px;transition:color .3s var(--ease)}
+@media(hover:hover){.hstory .more:hover{color:#fff}}
+/* home: the invitation to build a box (shown while "Make your own" is switched on in the admin) */
+.hmyo{padding:clamp(56px,8vw,120px) 0;background:linear-gradient(100deg,#cdb89c,#e9dfd0 30%,#ede4d6 70%,#d9c9b2)}
+.hmyo .wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(26px,5vw,80px);align-items:center}
+.hmyo h2{font-size:clamp(34px,4.2vw,62px);line-height:1.04}
+.hmyo .facts{margin-top:18px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--car);font-weight:500}
+.hmyo p{color:#6b5d57;font-weight:300;font-size:17px;line-height:1.8;max-width:430px;margin:14px 0 28px}
+.hmyo .im{display:block;overflow:hidden;box-shadow:0 30px 60px rgba(60,34,18,.22)}
+.hmyo .im img{display:block;width:100%;transition:transform .9s var(--ease)}
+@media(hover:hover){.hmyo .im:hover img{transform:scale(1.03)}}
+@media(max-width:900px){.hstory{grid-template-columns:1fr;min-height:0}.hstory .im{min-height:78vw}.hmyo .wrap{grid-template-columns:1fr}.hmyo .im{order:-1}}
 
 /* sections */
 section.s{padding:96px 0}
@@ -484,30 +493,28 @@ body.sbar-on .toast{bottom:96px}
 .mlinks .mlab{padding:22px 24px 8px;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--car);border-bottom:1px solid var(--line)}
 .mlinks{overflow-y:auto}
 
-/* ---------- shop by occasion ---------- */
-.occs{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-.occ{position:relative;display:block;aspect-ratio:4/5;overflow:hidden;background:var(--cream2);color:#fff;isolation:isolate}
+/* ---------- shop by occasion: every tile is the same card (dark silk, a thin gold frame, the name set like a gift tag);
+   a photo chosen in the admin, or a real photo of one of its products, replaces the silk ---------- */
+.hocc{padding:clamp(56px,7vw,110px) 0}
+.occs{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.2vw,18px)}
+.occ{position:relative;display:flex;align-items:flex-end;aspect-ratio:1/1.06;overflow:hidden;color:#f6ead8;background:#2a0409 url(img/about/silk.jpg) 30% 40%/230% auto;isolation:isolate}
+.occ:nth-child(4n+2){background-position:82% 12%}.occ:nth-child(4n+3){background-position:8% 92%}.occ:nth-child(4n){background-position:96% 68%}
+.occ:before{content:'';position:absolute;inset:11px;border:1px solid rgba(214,173,108,.38);z-index:1;pointer-events:none;transition:inset .5s var(--ease),border-color .4s}
 .occ .ph{position:absolute;inset:0;z-index:-2}
 .occ .ph img{width:100%;height:100%;object-fit:cover;transition:transform 1.3s var(--ease)}
-.occ:after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(40,4,10,0) 38%,rgba(40,4,10,.72) 100%);transition:opacity .4s}
-.occ .tx{position:absolute;left:22px;right:22px;bottom:20px;display:flex;flex-direction:column;gap:2px}
-.occ b{font-family:var(--serif);font-size:clamp(22px,2.1vw,30px);font-weight:500;line-height:1.1}
-.occ i{font-style:normal;font-size:14px;opacity:.85}
+.occ:after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(24,4,8,.08) 28%,rgba(24,4,8,.82) 100%)}
+.occ.plain:after{background:radial-gradient(95% 85% at 50% 26%,rgba(150,34,48,.3),rgba(60,8,16,.08) 52%,rgba(14,3,5,.5))}
+.occ.plain .ph{display:grid;justify-items:center;align-items:start;padding-top:21%}
+.occ.plain .ph img{width:21%;height:auto;object-fit:contain;opacity:.72;transition:transform .9s var(--ease),opacity .5s}
+.occ .tx{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;width:100%;padding:0 20px clamp(24px,2.6vw,40px)}
+.occ b{font-family:var(--serif);font-size:clamp(23px,2.2vw,33px);font-weight:500;line-height:1.08}
+.occ i{font-style:normal;font-size:15px;color:#d9b77e}
 .occ .go{display:block;height:1px;width:34px;background:var(--gold);margin-top:12px;transition:width .5s var(--ease)}
-.occ:hover .ph img,.occ:focus-visible .ph img{transform:scale(1.06)}
-.occ:hover .go,.occ:focus-visible .go{width:100%}
-.occ.plain{color:var(--bur);background:linear-gradient(160deg,#f6ecdf,#eadcc8)}
-.occ.plain:nth-child(even){background:linear-gradient(160deg,#4a0711,#2c040a);color:#f4e6d2}
-.occ.plain:after{display:none}
-.occ.plain .ph{display:grid;place-items:center}.occ.plain .ph img{width:44%;height:auto;object-fit:contain;opacity:.16;transform:translateY(-12%)}
-.occ.plain:hover .ph img{transform:translateY(-12%) scale(1.08)}
-.occ.cut{color:var(--bur);background:linear-gradient(160deg,#f9f2e8,#ecdfcc)}
-.occ.cut:after{display:none}
-.occ.cut .ph{display:grid;place-items:center;padding:6% 12% 36%;background:linear-gradient(160deg,#f9f2e8,#ecdfcc)}
-.occ.cut .ph img{object-fit:contain;mix-blend-mode:multiply}
+@media(hover:hover){.occ:hover:before{inset:6px;border-color:rgba(233,207,154,.9)}.occ:hover .go{width:72px}.occ:hover .ph img{transform:scale(1.06)}.occ.plain:hover .ph img{transform:scale(1.14);opacity:1}}
+.occ:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .occhead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:34px;flex-wrap:wrap}
 .occhead p{color:var(--mute);max-width:440px;margin-top:10px}
-@media(max-width:900px){.occs{grid-template-columns:repeat(2,1fr);gap:12px}.occs.rail2{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:0 20px 6px;scrollbar-width:none}.occs.rail2 .occ{flex:0 0 62%;scroll-snap-align:start}.occ .tx{left:16px;right:16px;bottom:16px}}
+@media(max-width:900px){.occs{grid-template-columns:1fr 1fr;gap:10px}.occ{aspect-ratio:1/1}.occ:before{inset:8px}.occ b{font-size:20px}.occ i{font-size:13.5px}.occ .go{display:none}.occ .tx{padding:0 12px 20px}.occ.plain .ph{padding-top:13%}.occ.plain .ph img{width:19%}.occhead{margin-bottom:24px}}
 
 /* ---------- about + contact ---------- */
 .doing{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -577,6 +584,233 @@ body.sbar-on .toast{bottom:96px}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .stats{display:none}
 @media(prefers-reduced-motion:reduce){.ndp,.occ .ph img,.occ .go{transition:none!important}}
+/* ---------- about: the company profile as a page ---------- */
+.ab{--abd:#150a09;--abg:#d6ad6c;--abg2:#e9cf9a;--abc:#f3ece1;background:var(--abc)}
+.ab section{position:relative}
+.ab h2{font-family:var(--serif);font-weight:500;font-size:clamp(38px,5.4vw,78px);line-height:1.02;color:var(--bur)}
+.ab h2 i{font-style:italic;font-weight:400;color:var(--car)}
+.ab-k{display:block;font-size:11.5px;letter-spacing:.36em;text-transform:uppercase;color:var(--abg);font-weight:500}
+.ab-k.d{color:var(--car)}.ab-k.k{color:#3a2412}.ab-k.b{color:var(--abg2);letter-spacing:.3em;line-height:2.1}
+.ab-k a{color:inherit}.ab-k a:hover{color:#fff}
+.ab-rule{display:block;width:92px;height:1px;background:var(--gold);margin:30px auto}.ab-rule.l{margin:26px 0}
+.ab-frame{position:absolute;inset:clamp(12px,2.6vw,40px);border:1px solid rgba(214,173,108,.34);pointer-events:none;z-index:1}
+.ab-link{display:inline-block;margin-top:30px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:500;color:var(--abg2);border-bottom:1px solid currentColor;padding-bottom:6px;transition:color .3s,letter-spacing .4s var(--ease)}
+.ab-link.d{color:var(--bur)}.ab-link.k{color:#2e1b0c}
+.ab-link:hover{letter-spacing:.3em}
+.ab-head{text-align:center;margin-bottom:clamp(36px,5vw,70px)}.ab-head .ab-k{margin-bottom:18px}
+/* cover */
+.ab-cover{min-height:min(88vh,860px);display:grid;place-items:center;text-align:center;color:#f1e4d0;background:#2a0409 url(img/about/silk.jpg) center/cover}
+.ab-cover:before,.ab-reach:before,.ab-end:before{content:'';position:absolute;inset:0;background:radial-gradient(70% 70% at 50% 45%,rgba(20,4,6,.08),rgba(14,3,5,.72))}
+.ab-cover .abin{position:relative;z-index:2;padding:clamp(70px,10vw,120px) 24px;display:grid;justify-items:center;gap:clamp(22px,3vw,40px)}
+.ab-cover .lg{width:min(560px,68vw)}
+.ab-cover h1{font-family:var(--serif);font-size:clamp(22px,2.5vw,34px);font-weight:400;font-style:italic;line-height:1.35;max-width:660px;color:#f4e8d6}
+/* story */
+.ab-story{padding:clamp(80px,11vw,170px) 0;text-align:center}
+.ab-story .mono{width:60px;margin:0 auto 22px}
+.ab-story blockquote{font-family:var(--serif);font-style:italic;font-size:clamp(30px,4.6vw,66px);line-height:1.12;color:var(--bur);max-width:1100px;margin:26px auto 0}
+.ab-story p{max-width:780px;margin:0 auto;font-size:clamp(15px,1.3vw,19px);line-height:1.85;color:#6b5d57;font-weight:300}
+/* dark chapters */
+.ab-dark{background:var(--abd);color:#e9dccb}
+.ab-dark h2,.ab-split .dark h2{color:#fbf3e6}.ab-dark h2 i,.ab-split .dark h2 i{color:var(--abg2)}
+.ab-dark p,.ab-split .dark p{color:#c9b8a6;font-weight:300}
+.ab-mv{padding:clamp(90px,11vw,170px) 0;text-align:center}
+.ab-mv .two{display:grid;grid-template-columns:1fr 1fr;margin:clamp(30px,4vw,60px) auto;max-width:1160px}
+.ab-mv .two>div{padding:10px clamp(18px,4vw,70px)}.ab-mv .two>div+div{border-left:1px solid rgba(214,173,108,.34)}
+.ab-mv em{display:block;font-family:var(--serif);font-size:30px;color:var(--abg);margin-bottom:16px}
+.ab-mv .two p{font-family:var(--serif);font-size:clamp(28px,3.5vw,50px);line-height:1.12;color:#fbf3e6;font-weight:400}
+/* values */
+.ab-vals{padding:clamp(60px,8vw,120px) 0;background:linear-gradient(160deg,#3a2118,#1d0f0b);text-align:center}
+.ab-vals .dots{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(12px,2vw,30px);max-width:1040px;margin:40px auto 0}
+.ab-vals .dots span{width:clamp(108px,15vw,196px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-size:clamp(15px,1.9vw,27px);letter-spacing:.04em;text-transform:uppercase;box-shadow:0 20px 40px rgba(0,0,0,.35)}
+/* split picture / text */
+.ab-split{display:grid;grid-template-columns:1.16fr 1fr;min-height:min(92vh,900px)}
+.ab-split.rev{grid-template-columns:1fr 1.22fr}
+.ab-split .im{background-size:cover;background-position:center;min-height:420px}
+.ab-split .tx{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(40px,7vw,120px)}
+.ab-split .tx.gold{background:var(--gold)}.ab-split .tx.gold h2{color:#fff;font-size:clamp(40px,5.6vw,84px);margin-top:26px}
+.ab-split .tx.dark{background:var(--abd)}
+.ab .num{display:block;font-family:var(--serif);font-size:32px;color:var(--abg);margin-bottom:10px}
+.ab-split .tx h2{margin-top:22px}.ab-split .tx p{max-width:440px;font-size:17px;line-height:1.8;margin-bottom:24px}
+/* chocolates */
+.ab-cream{padding:clamp(80px,10vw,150px) 0}
+.ab-ch{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,3vw,50px)}
+.ab-ch.two{grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,46px) clamp(16px,3vw,40px)}
+.ab-ch figure{text-align:center}
+.ab-ch span{display:block;aspect-ratio:1.25;overflow:hidden}
+.ab-ch img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;transition:transform 1s var(--ease)}
+.ab-ch figure:hover img{transform:scale(1.07) rotate(-2deg)}
+.ab-ch figcaption{font-family:var(--serif);font-size:clamp(20px,2.1vw,30px);color:var(--bur);margin-top:10px}
+.ab-ch figcaption i{display:block;font-style:normal;font-family:var(--sans);font-size:15px;color:var(--car);margin-top:2px}
+.ab-or{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,100px);align-items:center;margin-top:clamp(70px,9vw,140px)}
+.ab-or .ar{font-size:26px;color:var(--car);margin-top:12px}
+.ab-or p,.ab-pack p,.ab-bout p{font-size:17px;line-height:1.8;color:#6b5d57;font-weight:300;max-width:460px}
+/* packaging + boutique */
+.ab-pack,.ab-bout{padding:clamp(70px,9vw,140px) 0;background:linear-gradient(100deg,#cdb89c,#e9dfd0 30%,#ede4d6 70%,#d9c9b2)}
+.ab-pack .wrap,.ab-bout .wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(30px,5vw,80px);align-items:center}
+.ab-pack ul{list-style:none;margin:24px 0 32px}.ab-pack li{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--bur);line-height:2.3}
+.ab-pack .imgs{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ab-pack .imgs img,.ab-bout img{width:100%;box-shadow:0 30px 60px rgba(60,34,18,.22)}
+.ab-bout p{margin-bottom:30px}
+/* celebrations */
+.ab-cele{padding:clamp(80px,10vw,150px) 0}
+.ab-cele .wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(30px,5vw,80px);align-items:center}
+.ab-cele h2{margin-top:20px}.ab-cele p{font-size:17px;line-height:1.8;margin-bottom:24px;max-width:440px}
+.ab-cele .pics{display:grid;grid-template-columns:1fr 1.06fr;grid-template-rows:1fr 1fr;gap:16px}
+.ab-cele .pics img{width:100%;height:100%;object-fit:cover;border:1px solid rgba(214,173,108,.5)}
+.ab-cele .pics .a{grid-row:1/3}
+/* reach */
+.ab-reach{padding:clamp(90px,12vw,180px) 0;text-align:center;color:#eaddc9;background:#1c0508 url(img/about/silk.jpg) center/cover}
+.ab-reach .wrap{position:relative;z-index:2}
+.ab-reach .nums{display:grid;grid-template-columns:repeat(3,1fr);max-width:1100px;margin:clamp(30px,4vw,56px) auto}
+.ab-reach .nums div{padding:6px 10px}.ab-reach .nums div+div{border-left:1px solid rgba(214,173,108,.34)}
+.ab-reach b{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(70px,11vw,170px);line-height:.95;color:var(--abg2)}
+.ab-reach .nums span{font-size:clamp(10px,1vw,14px);letter-spacing:.3em;text-transform:uppercase;color:#f3e7d3}
+.ab-reach p{color:#cdbda8;font-weight:300;font-size:16px}
+/* steps */
+.ab-steps{padding:clamp(80px,10vw,150px) 0;text-align:center}
+.ab-steps ol{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,2.6vw,40px)}
+.ab-steps li{display:grid;justify-items:center;gap:8px}
+.ab-steps img{width:100%;max-width:260px;border-radius:999px 999px 0 0;border:1px solid rgba(214,173,108,.5);margin-bottom:12px}
+.ab-steps em{font-family:var(--serif);font-size:38px;color:var(--abg);line-height:1}
+.ab-steps b{font-size:14px;letter-spacing:.3em;text-transform:uppercase;color:var(--abg2);font-weight:500}
+.ab-steps li span{color:#c9b8a6;font-weight:300;max-width:220px;line-height:1.6}
+/* closing */
+.ab-end{padding:clamp(90px,12vw,170px) 24px;text-align:center;color:#f1e4d0;background:#1c0508 url(img/about/silk.jpg) center/cover}
+.ab-end .abin{position:relative;z-index:2;display:grid;justify-items:center;gap:22px}
+.ab-end .mono{width:74px}
+.ab-end h2{font-style:italic;font-weight:400;color:#fbf3e6;font-size:clamp(32px,4.6vw,62px)}
+.ab-end small{color:#bcab97;font-size:13px}
+@media(max-width:900px){
+ .ab-split,.ab-split.rev{grid-template-columns:1fr;min-height:0}.ab-split .im{min-height:74vw}.ab-split.rev .im{order:-1}
+ .ab-mv .two{grid-template-columns:1fr;gap:34px}.ab-mv .two>div+div{border-left:0;border-top:1px solid rgba(214,173,108,.34);padding-top:34px}
+ .ab-ch{grid-template-columns:1fr 1fr}.ab-or,.ab-pack .wrap,.ab-bout .wrap,.ab-cele .wrap{grid-template-columns:1fr}
+ .ab-steps ol{grid-template-columns:1fr 1fr;gap:34px 16px}.ab-reach .nums{grid-template-columns:1fr;gap:26px}.ab-reach .nums div+div{border-left:0}
+ .ab-cover{min-height:74vh}.ab-k{letter-spacing:.26em}
+}
+/* ---------- make your own box ---------- */
+.nav a{white-space:nowrap}.nav2{margin-right:14px}
+.myo{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:clamp(28px,4.4vw,72px);align-items:start;padding:clamp(14px,2vw,30px) 0 110px}
+.myo-stage{position:sticky;top:104px}
+/* the real box: cocoa walls, gold tray, one lane per line, the lid hinged at the far edge */
+.mstage{perspective:3600px;perspective-origin:50% 0;padding:38% 2% 0}
+.mb3{position:relative;transform-style:preserve-3d;transform:rotateX(17deg);transform-origin:50% 100%}
+.mbody{position:relative;padding:2.4% 2.4% 2.8%;background:linear-gradient(165deg,#523229,#34201b);border-radius:5px;box-shadow:0 70px 90px -34px rgba(40,18,10,.6),0 0 0 1px rgba(255,214,160,.07) inset}
+.mtray{display:grid;grid-template-columns:repeat(var(--lines,9),1fr);background:#a57a3d;box-shadow:inset 0 12px 22px rgba(50,24,6,.5)}
+.lane{position:relative;display:block;width:100%;padding:8% 5% 8%;border-left:3px solid #9a6f35;background:linear-gradient(90deg,#dcbd86,#f4e4c2 46%,#e6cb99);cursor:pointer;transition:box-shadow .3s}
+.lane:first-child{border-left:0}
+.lane:before{content:'';position:absolute;inset:0;box-shadow:inset 0 10px 16px -6px rgba(70,36,8,.45);pointer-events:none}
+.lpcs{display:grid;grid-template-rows:repeat(var(--per,7),auto);gap:clamp(2px,.3vw,5px)}
+.pc{position:relative;aspect-ratio:1/.84}
+.pc img{position:absolute;left:-24%;top:-24%;width:148%;height:148%;object-fit:contain;mix-blend-mode:multiply;opacity:0;transform:rotate(var(--r,0deg))}
+.pc img.photo{left:4%;top:4%;width:92%;height:92%;object-fit:cover;border-radius:12%;mix-blend-mode:normal;box-shadow:0 2px 5px rgba(50,24,6,.35)}
+.pc.in img{animation:mdrop .6s cubic-bezier(.2,.85,.28,1.2) both;animation-delay:var(--d,0s)}
+.pc.out img{animation:mlift .26s ease-in both}
+@keyframes mdrop{0%{opacity:0;transform:translateY(-70%) scale(1.35) rotate(calc(var(--r,0deg) - 12deg))}55%{opacity:1}100%{opacity:1;transform:translateY(0) scale(1) rotate(var(--r,0deg))}}
+@keyframes mlift{from{opacity:1;transform:rotate(var(--r,0deg))}to{opacity:0;transform:translateY(-40%) scale(1.2) rotate(var(--r,0deg))}}
+.lane .ln{position:absolute;left:0;right:0;bottom:-30px;text-align:center;font-family:var(--serif);font-size:16px;color:#a08a72;transition:color .3s}
+@media(hover:hover){.lane:hover{background:linear-gradient(90deg,#e4c892,#fbf0d6 46%,#edd6a8)}.lane.full:hover .lx{opacity:1;transform:none}}
+.lane.act{box-shadow:0 0 0 2px #fff7e6,0 0 0 4px var(--gold);z-index:2;background:linear-gradient(90deg,#e8cf9c,#fff6e0 46%,#f0dcb2)}
+.lane.act .ln{color:var(--bur);font-weight:600}
+.lane.act:not(.full):after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.5),rgba(255,255,255,0));background-size:100% 220%;animation:msheen 2.6s ease-in-out infinite;pointer-events:none}
+@keyframes msheen{0%{background-position:0 120%}100%{background-position:0 -120%}}
+.lane .lx{position:absolute;top:-13px;left:50%;margin-left:-13px;width:26px;height:26px;border-radius:50%;background:var(--bur);color:#fff;font-size:15px;line-height:1;display:grid;place-items:center;opacity:0;transform:scale(.6);transition:opacity .2s,transform .25s var(--ease);z-index:3}
+.lane.full.act .lx,.lane.full:focus-visible .lx{opacity:1;transform:none}
+.mlid{position:absolute;inset:0;z-index:4;transform-origin:50% 0;transform-style:preserve-3d;transform:translateZ(1px) rotateX(116deg);transition:transform 1.3s cubic-bezier(.7,0,.18,1);pointer-events:none}
+.mlid .in,.mlid .out{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center;align-content:center;gap:4%;border-radius:5px}
+.mlid .out{background:linear-gradient(165deg,#553429,#30201a);box-shadow:inset 0 0 0 1px rgba(255,214,160,.1)}
+.mlid .in{transform:rotateX(180deg);background:linear-gradient(15deg,#3a241e,#4b2e27)}
+.mlid img{width:30%;filter:drop-shadow(0 1px 0 rgba(0,0,0,.3))}
+.mlid span{font-size:clamp(8px,1vw,12px);letter-spacing:.3em;text-transform:uppercase;color:#d2a765;font-weight:500}
+.mb3.closed .mlid{transform:translateZ(1px) rotateX(0deg)}
+.mrib{position:absolute;z-index:5;background:linear-gradient(90deg,#b98848,#edd29d 45%,#b98848);box-shadow:0 2px 8px rgba(0,0,0,.35);transform:translateZ(2px) scaleX(0)}
+.mrib.h{left:0;right:0;top:66%;height:4.6%;transform-origin:left;transition:transform .7s cubic-bezier(.6,0,.2,1)}
+.mrib.v{top:0;bottom:0;left:21%;width:3.2%;background:linear-gradient(180deg,#b98848,#edd29d 45%,#b98848);transform:translateZ(2px) scaleY(0);transform-origin:top;transition:transform .7s cubic-bezier(.6,0,.2,1)}
+.mbow{position:absolute;z-index:6;left:22.6%;top:68.3%;width:17%;transform:translateZ(3px) translate(-50%,-56%) scale(.2) rotate(-18deg);opacity:0;transition:transform .7s cubic-bezier(.3,1.5,.5,1),opacity .3s}
+.mbow svg{width:100%;height:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+.mb3.closed .mrib.h{transform:translateZ(2px) scaleX(1);transition-delay:1.25s}
+.mb3.closed .mrib.v{transform:translateZ(2px) scaleY(1);transition-delay:1.6s}
+.mb3.closed .mbow{opacity:1;transform:translateZ(3px) translate(-50%,-56%) scale(1) rotate(0);transition-delay:2.15s}
+.mmeta{margin:48px 2% 0;display:flex;justify-content:space-between;gap:16px;font-size:12.5px;color:var(--mute)}
+.mmeta b{color:var(--bur);font-weight:600}
+/* the right side: what is in the box, then the chocolates to choose from */
+.myo-side h1{font-family:var(--serif);font-size:clamp(36px,4.4vw,58px);font-weight:500;color:var(--bur);line-height:1.02;margin-bottom:12px}
+.myo-side>p{color:var(--slate);max-width:470px;margin-bottom:18px}
+.mprice{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:13px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mprice span{font-size:12.5px;color:var(--mute)}.mprice b{font-family:var(--serif);font-size:27px;font-weight:500;color:var(--bur);white-space:nowrap}
+.mnow{font-family:var(--serif);font-size:23px;color:var(--ink);margin:20px 0 12px;min-height:30px}
+.mnow b{color:var(--bur);font-weight:600}
+.mchips{display:grid;grid-template-columns:repeat(var(--lines,9),1fr);gap:6px}
+.mchip{position:relative;aspect-ratio:1;border:1px solid var(--line);background:#fff;display:grid;place-items:center;font-family:var(--serif);font-size:17px;color:#b3a391;cursor:pointer;overflow:hidden;transition:border-color .25s,transform .3s var(--ease)}
+.mchip img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;transform:scale(1.25)}
+.mchip img.photo{mix-blend-mode:normal;transform:none}
+.mchip.full{background:var(--cream);border-color:#dcc9a8;color:transparent}
+.mchip.act{border-color:var(--bur);box-shadow:inset 0 0 0 1px var(--bur)}
+.mchip.pop{animation:mpop .5s var(--ease)}
+@keyframes mpop{0%{transform:scale(.7)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
+.mset{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.mset span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--car);margin-right:6px}
+.mset button{height:34px;padding:0 13px;border:1px solid #dcc9a8;background:var(--cream);font-size:12.5px;color:var(--bur);transition:background .2s,color .2s,border-color .2s}
+.mset button:hover{background:var(--bur);border-color:var(--bur);color:#fff}
+.mnow small{font-family:var(--sans);font-size:12px;color:var(--mute);margin-left:12px;letter-spacing:.04em;white-space:nowrap}
+.mch .ph{position:relative}.mch .inl{position:absolute;left:8px;top:8px;background:var(--bur);color:#fff;font-size:10.5px;letter-spacing:.06em;padding:4px 8px}
+.mbar #mbl{grid-column:1/-1;font-size:12px;color:var(--mute)}
+.mtools{display:flex;gap:8px;margin:20px 0 14px;flex-wrap:wrap}
+.mtools input{flex:1;min-width:150px;height:44px;border:1px solid var(--line);background:#fff;padding:0 14px;font-size:14px;outline:0}
+.mtools input:focus{border-color:var(--gold)}
+.mfil{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px}
+.mfil button{height:36px;padding:0 14px;border:1px solid var(--line);background:#fff;font-size:12.5px;white-space:nowrap;color:var(--slate);transition:all .2s}
+.mfil button.on{background:var(--bur);border-color:var(--bur);color:#fff}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mch{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);text-align:left;transition:border-color .25s,box-shadow .35s,transform .35s var(--ease)}
+.mch .ph{aspect-ratio:4/3;background:linear-gradient(180deg,#faf5ee,#f1e8da);overflow:hidden;display:grid;place-items:center}
+.mch .ph img{width:86%;height:86%;object-fit:contain;mix-blend-mode:multiply;transition:transform .7s var(--ease)}
+.mch .ph img.photo{width:100%;height:100%;object-fit:cover;mix-blend-mode:normal}
+.mch .tx{padding:12px 14px 4px;flex:1}
+.mch b{display:block;font-family:var(--serif);font-size:19px;font-weight:500;line-height:1.15;color:var(--ink)}
+.mch small{display:block;font-size:12.5px;color:var(--mute);margin-top:2px}
+.mch .ds{font-size:12px;line-height:1.5;color:var(--slate);margin-top:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mch .ac{display:flex;align-items:center;gap:8px;padding:10px 14px 14px}
+.mch .add{flex:1;height:42px;border:1px solid var(--bur);color:var(--bur);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;transition:background .25s,color .25s}
+.mch .add:hover{background:var(--bur);color:#fff}
+.mch .step{display:none;flex:1;align-items:center;justify-content:space-between;height:42px;background:var(--bur);color:#fff}
+.mch .step button{width:44px;height:42px;font-size:20px;color:#fff}
+.mch .step button:hover{background:rgba(255,255,255,.14)}
+.mch .step span{font-size:12.5px;letter-spacing:.04em}
+.mch.used{border-color:var(--gold);box-shadow:0 10px 26px rgba(64,5,14,.08)}
+.mch.used .add{display:none}.mch.used .step{display:flex}
+.mch:hover{border-color:#cdb694;transform:translateY(-2px);box-shadow:0 14px 30px rgba(64,5,14,.1)}
+.mch:hover .ph img{transform:scale(1.07)}
+.mch.max .add,.mch.max .step .pl{opacity:.35;pointer-events:none}
+.mnone{grid-column:1/-1;padding:40px 10px;text-align:center;color:var(--mute)}
+.macts{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px;align-items:center}
+.macts button{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--car);text-decoration:underline;text-underline-offset:6px;min-height:44px}
+.macts button:hover{color:var(--bur)}
+.mdone{display:none}
+.myo.done .mpick{display:none}
+.myo.done .mdone{display:block;animation:mup .8s 1.5s var(--ease) both}
+@keyframes mup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.mdone ol{list-style:none;border-top:1px solid var(--line);margin:8px 0 22px}
+.mdone li{display:grid;grid-template-columns:28px 46px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);align-items:center}
+.mdone li i{font-style:normal;font-family:var(--serif);font-size:18px;color:var(--car)}
+.mdone li img{width:46px;height:46px;object-fit:cover;mix-blend-mode:multiply;background:var(--cream)}
+.mdone li b{font-weight:500;font-size:15px}
+.mdone .btn{width:100%;height:58px}
+.mdone .again{display:block;margin:14px auto 0;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--car);text-decoration:underline;text-underline-offset:6px;min-height:44px}
+.mbar{display:none}
+@media(max-width:980px){
+ .myo{display:flex;flex-direction:column;align-items:stretch;padding-bottom:130px}.myo-side{display:contents}
+ .myo>*,.myo-side>*{min-width:0;max-width:100%}.mpick,.mdone{width:100%}
+ .myo-side h1{order:1}.myo-side>p{order:2;margin-bottom:0}.myo-stage{position:static;order:3;margin-bottom:8px}.myo-side .mprice{order:4}.mpick{order:5}.mdone{order:5}
+ body:has(#mbar) .wa{display:none}
+ .mnow small{display:block;margin:4px 0 0}
+ .mstage{padding-top:40%}.lane{border-left-width:2px}.lane .ln{font-size:13px;bottom:-24px}.mmeta{margin-top:38px}
+ .mch b{font-size:17px}.mch .ds{display:none}.mch .ac{padding:8px 10px 10px}.mch .tx{padding:10px 10px 2px}
+ .mbar{display:grid;grid-template-columns:1fr auto;gap:10px 14px;align-items:center;position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(255,253,249,.97);backdrop-filter:blur(10px);box-shadow:0 -14px 34px rgba(64,5,14,.14)}
+ .mbar .mchips{gap:4px}.mbar .mchip{font-size:13px}
+ .mbar b{font-family:var(--serif);font-size:20px;font-weight:500;color:var(--bur);white-space:nowrap}
+ .myo.done~.mbar{display:none}
+}
+@media(prefers-reduced-motion:reduce){.pc.in img{animation:none;opacity:1}.pc.out img{animation:none;opacity:0}.lane.act:not(.full):after{animation:none;display:none}.mlid,.mrib,.mbow{transition:none!important}.myo.done .mdone{animation:none}.mchip.pop{animation:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.fade{opacity:1;transform:none}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -590,7 +824,7 @@ body.sbar-on .toast{bottom:96px}
       <nav class="nav" id="nav" aria-label="Main"><a href="/" data-n="">Home</a><a href="/shop/all" data-n="shop">Shop</a><a href="/occasions" data-n="occasions">Occasions</a><a href="/about" data-n="about">About</a><a href="/contact" data-n="contact">Contact</a></nav>
     </div>
     <a href="/" class="logo" aria-label="The Touch home"><img src="img/logo-burgundy.png" alt="The Touch"></a>
-    <div class="hicons">
+    <div class="hicons"><nav class="nav nav2" id="nav2" aria-label="The house"><a href="/about" data-n="about">About</a><a href="/contact" data-n="contact">Contact</a></nav>
       <button class="ib" aria-label="Search" onclick="openSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
       <a class="ib" aria-label="WhatsApp" id="hdrWa" target="_blank" rel="noopener" style="display:none"></a>
       <button class="ib" aria-label="Shopping bag" onclick="openDrawer('cart')"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg><span class="badge hidden" id="cartCount">0</span></button>
@@ -628,6 +862,7 @@ body.sbar-on .toast{bottom:96px}
   <div class="mlinks" onclick="closeDrawers()">
     <a href="/">Home <span>›</span></a>
     <a href="/shop/all">Shop all <span>›</span></a>
+    <a href="/make-your-own">Make your own box <span>›</span></a>
     <div id="mCats" style="display:contents"></div>
     <div class="mlab">Shop by occasion</div>
     <div id="mOcc" style="display:contents"></div>
@@ -667,7 +902,7 @@ async function subscribe(f){const i=f.querySelector('input'),b=f.querySelector('
   f.reset();b.disabled=false;toast('Thank you — welcome to The Touch.')}
 let S, PRODUCTS=[];
 // Home brand statement (edit the words here). Each word lights up as the visitor scrolls past.
-const STATEMENT='Single-origin cocoa, tempered by hand in small batches, then boxed and ribboned to be given. Every piece is made for a moment worth remembering.';
+const STATEMENT='“Chocolate has the power to express what words sometimes can’t.”';
 
 /* ---------- Cart (kept on this device) ---------- */
 const Cart={
@@ -705,7 +940,8 @@ function renderNav(){
   set($('#nav'),'<a href="/" data-n="">Home</a>'
     +drop('/shop/all','shop','Shop',cats.map(c=>`<a href="/shop/${c.id}">${U.esc(c.nav||c.name)}<span lang="ar">${MENU_AR[c.id]||U.esc(c.ar)}</span></a>`).join('')+'<a class="all" href="/shop/all">All chocolates</a>')
     +(occ.length?drop('/occasions','occasions','Occasions',occ.map(o=>`<a href="/occasion/${o.id}">${U.esc(o.name)}${o.ar?`<span lang="ar">${U.esc(o.ar)}</span>`:''}</a>`).join('')+'<a class="all" href="/occasions">All occasions</a>',occ.length>5):'')
-    +'<a href="/about" data-n="about">About</a><a href="/contact" data-n="contact">Contact</a>');
+    +(TT.myoCfg().on?'<a href="/make-your-own" data-n="make-your-own">Make your own</a>':''));
+  set($('#nav2'),'<a href="/about" data-n="about">About</a><a href="/contact" data-n="contact">Contact</a>');
   set($('#mCats'),cats.map(c=>`<a href="/shop/${c.id}">${U.esc(c.nav||c.name)} <span>${MENU_AR[c.id]||U.esc(c.ar)}</span></a>`).join(''));
   set($('#mOcc'),occ.map(o=>`<a href="/occasion/${o.id}">${U.esc(o.name)} <span>${U.esc(o.ar||'›')}</span></a>`).join(''));
   set($('#fCats'),cats.map(c=>`<li><a href="/shop/${c.id}">${U.esc(c.name)}</a></li>`).join(''));
@@ -738,7 +974,7 @@ function pageHome(){
   // second rail: the National Day collection while it is on sale, otherwise the Oriental collection
   const r2=[{id:'national',eb:'National Day Collection',h:'In the colours <span class="it">of the Union</span>'},{id:'oriental',eb:'Oriental Collection',h:'Heritage, <span class="it">reimagined</span>'}]
     .map(x=>Object.assign(x,{list:vis.filter(p=>p.cat===x.id)})).find(x=>x.list.length);
-  const occs=TT.occasions().slice(0,8);
+  const occs=TT.occasions().slice(0,8),myo=TT.myoCfg();
   const stWords=STATEMENT.split(' ').map(w=>`<span>${U.esc(w)}</span>`).join(' ');
   app.innerHTML=`
   <section class="hero">
@@ -756,15 +992,14 @@ function pageHome(){
       <div class="row fade"><a class="btn btn-dark" href="/shop/all">Discover the collection</a><a class="tlink" href="/occasions">Shop by occasion</a></div>
     </div>
   </section>
-  ${occs.length?`<section class="s" style="padding-bottom:0"><div class="wrap">
+  ${occs.length?`<section class="hocc"><div class="wrap">
     <div class="occhead fade"><div><h2 class="h2">Shop by occasion</h2><p>Start with the moment. We have chosen what suits it.</p></div><a class="link" href="/occasions">All occasions</a></div>
-    <div class="occs rail2">${occs.map(occTile).join('')}</div>
+    <div class="occs">${occs.map(occTile).join('')}</div>
   </div></section>`:''}
-  <section class="stmt"><div class="wrap">
-    <span class="rule" aria-hidden="true"></span>
-    <p class="st">${stWords}</p>
-    <a class="link" href="/about">About The Touch</a>
-  </div></section>
+  <section class="hstory"><div class="im" style="background-image:url(img/about/stack.jpg)" role="img" aria-label="Three chocolates stacked, with almonds"></div>
+    <div class="tx"><img class="mono fade" src="img/monogram-gold.png" alt=""><blockquote class="st">${stWords}</blockquote><span class="rule" aria-hidden="true"></span>
+      <p class="fade">Born in Abu Dhabi, The Touch blends artistry with authenticity: handcrafted chocolates made for life’s meaningful moments.</p><a class="more fade" href="/about">About The Touch</a></div></section>
+  ${myo.on?`<section class="hmyo"><div class="wrap"><div class="tx fade"><h2 class="h2">${U.esc(myo.title)}</h2><div class="facts">${U.r2(myo.grams/1000)} kg · ${myo.lines} lines · ${myo.lines*myo.per} pieces</div><p>${U.esc(myo.intro)}</p><a class="btn btn-dark" href="/make-your-own">Start your box</a></div><a class="im fade" href="/make-your-own" tabindex="-1" aria-hidden="true"><img loading="lazy" src="img/about/box-open.jpg" alt=""></a></div></section>`:''}
 
   <section class="s"><div class="wrap">
     <div class="shead fade"><span class="eyebrow">The Collections</span><h2 class="h2">Crafted for every <span class="it">meaningful</span> moment</h2></div>
@@ -1131,25 +1366,71 @@ async function pageOrder(no){
   if(q.get('pay')==='now'&&!FILE&&location.pathname===here){history.replaceState(null,'',here+(k?'?k='+k:''));const b=$('#payNow');if(b)b.click()}   // straight from the checkout: open the card form
 }
 
+/* ---------- about: the company profile as a page (its chapters, its words, its pictures: img/about/) ---------- */
 function pageAbout(){
-  app.innerHTML=`<div class="phead"><span class="eyebrow">About The Touch</span><h1 class="h2">Chocolate that says what<br><span class="it">words sometimes can't</span></h1></div>
-  <section class="s"><div class="wrap">
-    <p class="prose fade">The Touch was born from a simple idea: that chocolate has the power to express what words sometimes can't. Founded with passion for flavour, we blend <em>artistry with authenticity</em>, creating premium chocolates that bring people closer together.</p>
-    <div class="story-grid" style="margin-top:80px">
-      <div class="fade"><h4>Our Mission</h4><p>To craft exceptional chocolates using the finest ingredients, creating personal gestures of warmth and connection for every occasion.</p></div>
-      <div class="fade"><h4>Our Vision</h4><p>To become the UAE's premier destination for luxury gifting, elevated event arrangements and unforgettable chocolate experiences.</p></div>
-      <div class="fade"><h4>Our Values</h4><p>Serenity, passion, artisanal purity and perfection in presentation define every chocolate piece and every client interaction.</p></div>
-    </div></div></section>
-  <section class="split"><div class="im" style="background-image:url(img/gift-bag-sign.jpg)"></div><div class="tx fade"><span class="eyebrow">Artisanal Sourcing</span><h2 class="h2">From bean<br>to <span class="it">boutique</span></h2>
-    <p>Single-origin cocoa selected for depth and smoothness. Small batches prepared by master chocolatiers with precise temperature control. Daily replenishment in our Abu Dhabi boutique, and cold-chain delivery across all seven Emirates.</p><div><a class="btn btn-dark" href="/shop/all">Explore the collection</a></div></div></section>`;
-  app.insertAdjacentHTML('beforeend',aboutMore());
+  const ch=(img,en,ar)=>`<figure class="fade"><span><img loading="lazy" src="img/${img}.jpg" alt="${en}"></span><figcaption>${en}<i lang="ar">${ar}</i></figcaption></figure>`;
+  const tel=String(S.phone||'').replace(/[^\d+]/g,'');
+  app.innerHTML=`<div class="ab">
+  <section class="ab-cover"><div class="ab-frame" aria-hidden="true"></div>
+    <div class="abin"><span class="ab-k fade">About the house</span><img class="lg fade" src="img/logo-gold.png" alt="The Touch"><h1 class="fade">An Abu Dhabi maison of fine chocolate, bespoke gifting and celebration.</h1><span class="ab-k b fade">Abu Dhabi · United Arab Emirates</span></div></section>
+
+  <section class="ab-story"><div class="wrap"><img class="mono fade" src="img/monogram-gold.png" alt=""><span class="ab-k d fade">Our story</span>
+    <blockquote class="fade">“Chocolate has the power to express what words sometimes can’t.”</blockquote><span class="ab-rule fade" aria-hidden="true"></span>
+    <p class="fade">Born in Abu Dhabi, The Touch blends artistry with authenticity: premium handcrafted chocolates made for life’s meaningful moments. Celebrations, thank-yous, or simply because.</p></div></section>
+
+  <section class="ab-dark ab-mv"><div class="ab-frame" aria-hidden="true"></div><div class="wrap"><span class="ab-k fade">Mission &amp; vision</span>
+    <div class="two"><div class="fade"><em>Mission</em><p>Moments of connection, crafted in exceptional chocolate.</p></div><div class="fade"><em>Vision</em><p>To become the UAE’s destination for luxury gifting.</p></div></div>
+    <span class="ab-k b fade">Serenity · Passion · Purity · Perfection</span></div></section>
+
+  <section class="ab-vals"><div class="wrap"><span class="ab-k fade">Brand values</span>
+    <div class="dots">${[['Intensity','#0b0706','#fff'],['Mystery','#1f1e2c','#fff'],['Passion','#40050e','#fff'],['Earth','#39261f','#fff'],['Serenity','#7a6f7b','#fff'],['Caramel','#9c6036','#fff'],['Depth','#3b3d50','#fff'],['Bliss','#cd9754','#fff'],['Purity','#fdfaf5','#1c1210']].map(([n,bg,fg],i)=>`<span class="fade" style="background:${bg};color:${fg};transition-delay:${(i*.06).toFixed(2)}s">${n}</span>`).join('')}</div></div></section>
+
+  <section class="ab-split"><div class="im" style="background-image:url(img/about/stack.jpg)" role="img" aria-label="Three chocolates stacked, with almonds"></div>
+    <div class="tx gold"><span class="ab-k k fade">II · The collections</span><h2 class="fade">Where Luxury Finds Its Flavor</h2><a class="ab-link k fade" href="/shop/all">Shop the collection</a></div></section>
+
+  <section class="ab-cream"><div class="wrap"><div class="ab-head"><span class="ab-k d fade">Signature creations</span><h2 class="fade">Crafted <i>piece by piece</i></h2></div>
+    <div class="ab-ch">${ch('truffle-rocher','Truffle Rocher','ترافل روشيه')}${ch('pistachio-orange','Orange Blossom','فستق بماء الزهر')}${ch('orange-slices','Dipped Orange','برتقال بالشوكولا')}${ch('macadamia','Macadamia','مكاديميا مكرملة')}</div></div>
+   <div class="wrap ab-or"><div class="ab-ch two">${ch('kunafah','Kunafah','كنافة')}${ch('madlouka','Madlouka','مدلوقة')}${ch('snayniyeh','Snayniyeh','سنينية')}${ch('pistachio-halawa','Pistachio Halawa','حلاوة بالفستق الحلبي')}</div>
+    <div class="tx"><span class="ab-k d fade">The Oriental collection</span><h2 class="fade">Arabia, <i>reimagined</i></h2><div class="ar fade" lang="ar">التشكيلة الشرقية</div><span class="ab-rule l fade" aria-hidden="true"></span>
+     <p class="fade">The flavours we grew up with, wrapped in fine chocolate and finished by hand.</p><a class="ab-link d fade" href="/shop/oriental">See the Oriental collection</a></div></div></section>
+
+  <section class="ab-split rev"><div class="tx dark"><em class="num fade">III.</em><span class="ab-k fade">The art of gifting</span><h2 class="fade">Arranged <i>by hand</i></h2><span class="ab-rule l fade" aria-hidden="true"></span>
+     <p class="fade">Signature gift bags, crystal trays and keepsake boxes, finished with our ribbon and your message.</p><span class="ab-k b fade">Hampers · Trays · Keepsakes</span><a class="ab-link fade" href="/occasions">Choose a gift by occasion</a></div>
+    <div class="im" style="background-image:url(img/about/gifting.jpg)" role="img" aria-label="A The Touch gift box with its ribbon, open beside it"></div></section>
+
+  <section class="ab-pack"><div class="wrap"><div class="tx"><span class="ab-k d fade">Signature packaging</span><h2 class="fade">Dressed in <i>cocoa &amp; gold</i></h2><span class="ab-rule l fade" aria-hidden="true"></span>
+     <p class="fade">Magnetic keepsake boxes, foiled in gold and lined to cradle every piece.</p><ul class="fade"><li>Magnetic closure</li><li>Gold-foil seal</li><li>Gold-lined tray</li></ul>
+     ${TT.myoCfg().on?'<a class="btn btn-dark fade" href="/make-your-own">Make your own box</a>':''}</div>
+    <div class="imgs"><img class="fade" loading="lazy" src="img/about/box-closed.jpg" alt="The Touch boxes, closed, in cocoa brown with the gold logo"><img class="fade" loading="lazy" src="img/about/box-open.jpg" alt="The Touch box open, with its gold-lined tray of nine lanes"></div></div></section>
+
+  <section class="ab-dark ab-cele"><div class="ab-frame" aria-hidden="true"></div><div class="wrap"><div class="tx"><em class="num fade">IV.</em><span class="ab-k fade">Celebrations</span><h2 class="fade">Moments, <i>elevated</i></h2><span class="ab-rule l fade" aria-hidden="true"></span>
+     <p class="fade">Chocolate displays, favours and dessert stations designed around your theme.</p><span class="ab-k b fade">VIP weddings<br>Corporate galas<br>Family celebrations</span><a class="ab-link fade" href="/events">Plan your event</a></div>
+    <div class="pics"><img class="a fade" loading="lazy" src="img/about/event-eid.jpg" alt="An Eid tray of chocolates laid in lines"><img class="fade" loading="lazy" src="img/about/event-grad.jpg" alt="A graduation table of wrapped chocolates"><img class="fade" loading="lazy" src="img/about/event-table.jpg" alt="A silver and gold chocolate arrangement"></div></div></section>
+
+  <section class="ab-reach"><div class="ab-frame" aria-hidden="true"></div><div class="wrap"><span class="ab-k fade">Our reach</span>
+    <div class="nums"><div class="fade"><b>7</b><span>Emirates delivered</span></div><div class="fade"><b>100%</b><span>Natural cocoa</span></div><div class="fade"><b>365</b><span>Days of VIP service</span></div></div>
+    <p class="fade">Cold-chain delivery from our Abu Dhabi boutique to every Emirate, all year round.</p></div></section>
+
+  <section class="ab-dark ab-steps"><div class="wrap"><div class="ab-head"><span class="ab-k fade">Bespoke service</span><h2 class="fade">From first sketch <i>to the final touch</i></h2></div>
+    <ol>${[['consult','I','Consult','Your occasion, colours and guests.'],['design','II','Design','Arrangement, packaging and tasting.'],['craft','III','Craft','Made fresh, by hand, in Abu Dhabi.'],['deliver','IV','Deliver','Set up anywhere in the seven Emirates.']].map(([f,n,t,d],i)=>`<li class="fade" style="transition-delay:${(i*.1).toFixed(1)}s"><img loading="lazy" src="img/about/step-${f}.jpg" alt=""><em>${n}</em><b>${t}</b><span>${d}</span></li>`).join('')}</ol></div></section>
+
+  <section class="ab-bout"><div class="wrap"><div class="tx"><span class="ab-k d fade">The boutique</span><h2 class="fade">Abu <i>Dhabi</i></h2><span class="ab-rule l fade" aria-hidden="true"></span>
+     <p class="fade">Carried home in cocoa and gold. Taste, assemble and gift, in store, online or on WhatsApp.</p>
+     <div class="fade" style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn btn-dark" href="/contact">Contact the boutique</a><a class="btn btn-line" href="/shop/all">Shop chocolates</a></div></div>
+    <img class="fade" loading="lazy" src="img/about/bags.jpg" alt="The Touch gift bags in cocoa brown with gold rope handles"></div></section>
+
+  <section class="ab-end"><div class="ab-frame" aria-hidden="true"></div><div class="abin"><img class="mono fade" src="img/monogram-gold.png" alt=""><h2 class="fade">Let’s create your next moment</h2>
+    <p class="ab-k fade">${[tel?`<a href="tel:${U.esc(tel)}">${U.esc(S.phone)}</a>`:'',S.instagram?`<a href="https://instagram.com/${U.esc(S.instagram)}" target="_blank" rel="noopener">@${U.esc(S.instagram)}</a>`:'','<a href="/contact">Write to us</a>'].filter(Boolean).join(' · ')}</p>
+    <small class="fade">${U.esc(S.legalName||'The Touch Planners for Chocolates & Sweets')} · ${U.esc(S.address||'Abu Dhabi, United Arab Emirates')}</small></div></section>
+  </div>`;
   observe();
 }
+
 /* ---------- shop by occasion (the list is managed in Admin → Products → Occasions; a product names the occasions it suits) ---------- */
 const forOcc=id=>visible().filter(p=>Array.isArray(p.occasions)&&p.occasions.includes(id));
-function occCover(o){if(o.img)return o.img;const l=forOcc(o.id);const p=l.find(x=>isPhoto(x.img))||l[0];return p?p.img:''}
+function occCover(o){if(o.img)return o.img;const p=forOcc(o.id).find(x=>isPhoto(x.img));return p?p.img:''}
 function occTile(o){const src=occCover(o);
-  return `<a class="occ${src?(isPhoto(src)?'':' cut'):' plain'}" href="/occasion/${o.id}"><span class="ph"><img loading="lazy" src="${U.esc(src||'img/monogram-gold.png')}" alt=""></span><span class="tx"><b>${U.esc(o.name)}</b>${o.ar?`<i lang="ar">${U.esc(o.ar)}</i>`:''}<span class="go"></span></span></a>`}
+  return `<a class="occ${src?'':' plain'}" href="/occasion/${o.id}"><span class="ph"><img loading="lazy" src="${U.esc(src||'img/monogram-gold.png')}" alt=""></span><span class="tx"><b>${U.esc(o.name)}</b>${o.ar?`<i lang="ar">${U.esc(o.ar)}</i>`:''}<span class="go"></span></span></a>`}
 function pageOccasions(){const l=TT.occasions();
   app.innerHTML=`<div class="phead"><h1 class="h2">Gifts by occasion</h1><p>Tell us the moment and we show you what suits it. Every gift is arranged by hand and finished with our ribbon.</p></div>
   <div class="wrap" style="padding-bottom:100px">${l.length?`<div class="occs">${l.map(occTile).join('')}</div>`:'<div class="nores"><div class="h3">Coming soon</div><p style="margin-bottom:22px">Our occasion selections are being prepared.</p><a class="btn btn-line" href="/shop/all">View all chocolates</a></div>'}
@@ -1165,16 +1446,6 @@ function pageOccasion(id){const l=TT.occasions(),o=l.find(x=>x.id===id);if(!o){g
     ${list.length?'':(l2=>l2.length?`<div class="shead" style="margin-bottom:34px"><h2 class="h2">Most loved right now</h2></div><div class="grid" style="margin-bottom:90px">${l2.map(card).join('')}</div>`:'')((visible().filter(p=>p.featured).length?visible().filter(p=>p.featured):visible()).slice(0,8))}
   </div>`;
   const on=app.querySelector('.tab.on'),tb=app.querySelector('.tabs');if(on&&tb.scrollWidth>tb.clientWidth)tb.scrollLeft=on.offsetLeft-tb.offsetLeft-24}
-
-/* ---------- about: what the boutique does, each line leading somewhere ---------- */
-function aboutMore(){return `<section class="s" style="padding-bottom:0"><div class="wrap"><div class="doing fade">
-    <a href="/shop/all"><b>Chocolates</b><span>Pralines, bars and oriental pieces, sold by weight or by the box.</span><em>Shop the collection</em></a>
-    <a href="/occasions"><b>Gifts by occasion</b><span>Boxes, trays and arrangements chosen for the moment you are marking.</span><em>Choose an occasion</em></a>
-    <a href="/events"><b>Weddings and events</b><span>Displays, favours and dessert tables designed for your celebration.</span><em>Plan an event</em></a>
-    <a href="/contact"><b>For companies</b><span>Staff and client gifts with a written quotation, invoice and receipt.</span><em>Ask for a quotation</em></a>
-  </div></div></section>
-  <section class="s"><div class="wrap" style="text-align:center"><h2 class="h2 fade" style="margin-bottom:14px">Come and taste</h2><p class="fade" style="color:var(--mute);max-width:480px;margin:0 auto 28px">${U.esc(S.address||'Abu Dhabi, United Arab Emirates')}${S.hours?' · '+U.esc(S.hours):''}</p>
-    <div class="fade" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn btn-dark" href="/contact">Contact the boutique</a><a class="btn btn-line" href="/shop/all">Shop chocolates</a></div></div></section>`}
 
 /* ---------- contact: every way to reach the boutique + a message form (saved with the enquiries the admin already lists) ---------- */
 function pageContact(){
@@ -1204,6 +1475,94 @@ function pageContact(){
     try{await DB.put('enquiries',d)}catch(err){console.error(err);b.disabled=false;b.textContent='Send message';toast('Your message could not be sent. Please use WhatsApp.');return}
     f.innerHTML=`<div class="done"><b>Thank you, ${U.esc(d.name.split(' ')[0])}</b><p style="color:var(--mute);margin-bottom:24px">Your message is with us. We will reply on ${d.email?'WhatsApp or by email':'WhatsApp'} shortly.</p><a class="btn btn-line" href="/shop/all">Continue shopping</a></div>`};
   observe()}
+
+/* ---------- make your own box: the page is the boutique's real box (cocoa walls, gold tray, one lane per line, the lid
+   hinged at the far edge). The customer chooses a chocolate for each lane and its pieces are laid in one by one; when the
+   last lane is full the lid closes and the ribbon ties. Every number and word comes from settings.myo
+   (Admin → Make your own): TT.myoCfg / TT.myoPrice in store.js. ---------- */
+function myoCfg(){return TT.myoCfg()}
+// the loose chocolates offered: chosen in the admin (they may be "boutique only" in the shop); each needs a photo and stock
+function myoList(c){const v=PRODUCTS.filter(p=>p.active!==false&&p.unit==='kg'&&p.img&&!/monogram/.test(p.img)&&!(p.stock!=null&&p.stock<=0));const ids=Array.isArray(c.items)?c.items:[];return ids.length?ids.map(id=>v.find(p=>p.id===id)).filter(Boolean):v}
+function pageMyo(){
+  const c=myoCfg(),list=c.on?myoList(c):[],here=location.pathname,KEY='tt_myo';
+  if(!list.length){app.innerHTML='<div class="empty" style="padding:120px 20px"><div class="h2" style="margin-bottom:12px;color:var(--ink)">Make your own box is being prepared</div><p style="margin-bottom:26px">Please come back soon, or choose from our ready boxes.</p><a class="btn btn-dark" href="/shop/all">View the collection</a></div>';return}
+  let sel=Array(c.lines).fill(null),act=0,swap=false,busy=false,done=false,q='',cat='all';
+  try{const x=JSON.parse(sessionStorage.getItem(KEY)||'null');if(Array.isArray(x)&&x.length===c.lines)sel=x.map(id=>list.some(p=>p.id===id)?id:null)}catch(e){}
+  const P=id=>list.find(p=>p.id===id),per=U.r2(c.grams/c.lines),kg=c.grams>=1000?U.r2(c.grams/1000)+' kg':c.grams+' g';
+  const price=()=>TT.myoPrice(c,sel.map(id=>(P(id)||list[0]).price));
+  const lo=TT.myoPrice(c,Array(c.lines).fill(Math.min(...list.map(p=>p.price)))),hi=TT.myoPrice(c,Array(c.lines).fill(Math.max(...list.map(p=>p.price))));
+  const filled=()=>sel.filter(Boolean).length,nextEmpty=()=>sel.findIndex(x=>!x),uses=id=>sel.filter(x=>x===id).length;
+  const rot=(i,j)=>(((i*31+j*17)%11)-5)*1.1;   // every piece sits at its own small angle, the same each time
+  const cats=TT.CATS.filter(x=>list.some(p=>p.cat===x.id));
+  const chips=()=>sel.map((id,i)=>{const p=P(id);return `<button class="mchip${p?' full':''}${i===act&&!done?' act':''}" data-c="${i}" aria-label="Line ${i+1}${p?': '+U.esc(p.name):': empty'}">${p?`<img${imgCls(p.img)} src="${U.esc(p.img)}" alt="">`:i+1}</button>`}).join('');
+  app.innerHTML=`<div class="wrap"><div class="crumbs"><a href="/">Home</a> / ${U.esc(c.title)}</div>
+  <div class="myo" id="myo">
+    <div class="myo-stage"><div class="mstage"><div class="mb3" id="mbox" style="--lines:${c.lines};--per:${c.per}">
+        <div class="mbody"><div class="mtray">${sel.map((_,i)=>`<div class="lane" data-i="${i}" role="button" tabindex="0"><span class="lpcs">${Array.from({length:c.per},(_,j)=>`<i class="pc" style="--r:${rot(i,j)}deg"><img alt=""></i>`).join('')}</span><span class="ln">${i+1}</span><span class="lx" data-x="${i}" role="button" aria-label="Empty line ${i+1}">×</span></div>`).join('')}</div></div>
+        <div class="mlid" aria-hidden="true"><div class="in"><img src="img/logo-gold.png" alt=""><span>Where Luxury Finds Its Flavor</span></div><div class="out"><img src="img/logo-gold.png" alt=""><span>Made by you</span></div></div>
+        <div class="mrib h" aria-hidden="true"></div><div class="mrib v" aria-hidden="true"></div>
+        <div class="mbow" aria-hidden="true"><svg viewBox="0 0 120 80"><defs><linearGradient id="mbg" x1="0" x2="1"><stop offset="0" stop-color="#b98848"/><stop offset=".5" stop-color="#f0d6a2"/><stop offset="1" stop-color="#b98848"/></linearGradient></defs><path d="M60 40C40 8 8 6 6 26s34 22 54 14z" fill="url(#mbg)"/><path d="M60 40c20-32 52-34 54-14S80 48 60 40z" fill="url(#mbg)"/><path d="M56 42L40 76l12-6 6 8 6-34zM64 42l16 34-12-6-6 8-6-34z" fill="#c69a55"/><ellipse cx="60" cy="40" rx="9" ry="8" fill="#e6c88f" stroke="#a9793b"/></svg></div>
+      </div></div>
+      <div class="mmeta"><span><b id="mcount">0</b> of ${c.lines} lines</span><span id="mwt"></span></div></div>
+    <div class="myo-side">
+      <h1>${U.esc(c.title)}</h1><p>${U.esc(c.intro)}</p>
+      <div class="mprice"><span>${U.esc(c.name)} · ${kg} · ${c.lines*c.per} pieces</span><b id="mpr">${lo===hi?money(lo):'from '+money(lo)}</b></div>
+      <div class="mpick">
+        <div class="mnow" id="mnow" aria-live="polite"></div>
+        <div class="mchips" id="mchips" style="--lines:${c.lines}"></div>
+        <div class="mset" id="mset"><span>Start with a set</span><button data-set="fav">Most loved</button>${cats.map(x=>`<button data-set="${x.id}">${U.esc(x.nav||x.name)}</button>`).join('')}<button data-set="rand">Surprise me</button></div>
+        <div class="mtools"><input id="mq" type="search" placeholder="Search a chocolate…" aria-label="Search a chocolate" autocomplete="off"></div>
+        ${cats.length>1?`<div class="mfil" id="mfil"><button class="on" data-f="all">All</button>${cats.map(x=>`<button data-f="${x.id}">${U.esc(x.nav||x.name)}</button>`).join('')}</div>`:''}
+        <div class="mgrid" id="mgrid"></div>
+        <div class="macts"><button id="mfill">Fill the rest for me</button><button id="mreset">Start again</button></div>
+      </div>
+      <div class="mdone" id="mdone"></div>
+    </div>
+  </div>
+  <div class="mbar" id="mbar"><span id="mbl"></span><div class="mchips" id="mchips2" style="--lines:${c.lines}"></div><b id="mpr2"></b></div></div>`;
+  const $m=s=>app.querySelector(s),lanes=[...app.querySelectorAll('.lane')];
+  const paintLane=(i,animate)=>{const r=lanes[i],p=P(sel[i]);r.classList.toggle('full',!!p);r.setAttribute('aria-label','Line '+(i+1)+(p?': '+p.name+'. Press to change':': empty'));
+    r.querySelectorAll('.pc').forEach((cu,j)=>{const im=cu.querySelector('img');cu.classList.remove('in','out');cu.style.setProperty('--d',animate?((c.per-1-j)*.055).toFixed(3)+'s':'0s');   // laid from the near end of the lane
+      if(p){im.src=p.img;im.className=isPhoto(p.img)?'photo':'';void cu.offsetWidth;cu.classList.add('in')}else im.removeAttribute('src')})};
+  const grid=()=>{const k=q.trim().toLowerCase(),l=list.filter(p=>(cat==='all'||p.cat===cat)&&(!k||(p.name+' '+(p.ar||'')+' '+(p.desc||'')).toLowerCase().includes(k)));
+    $m('#mgrid').innerHTML=l.map(p=>{const u=uses(p.id);return `<div class="mch${u?' used':''}${u>=c.maxSame?' max':''}" data-p="${p.id}"><button class="ph" data-add aria-label="Add ${U.esc(p.name)}"><img${imgCls(p.img)} loading="lazy" src="${U.esc(p.img)}" alt="">${u?`<span class="inl">Line ${sel.map((x,i)=>x===p.id?i+1:0).filter(Boolean).join(' · ')}</span>`:''}</button><div class="tx"><b>${U.esc(p.name)}</b><small lang="ar">${U.esc(p.ar||'')}</small>${p.desc?`<div class="ds">${U.esc(p.desc)}</div>`:''}</div>
+      <div class="ac"><button class="add" data-add>Add to my box</button><div class="step"><button class="mi" data-min aria-label="One line less">−</button><span>${u} ${u===1?'line':'lines'}</span><button class="pl" data-add aria-label="One more line">+</button></div></div></div>`}).join('')||'<div class="mnone">No chocolate matches. Try another word.</div>'};
+  const state=pop=>{const n=filled();if(!(act>=0&&act<c.lines))act=Math.max(0,nextEmpty());
+    lanes.forEach((r,i)=>r.classList.toggle('act',i===act&&!done));
+    $m('#mcount').textContent=n;$m('#mwt').innerHTML='about <b>'+Math.round(n*per)+' g</b> of '+kg;
+    const ch=chips();$m('#mchips').innerHTML=ch;$m('#mchips2').innerHTML=ch;if(pop!=null)app.querySelectorAll('.mchip[data-c="'+pop+'"]').forEach(x=>x.classList.add('pop'));
+    const pr=n===c.lines||lo===hi?money(price()):'from '+money(lo);$m('#mpr').textContent=pr;$m('#mpr2').textContent=pr;
+    $m('#mnow').innerHTML=swap&&sel[act]?'Line <b>'+(act+1)+'</b> holds '+U.esc(P(sel[act]).name)+'. Choose another chocolate to change it.':n===c.lines?'Your box is full':'Choose a chocolate for line <b>'+(Math.max(0,sel[act]?nextEmpty():act)+1)+'</b><small>'+(c.lines-n)+' to go</small>';
+    $m('#mbl').textContent=n===c.lines?'Your box is full':'Line '+(Math.max(0,sel[act]?nextEmpty():act)+1)+' · '+(c.lines-n)+' to go';
+    grid();try{sessionStorage.setItem(KEY,JSON.stringify(sel))}catch(e){}};
+  const finish=()=>{done=true;$m('#myo').classList.add('done');lanes.forEach(r=>r.classList.remove('act'));
+    $m('#mdone').innerHTML=`<div class="mnow" style="margin-top:22px">Your box is ready</div><ol>${sel.map((id,i)=>{const p=P(id);return `<li><i>${i+1}</i><img src="${U.esc(p.img)}" alt=""><b>${U.esc(p.name)}</b></li>`}).join('')}</ol>
+      <button class="btn btn-dark" id="madd">Add my box to the bag · ${money(price())}</button><button class="again" id="mopen">Open the box and change it</button>`;
+    setTimeout(()=>{if(location.pathname!==here)return;$m('#mbox').classList.add('closed');const y=$m('.myo-stage').getBoundingClientRect().top+window.scrollY-110;if(Math.abs(window.scrollY-y)>60)window.scrollTo({top:Math.max(0,y),behavior:'smooth'})},600);
+    $m('#madd').onclick=()=>toast('Preview: the order is connected after you approve this design.');
+    $m('#mopen').onclick=()=>{done=false;swap=false;$m('#mbox').classList.remove('closed');$m('#myo').classList.remove('done');act=0;swap=true;state()}};
+  const settle=()=>{busy=true;setTimeout(()=>{busy=false;if(location.pathname===here&&nextEmpty()<0&&!done)finish()},c.per*55+700)};
+  const add=id=>{if(busy||done)return;if(uses(id)>=c.maxSame&&!(swap&&sel[act]===id)){toast('This chocolate already fills '+c.maxSame+' '+(c.maxSame===1?'line':'lines'));return}
+    let i=swap?act:(sel[act]?nextEmpty():act);if(i<0)i=act;sel[i]=id;paintLane(i,true);swap=false;const n=nextEmpty();act=n<0?i:n;state(i);if(n<0)settle()};
+  const empty=i=>{if(done||!sel[i])return;lanes[i].querySelectorAll('.pc').forEach(cu=>{cu.classList.remove('in');cu.classList.add('out')});sel[i]=null;act=i;swap=false;setTimeout(()=>{if(!sel[i]&&location.pathname===here)paintLane(i)},270);state()};
+  $m('#mgrid').onclick=e=>{const card=e.target.closest('.mch');if(!card)return;const id=card.dataset.p;if(e.target.closest('[data-min]')){const i=sel.lastIndexOf(id);if(i>=0)empty(i)}else if(e.target.closest('[data-add]'))add(id)};
+  const pick=i=>{if(done)return;act=i;swap=!!sel[i];state()};
+  $m('.mtray').addEventListener('click',e=>{const x=e.target.closest('[data-x]');if(x){e.stopPropagation();empty(+x.dataset.x);return}const r=e.target.closest('.lane');if(r)pick(+r.dataset.i)});
+  $m('.mtray').addEventListener('keydown',e=>{const r=e.target.closest('.lane');if(!r)return;const i=+r.dataset.i;if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(i)}else if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();empty(i)}else if(e.key==='ArrowRight'&&lanes[i+1]){lanes[i+1].focus()}else if(e.key==='ArrowLeft'&&lanes[i-1]){lanes[i-1].focus()}});
+  app.querySelectorAll('.mchips').forEach(el=>el.onclick=e=>{const b=e.target.closest('.mchip');if(b)pick(+b.dataset.c)});
+  $m('#mq').oninput=()=>{q=$m('#mq').value;grid()};
+  if($m('#mfil'))$m('#mfil').onclick=e=>{const b=e.target.closest('button');if(!b)return;cat=b.dataset.f;$m('#mfil').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));grid()};
+  $m('#mreset').onclick=()=>{if(busy)return;sel.forEach((id,i)=>{if(id){lanes[i].querySelectorAll('.pc').forEach(cu=>{cu.classList.remove('in');cu.classList.add('out')});sel[i]=null}});setTimeout(()=>{if(location.pathname===here)sel.forEach((id,i)=>{if(!id)paintLane(i)})},270);act=0;swap=false;state()};
+  const fillWith=order=>{if(busy||done)return;const todo=sel.map((id,i)=>id?-1:i).filter(i=>i>=0);if(!todo.length)return;busy=true;const pool=order.filter(id=>!sel.includes(id)),all=order.length?order:list.map(p=>p.id);
+    todo.forEach((i,k)=>setTimeout(()=>{if(location.pathname!==here)return;let id=pool[k]||all[(k*3+i)%all.length];if(uses(id)>=c.maxSame)id=(list.find(p=>uses(p.id)<c.maxSame)||list[0]).id;sel[i]=id;paintLane(i,true);act=i;swap=false;state(i);if(k===todo.length-1){busy=false;settle()}},k*240))};
+  $m('#mfill').onclick=()=>{const fav=c.favourites.filter(id=>P(id));fillWith(fav.length?fav:list.map(p=>p.id))};
+  $m('#mset').onclick=e=>{const b=e.target.closest('button');if(!b||busy||done)return;const k=b.dataset.set;let ids;
+    if(k==='rand'){ids=list.map(p=>p.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}}
+    else if(k==='fav'){const fav=c.favourites.filter(id=>P(id)),ft=list.filter(p=>p.featured);ids=fav.length?fav:(ft.length?ft:list).map(p=>p.id)}
+    else ids=list.filter(p=>p.cat===k).map(p=>p.id);
+    if(!ids.length)return;sel.forEach((id,i)=>{if(id){sel[i]=null;paintLane(i)}});act=0;swap=false;state();fillWith(ids)};
+  sel.forEach((id,i)=>{if(id)paintLane(i,false)});act=Math.max(0,nextEmpty());state();if(nextEmpty()<0)finish();
+}
 
 function pageEvents(){
   app.innerHTML=`<div class="phead noir"><span class="eyebrow">Weddings · Corporate · Celebrations</span><h1 class="h2">Bespoke chocolate<br><span class="it">arrangements</span></h1><p>Tell us about your occasion — our team will design a proposal within 24 hours.</p></div>
@@ -1329,6 +1688,7 @@ const PAGE_META={ // title, description (the product and collection pages build 
   '':['The Touch | Luxury Chocolates & Chocolate Gifts in Abu Dhabi','The Touch is a luxury chocolate boutique in Abu Dhabi: handcrafted chocolates, gift boxes, trays and bespoke arrangements, delivered across all seven Emirates.'],
   about:['About The Touch','The Touch is a luxury chocolate boutique in Abu Dhabi. Chocolate that says what words sometimes cannot: our story, our craft and how we work.'],
   story:['About The Touch','The Touch is a luxury chocolate boutique in Abu Dhabi. Chocolate that says what words sometimes cannot: our story, our craft and how we work.'],
+  'make-your-own':['Make Your Own Chocolate Box','Build your own box of The Touch chocolates: choose a chocolate for every line and we lay it by hand, close the lid and tie the ribbon.'],
   contact:['Contact The Touch','Visit, call or message The Touch chocolate boutique in Abu Dhabi. WhatsApp, phone, email and a form for orders, corporate gifting and events.'],
   occasions:['Chocolate Gifts by Occasion','Choose a chocolate gift by occasion: birthdays, new born, weddings, Ramadan, Eid, National Day and more, delivered across the UAE.'],
   events:['Weddings, Corporate Gifting & Events','Bespoke chocolate arrangements for weddings, corporate gifting, baby receptions and Eid. Tell us about your occasion and receive a proposal within 24 hours.'],
@@ -1354,10 +1714,10 @@ function route(){
   if(!FILE&&/^#\//.test(location.hash))history.replaceState(null,'',location.hash.slice(1)); // old #/ link
   const h=curPath();const [pg,arg]=h.split('?')[0].split('/');
   renderNav();setMeta(pg,arg);
-  {const nk=!pg?'':pg==='p'?'shop':pg==='occasion'?'occasions':pg==='story'?'about':pg;document.querySelectorAll('#nav a[data-n]').forEach(a=>a.classList.toggle('on',a.dataset.n===nk))}
+  {const nk=!pg?'':pg==='p'?'shop':pg==='occasion'?'occasions':pg==='story'?'about':pg;document.querySelectorAll('#nav a[data-n],#nav2 a[data-n]').forEach(a=>a.classList.toggle('on',a.dataset.n===nk))}
   closeSearch();closeDrawers();document.body.classList.remove('sbar-on','pinv');closePayForm();{const t=$('#toast');if(t&&!t._keep)t.classList.remove('on')}
   if(pg==='shop')pageShop(arg);else if(pg==='p')pageProduct(arg);else if(pg==='checkout')pageCheckout();else if(pg==='order')pageOrder(arg);else if(pg==='quote'&&arg)pageQuote(arg);
-  else if(pg==='story'||pg==='about')pageAbout();else if(pg==='contact')pageContact();else if(pg==='occasions')pageOccasions();else if(pg==='occasion'&&arg)pageOccasion(arg);else if(pg==='events')pageEvents();else if(pg==='delivery')pageDelivery();
+  else if(pg==='story'||pg==='about')pageAbout();else if(pg==='contact')pageContact();else if(pg==='make-your-own')pageMyo();else if(pg==='occasions')pageOccasions();else if(pg==='occasion'&&arg)pageOccasion(arg);else if(pg==='events')pageEvents();else if(pg==='delivery')pageDelivery();
   else if(pg==='privacy'||pg==='terms'||pg==='refunds')pageLegal(pg);else if(!pg)pageHome();else pageNotFound();
   window.scrollTo(0,0);
 }
@@ -1383,8 +1743,8 @@ addEventListener('popstate',route);addEventListener('hashchange',()=>{if(FILE||/
     hc.forEach(([e,s])=>{e.style.transform=`translate3d(0,${(-y*s).toFixed(1)}px,0) rotate(${(y*s*.02).toFixed(2)}deg)`});
     if(hcp){hcp.style.transform=`translate3d(0,${(y*.08).toFixed(1)}px,0)`;hcp.style.opacity=Math.max(0,1-y/(hh*.9)).toFixed(3)}
   }
-  let st=null,sw=[],sr=null,lit=-1; // home brand statement: words light up in reading order, gold rule draws down
-  function bindStmt(){st=document.querySelector('.st');sw=st?[...st.querySelectorAll('span')]:[];sr=document.querySelector('.stmt .rule');lit=-1;if(st)st.classList.add('js')}
+  let st=null,sw=[],sr=null,lit=-1; // home story: the sentence lights up in reading order, the gold rule draws across
+  function bindStmt(){st=document.querySelector('.st');sw=st?[...st.querySelectorAll('span')]:[];sr=document.querySelector('.hstory .rule');lit=-1;if(st)st.classList.add('js')}
   function paintStmt(){
     if(!st||!st.isConnected)bindStmt();if(!st)return;
     // 0 when the sentence enters at 90% of the screen height → 1 when its centre reaches 55% (fully lit by mid-screen)

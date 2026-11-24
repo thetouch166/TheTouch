@@ -94,6 +94,10 @@
       { id: 'nationalday', name: 'National Day', ar: 'اليوم الوطني', on: true }, { id: 'christmas', name: 'Christmas', ar: 'عيد الميلاد المجيد', on: true }
     ],
     hours: '', mapUrl: '',   // contact page: opening hours and an optional Google Maps link
+    // make your own box (Admin → Products → Make your own). mode: 'weight' = each line at its chocolate's price per kg ·
+    // 'kg' = one price per kg for the box · 'fixed' = one price. fee = box and packaging on top (weight / kg). round = 0 | 1 | 5.
+    myo: { on: false, title: 'Make your own box', intro: 'Nine lines, each one a chocolate you choose. We lay them by hand, close the lid and tie the ribbon.', name: 'Signature box',
+      grams: 1100, lines: 9, per: 7, mode: 'weight', kgPrice: 0, price: 0, fee: 0, round: 0, maxSame: 9, items: [], favourites: [] },
     legalName: 'The Touch Planners For Chocolates and Sweets LLC–SPC',
     payTerms: '100% on advance.',
     quoteStart: 1, invoiceStart: 1
@@ -282,6 +286,19 @@
       if (!prods.length) prods = SEED.slice(); // public fallback
       TT.products = prods;
       return TT;
+    },
+    /* make your own box: the settings with safe numbers, and the price of a box (prices = price per kg of each line's chocolate) */
+    myoCfg() {
+      const c = Object.assign({}, DEFAULT_SETTINGS.myo, TT.settings.myo || {}), n = (v, d) => { v = Number(v); return isFinite(v) ? v : d; };
+      c.lines = Math.min(12, Math.max(1, Math.round(n(c.lines, 9)))); c.per = Math.min(10, Math.max(3, Math.round(n(c.per, 7)))); c.grams = Math.min(10000, Math.max(100, n(c.grams, 1100)));
+      c.mode = ['weight', 'kg', 'fixed'].includes(c.mode) ? c.mode : 'weight'; c.kgPrice = Math.max(0, n(c.kgPrice, 0)); c.price = Math.max(0, n(c.price, 0)); c.fee = Math.max(0, n(c.fee, 0));
+      c.round = [0, 1, 5, 10].includes(n(c.round, 0)) ? n(c.round, 0) : 0; c.maxSame = Math.min(c.lines, Math.max(1, Math.round(n(c.maxSame, c.lines))));
+      c.items = Array.isArray(c.items) ? c.items.map(String) : []; c.favourites = Array.isArray(c.favourites) ? c.favourites.map(String) : []; c.on = c.on === true;   // closed until the owner opens it
+      return c;
+    },
+    myoPrice(c, prices) {
+      const v = c.mode === 'fixed' ? c.price : c.mode === 'kg' ? c.kgPrice * c.grams / 1000 + c.fee : prices.reduce((a, p) => a + (Number(p) || 0) * (c.grams / c.lines) / 1000, 0) + c.fee;
+      return c.mode !== 'fixed' && c.round > 0 ? Math.ceil(v / c.round - 1e-9) * c.round : U.r2(v);   // a fixed price is taken as it is
     },
     /* the occasions shown on the website: cleaned, only those switched on */
     occasions(all) {
