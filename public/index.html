@@ -280,6 +280,7 @@ footer li{list-style:none;margin-bottom:10px}footer a:hover{color:var(--gold)}
 .ci{display:grid;grid-template-columns:78px 1fr auto;gap:14px;padding:18px 0;border-bottom:1px solid var(--line)}
 .ci img{width:78px;height:78px;object-fit:cover;background:var(--cream);mix-blend-mode:multiply}
 .ci .n{font-family:var(--serif);font-size:17px;line-height:1.2}
+.mprev{margin:4px 0 18px;padding:12px 16px;background:#fff6e4;border:1px solid #e6c88f;color:#6b4419;font-size:13px;line-height:1.5}
 .ci .bx{font-size:12px;line-height:1.5;color:var(--mute);margin-top:3px}.ci .bx a{color:var(--bur);text-decoration:underline;text-underline-offset:3px;white-space:nowrap;display:inline-block;padding:4px 0}
 .ci .m{font-size:11.5px;color:var(--mute);margin:3px 0 8px}
 .ci .q{display:inline-flex;align-items:center;border:1px solid var(--line);height:30px}
@@ -1495,7 +1496,9 @@ function myoCfg(){return TT.myoCfg()}
 // the loose chocolates offered: chosen in the admin (they may be "boutique only" in the shop); each needs a photo and stock
 function myoList(c){const v=PRODUCTS.filter(p=>p.active!==false&&p.unit==='kg'&&p.img&&!/monogram/.test(p.img)&&!(p.stock!=null&&p.stock<=0));const ids=Array.isArray(c.items)?c.items:[];return ids.length?ids.map(id=>v.find(p=>p.id===id)).filter(Boolean):v}
 function pageMyo(){
-  const c=myoCfg(),list=c.on?myoList(c):[],here=location.pathname,KEY='tt_myo';
+  // while the page is closed, someone signed in to the admin on this device still sees it, as a preview (nothing can be ordered from it)
+  const c=myoCfg();let staff=false;try{staff=!c.on&&!!localStorage.getItem('tt_tok')}catch(e){}
+  const list=(c.on||staff)?myoList(c):[],here=location.pathname,KEY='tt_myo';
   if(!list.length){app.innerHTML='<div class="empty" style="padding:120px 20px"><div class="h2" style="margin-bottom:12px;color:var(--ink)">Make your own box is being prepared</div><p style="margin-bottom:26px">Please come back soon, or choose from our ready boxes.</p><a class="btn btn-dark" href="/shop/all">View the collection</a></div>';return}
   let sel=Array(c.lines).fill(null),act=0,swap=false,busy=false,done=false,q='',cat='all';
   try{const x=JSON.parse(sessionStorage.getItem(KEY)||'null');if(Array.isArray(x)&&x.length===c.lines)sel=x.map(id=>list.some(p=>p.id===id)?id:null)}catch(e){}
@@ -1531,6 +1534,7 @@ function pageMyo(){
     </div>
   </div>
   <div class="mbar" id="mbar"><span id="mbl"></span><div class="mchips" id="mchips2" style="--lines:${c.lines}"></div><b id="mpr2"></b></div></div>`;
+  if(staff)app.querySelector('.crumbs').insertAdjacentHTML('afterend','<div class="mprev">Preview for the boutique: customers cannot see this page yet. Set the price and open it in Admin → Own box.</div>');
   const $m=s=>app.querySelector(s),lanes=[...app.querySelectorAll('.lane')];
   const paintLane=(i,animate)=>{const r=lanes[i],p=P(sel[i]);r.classList.toggle('full',!!p);r.setAttribute('aria-label','Line '+(i+1)+(p?': '+p.name+'. Press to change':': empty'));
     r.querySelectorAll('.pc').forEach((cu,j)=>{const im=cu.querySelector('img');cu.classList.remove('in','out');cu.style.setProperty('--d',animate?((c.per-1-j)*.055).toFixed(3)+'s':'0s');   // laid from the near end of the lane
@@ -1550,7 +1554,7 @@ function pageMyo(){
     $m('#mdone').innerHTML=`<div class="mnow" style="margin-top:22px">Your box is ready</div><ol>${sel.map((id,i)=>{const p=P(id);return `<li><i>${i+1}</i><img src="${U.esc(p.img)}" alt=""><b>${U.esc(p.name)}</b></li>`}).join('')}</ol>
       <button class="btn btn-dark" id="madd">Add my box to the bag · ${money(price())}</button><button class="again" id="mopen">Open the box and change it</button>`;
     setTimeout(()=>{if(location.pathname!==here)return;$m('#mbox').classList.add('closed');const y=$m('.myo-stage').getBoundingClientRect().top+window.scrollY-110;if(Math.abs(window.scrollY-y)>60)window.scrollTo({top:Math.max(0,y),behavior:'smooth'})},600);
-    $m('#madd').onclick=()=>{const ps=sel.map(P);if(ps.some(p=>!p))return;
+    $m('#madd').onclick=()=>{const ps=sel.map(P);if(ps.some(p=>!p))return;if(staff){toast('Preview only. Open the page in Admin → Own box to take orders.');return}
       try{const ek=sessionStorage.getItem('tt_myo_edit');if(ek){Cart.items=Cart.items.filter(i=>i.k!==ek);sessionStorage.removeItem('tt_myo_edit')}}catch(e){}   // a box opened from the bag to be changed replaces itself
       Cart.addBox(c,ps,price());toast('Your box is in the bag ✓');openDrawer('cart')};
     $m('#mopen').onclick=()=>{done=false;swap=false;$m('#mbox').classList.remove('closed');$m('#myo').classList.remove('done');act=0;swap=true;state()}};

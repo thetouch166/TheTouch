@@ -59,7 +59,8 @@ a{color:inherit}
 .msheet .on{color:var(--gold2);border-color:rgba(205,151,84,.5);background:rgba(205,151,84,.14)}
 .msheet .dot{position:absolute;top:8px;right:calc(50% - 26px);background:var(--gold);color:#1a0206;border-radius:10px;font-size:10px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 5px;letter-spacing:0;font-weight:700}
 @media(max-width:760px){.shell{grid-template-columns:1fr;grid-template-rows:1fr 66px}.rail{grid-row:2;flex-direction:row;justify-content:space-around;padding:4px 4px env(safe-area-inset-bottom);overflow:visible;z-index:160}.rail:after,.rail .mono,.rail .sp,.rail button.on:before{display:none}.rail button{width:auto;flex:1;min-width:0;max-width:86px;padding:7px 2px;font-size:9px;letter-spacing:.06em;gap:5px}
- .rail button[data-v=reports],.rail button[data-v=customers],.rail button[data-v=events],.rail button[data-v=settings],.rail #lockBtn{display:none}.rail #moreBtn{display:flex}.rail .dot{right:calc(50% - 24px)}[dir=rtl] .rail .dot{right:auto;left:calc(50% - 24px)}
+ .rail button[data-v=reports],.rail button[data-v=customers],.rail button[data-v=events],.rail button[data-v=quotes],.rail button[data-v=myo],.rail button[data-v=settings],.rail #lockBtn{display:none}
+ .rail button{font-size:9.5px}   /* five places on a phone: Home, POS, Orders, Products, More (everything else opens from More) */.rail #moreBtn{display:flex}.rail .dot{right:calc(50% - 24px)}[dir=rtl] .rail .dot{right:auto;left:calc(50% - 24px)}
  .main{grid-row:1}.topbar{padding:0 14px;height:58px}.topbar .tt{min-width:0}.topbar h1{font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.topbar .sub,.topbar .hide-m{display:none}.view{padding:14px}}
 
 /* topbar round buttons (theme / language) */
@@ -104,7 +105,7 @@ a{color:inherit}
 .seg button{height:36px;border-radius:8px;font-size:12px;font-weight:600;color:var(--slate);transition:all .15s}
 .seg button.on{background:var(--card);color:var(--hd);box-shadow:0 1px 4px rgba(57,38,31,.12)}
 body.cashier .rail button[data-v=reports],body.cashier .rail button[data-v=customers],body.cashier .rail button[data-v=quotes],body.cashier .rail button[data-v=myo],body.cashier .own,body.cashier [data-ed],body.cashier #padd,body.cashier #ptable .switch,body.cashier .qa .ownb{display:none!important}
-.lshow{display:flex;align-items:center;gap:8px;justify-content:center;margin:2px 0 12px;font-size:12px;color:#c9b29a;cursor:pointer}.lshow input{width:16px;height:16px;accent-color:#cd9754}
+.lshow{display:flex;align-items:center;gap:8px;justify-content:center;margin:2px 0 12px;font-size:12px;color:#c9b29a;cursor:pointer}.login .lshow input,.lshow input{width:18px;height:18px;min-height:0;margin:0;padding:0;border:0;background:none;border-radius:4px;flex:none;accent-color:#cd9754}
 .pwrow{display:flex;gap:8px}.pwrow input{flex:1;min-width:0}
 .tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;color:#fff;white-space:nowrap}
 .muted{color:var(--mute)}.small{font-size:12px}
@@ -304,7 +305,10 @@ table.t tr:hover td{background:var(--soft2)}
 .mypbox img{position:absolute;left:-20%;top:-20%;width:140%;height:140%;object-fit:contain;mix-blend-mode:multiply}
 .myres{padding:14px 16px;border-radius:12px;background:var(--tint);border:1px solid var(--tintb);font-size:12.5px;line-height:1.7;display:flex;flex-direction:column}
 .myres .big{font-size:26px;font-weight:700;color:var(--hd);line-height:1.3}
-@media(max-width:1100px){.myp{grid-template-columns:1fr}.myp-side{position:static;order:-1}}
+.mybar{display:none}
+@media(max-width:1100px){.myp{grid-template-columns:1fr}.myp-side{position:static}   /* small screens: the fields first, the picture of the box after them, the price and Save always in reach */
+ .mybar{display:flex;position:sticky;bottom:0;z-index:5;gap:12px;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px 10px 16px;box-shadow:0 -6px 24px rgba(57,38,31,.08)}
+ .mybar small{display:block;color:var(--mute);font-size:11px}.mybar b{font-size:18px;color:var(--hd)}.mybar .btn{min-width:120px;height:46px}.myp-side #my_save{display:none}}
 /* occasions manager */
 .ocrow{display:grid;grid-template-columns:auto 52px minmax(0,1.2fr) minmax(0,1fr) auto auto 34px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--hair)}
 .ocrow .mv{display:flex;flex-direction:column;gap:3px}.ocrow .mv .x{width:28px;height:22px;font-size:12px;border-radius:6px}
@@ -335,7 +339,11 @@ table.t tr:hover td{background:var(--soft2)}
 .qsum{margin-top:18px;margin-inline-start:auto;max-width:320px;font-size:13px}
 .qsum div{display:flex;justify-content:space-between;gap:20px;padding:5px 0;color:var(--slate)}
 .qsum .g{border-top:1.5px solid var(--line);margin-top:6px;padding-top:10px;font-size:18px;font-weight:700;color:var(--hd)}
-@media(max-width:700px){.qlh{display:none}.qline{grid-template-columns:1fr 1fr 1fr 36px}.qline .nm{grid-column:1/-1;grid-row:1}.qline .un{grid-row:2;grid-column:1}.qline .nn{grid-row:2;grid-column:2}.qline .pr{grid-row:2;grid-column:3}.qline .x{grid-row:2;grid-column:4}.qline .dp{grid-row:3;grid-column:1}.qline .lt{grid-row:3;grid-column:2/5}.qline .ds{grid-row:4;grid-column:1/-1}.qbar .seg{min-width:0;width:100%}.qbar .btn{flex:1}}
+.qline .ql{display:none}
+@media(max-width:700px){.qlh{display:none}.qline{grid-template-columns:1fr 1fr 1fr 36px;row-gap:4px}.qline .nm{grid-column:1/-1;grid-row:1;margin-bottom:6px}
+ .qline .ql{display:block;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}.qline .ql.u{grid-row:2;grid-column:1}.qline .ql.q{grid-row:2;grid-column:2}.qline .ql.p{grid-row:2;grid-column:3}.qline .ql.d{grid-row:4;grid-column:1;margin-top:6px}
+ .qline .un{grid-row:3;grid-column:1}.qline .nn{grid-row:3;grid-column:2}.qline .pr{grid-row:3;grid-column:3}.qline .x{grid-row:3;grid-column:4}.qline .dp{grid-row:5;grid-column:1}.qline .lt{grid-row:5;grid-column:2/5}.qline .ds{grid-row:6;grid-column:1/-1;margin-top:6px}.qbar .seg{min-width:0;width:100%}.qbar .btn{flex:1}
+ .t tr.emp td{text-align:start}.t tr.emp .empin{max-width:calc(100vw - 76px)}}
 /* end quotations */
 /* new-order alert pop-up */
 .mbox.nal{width:min(640px,100%)}
@@ -446,6 +454,7 @@ table.t tr:hover td{background:var(--soft2)}
 .setw{max-width:880px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 .savebar{position:sticky;bottom:0;padding:12px 14px 12px 20px;background:var(--card);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 -6px 24px rgba(57,38,31,.08);display:flex;gap:12px;align-items:center;justify-content:space-between;z-index:5}
 .savebar .msg{font-size:12.5px;color:var(--mute)}.savebar.dirty .msg{color:var(--warn);font-weight:600}
+@media(max-width:760px){.savebar,.mybar{box-shadow:0 -6px 24px rgba(57,38,31,.08),0 70px 0 0 var(--bg)}}   /* nothing shows through under the bar */
 @media(pointer:coarse){.stk button{width:42px;height:40px}.switch{width:50px;height:30px;border-radius:15px}.switch:after{width:24px;height:24px}.switch.on:after{transform:translateX(20px)}}
 @media(max-width:1000px){.ptbl th:nth-child(3),.ptbl td:nth-child(3){display:none}}
 @media(max-width:1000px){
@@ -712,7 +721,7 @@ const AR={
  'Could not draw the invoice image — use Print / PDF.':'تعذّر إنشاء صورة الفاتورة — استخدم الطباعة / PDF.',
  // products & stock
  'Search products…':'ابحث عن منتج…','History':'السجل','Stock list':'قائمة المخزون','Count sheet':'ورقة الجرد','Products':'المنتجات','on sale':'معروض للبيع','Restock soon':'أعد التخزين قريباً','All above alert level':'الكل فوق حد التنبيه',
- 'Out of stock':'نفد من المخزون','View':'عرض','Everything available':'كل المنتجات متوفرة','Stock value':'قيمة المخزون','At selling price':'بسعر البيع','In the shop':'في المتجر الآن','boxed pieces':'قطعة معلّبة','Customers find it in the menu, build their box line by line and order it. Set the price first.':'يجده العملاء في القائمة، يكوّنون علبتهم صفاً بصف ويطلبونها. حدّدي السعر أولاً.','In this list':'في هذه القائمة','worth':'بقيمة','products':'منتج','Product':'المنتج','Category':'الفئة','Price':'السعر','Stock':'المخزون','On sale':'معروض للبيع',
+ 'Out of stock':'نفد من المخزون','View':'عرض','Everything available':'كل المنتجات متوفرة','Stock value':'قيمة المخزون','At selling price':'بسعر البيع','In the shop':'في المتجر الآن','boxed pieces':'قطعة معلّبة','Customers find it in the menu, build their box line by line and order it. Set the price first.':'يجده العملاء في القائمة، يكوّنون علبتهم صفاً بصف ويطلبونها. حدّدي السعر أولاً.','The customer pays':'يدفع العميل','In this list':'في هذه القائمة','worth':'بقيمة','products':'منتج','Product':'المنتج','Category':'الفئة','Price':'السعر','Stock':'المخزون','On sale':'معروض للبيع',
  'Show password':'إظهار كلمة المرور','Signed in as':'تم تسجيل الدخول باسم','Owner':'المالك','Cashier':'كاشير','Access':'الصلاحية','Last sign-in':'آخر دخول','Never':'لم يدخل بعد','Add a person':'إضافة شخص','Change my password':'تغيير كلمة المرور','New person':'شخص جديد','Edit person':'تعديل الشخص','New password':'كلمة مرور جديدة','Generate':'توليد','Remove':'حذف','Current password':'كلمة المرور الحالية','Repeat the new password':'أعد كلمة المرور الجديدة','Change password':'تغيير كلمة المرور','Password changed ✓':'تم تغيير كلمة المرور ✓','The two passwords are not the same':'كلمتا المرور غير متطابقتين','Remove this person?':'حذف هذا الشخص؟','Removed':'تم الحذف','Developer login':'دخول المطوّر','Could not load the staff list.':'تعذّر تحميل قائمة الموظفين.','Leave empty to keep the current password':'اتركه فارغاً للإبقاء على كلمة المرور الحالية',
  'Owner: everything. Cashier: sales, orders, shifts and stock counts — not prices, products, reports, clients or settings.':'المالك: كل شيء. الكاشير: المبيعات والطلبات والورديات وجرد المخزون فقط — دون الأسعار والمنتجات والتقارير والعملاء والإعدادات.',
  'At least 8 characters, with letters and numbers. Write it down for this person — it is not shown again.':'8 أحرف على الأقل، بحروف وأرقام. دوّنها لهذا الشخص — لن تظهر مرة أخرى.',
@@ -1827,7 +1836,8 @@ function renderMyo(){
       <div class="mypbox" id="my_box"></div>
       <div class="myres" id="my_res"></div>
       <button class="btn b-dark" id="my_save" style="width:100%;margin-top:14px;height:50px">Save</button>
-      <div class="small muted" id="my_msg" style="text-align:center;margin-top:8px;min-height:18px"></div></div></aside></div>`;
+      <div class="small muted" id="my_msg" style="text-align:center;margin-top:8px;min-height:18px"></div></div></aside>
+   <div class="mybar"><div id="my_bar"></div><button class="btn b-dark" id="my_save2" type="button">Save</button></div></div>`;
   const g=id=>view.querySelector('#'+id),num=(id,d)=>{const v=+g(id).value;return isFinite(v)&&g(id).value!==''?v:d};g('my_round').value=String(c.round);
   const read=()=>{const lines=Math.min(12,Math.max(1,Math.round(num('my_lines',9))));return {on:g('my_on').checked,title:g('my_title').value.trim().slice(0,80)||'Make your own box',intro:g('my_intro').value.trim().slice(0,300),name:g('my_name').value.trim().slice(0,60)||'Signature box',
     grams:Math.round(Math.min(10,Math.max(.1,num('my_kg',1.1)))*1000),lines,per:Math.min(10,Math.max(3,Math.round(num('my_per',7)))),mode,kgPrice:Math.max(0,num('my_kgprice',0)),price:Math.max(0,num('my_price',0)),fee:Math.max(0,num('my_fee',0)),round:+g('my_round').value||0,
@@ -1845,7 +1855,9 @@ function renderMyo(){
     g('my_res').innerHTML=!off.length?'<b style="color:var(--bad)">Offer at least one chocolate with a photo.</b>':(mode!=='weight'&&!p1?'<b style="color:var(--bad)">Enter the price.</b>':`<span class="muted">${esc(x.name)} · the customer pays</span><b class="big">${p1===p2?money(p1):money(p1)+' to '+money(p2)}</b><span class="muted">${sums}${x.round&&mode!=='fixed'?' · rounded up':''}</span><span class="muted">${x.lines} lines × ${x.per} = ${x.lines*x.per} pieces · about ${Math.round(x.grams/x.lines)} g a line · ${off.length} ${off.length===1?'chocolate':'chocolates'} offered</span>${diff}`);
     const show=(x.favourites.length?x.favourites:x.items).map(id=>all.find(p=>p.id===id)).filter(Boolean);
     g('my_box').style.setProperty('--lines',x.lines);g('my_box').innerHTML=Array.from({length:x.lines},(_,i)=>{const p=show.length?show[i%show.length]:null;return `<div class="ml">${Array.from({length:x.per},()=>`<i>${p?`<img src="${esc(p.img)}" alt="">`:''}</i>`).join('')}</div>`}).join('');
+    g('my_bar').innerHTML='<small>The customer pays</small><b>'+(off.length&&p1?(p1===p2?money(p1):money(p1)+' to '+money(p2)):'—')+'</b>';
     g('my_msg').textContent='Not saved yet'};
+  g('my_save2').onclick=()=>g('my_save').click();
   view.querySelector('.myp-main').addEventListener('input',e=>{if(e.target.id==='my_q'){q=e.target.value;tiles();return}draw()});
   g('my_mode').onclick=e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;draw()}};
   const flip=id=>{const p=all.find(x=>x.id===id);if(!p||!hasPhoto(p))return;if(items.has(id)){items.delete(id);fav.delete(id)}else items.add(id);tiles();draw()};
@@ -1964,7 +1976,7 @@ function renderQuotes(){
    <div class="card" style="overflow:auto">${qTab==='quotes'?`<table class="t qtbl"><thead><tr><th>Quotation</th><th>Company</th><th>Total</th><th>Status</th><th>Valid until</th><th></th></tr></thead><tbody>
      ${ql.map(q=>{const o=qInvoice(q);return `<tr data-q="${q.id}" style="cursor:pointer"><td><b data-en>${esc(q.no)}</b><div class="small muted">${U.fmtTime(q.created)}</div></td><td><b>${esc(q.company.name||'—')}</b><div class="small muted">${esc(q.subject||q.company.contact||'')}</div></td><td><b>${money(q.total)}</b></td>
        <td>${qTag(q)}${o?`<div class="small" style="margin-top:5px">${o.status==='cancelled'?'<b style="color:var(--bad)">Invoice cancelled</b>':o.payment.paid?'<b style="color:var(--ok)">Invoice paid</b>':'<b style="color:var(--warn)">Invoice not paid</b>'} · <span data-en>${esc(o.no)}</span></div>`:''}</td>
-       <td class="small">${q.validUntil?qDay(q.validUntil):'—'}</td><td style="text-align:end"><button class="btn b-line b-sm">Open</button></td></tr>`}).join('')||`<tr class="emp"><td colspan="6" class="empty">${qQ?'No quotations match “'+esc(qQ)+'”':'No quotations yet. Press “+ New quotation” to write the first one for a company.'}</td></tr>`}</tbody></table>`
+       <td class="small">${q.validUntil?qDay(q.validUntil):'—'}</td><td style="text-align:end"><button class="btn b-line b-sm">Open</button></td></tr>`}).join('')||`<tr class="emp"><td colspan="6" class="empty"><div class="empin">${qQ?'No quotations match “'+esc(qQ)+'”':'No quotations yet. Press “+ New quotation” to write the first one for a company.'}</div></td></tr>`}</tbody></table>`
    :`<table class="t qtbl"><thead><tr><th>Company</th><th>Contact</th><th>TRN</th><th>Quotations</th><th></th></tr></thead><tbody>
      ${cl.map(c=>`<tr data-c="${c.id}" style="cursor:pointer"><td><b>${esc(c.name)}</b><div class="small muted">${esc(c.address||'')}</div></td><td>${esc(c.contact||'—')}<div class="small muted">${[c.phone,c.email].filter(Boolean).map(esc).join(' · ')}</div></td><td data-en>${esc(c.trn||'—')}</td><td>${QUOTES.filter(q=>q.company.id===c.id).length}</td>
        <td style="text-align:end;white-space:nowrap"><button class="btn b-line b-sm" data-cq="${c.id}">+ Quotation</button> <button class="btn b-line b-sm">Edit</button></td></tr>`).join('')||`<tr class="emp"><td colspan="5" class="empty">${qQ?'No companies match “'+esc(qQ)+'”':'Add the companies you sell to. Their details fill in on every quotation and invoice.'}</td></tr>`}</tbody></table>`}</div>`;
@@ -2027,7 +2039,7 @@ function quoteForm(q,companyId){
   const drawSum=()=>{const s=sums();g('q_delivery').closest('.fld').style.visibility=s.fulfil==='delivery'?'':'hidden';
     g('q_sum').innerHTML=`<div><span>Subtotal</span><span>${money(s.subtotal)}</span></div>${s.discount?`<div><span>Discount</span><span>− ${money(s.discount)}</span></div>`:''}${s.fulfil==='delivery'?`<div><span>Delivery</span><span>${s.delivery?money(s.delivery):'Free'}</span></div>`:''}<div><span>VAT ${S.vatRate}% (included)</span><span>${money(s.vat)}</span></div><div class="g"><span>Total</span><span>${money(s.total)}</span></div>`;
     m.querySelectorAll('.qline').forEach(r=>{const l=lines[+r.dataset.i];if(l)r.querySelector('.lt').innerHTML=money(U.r2(net(l)*(l.unit==='kg'?l.n:Math.max(0,Math.round(l.n)))))+(l.dp>0&&l.list>0?'<small>'+money(net(l))+(l.unit==='kg'?' / kg':' each')+'</small>':'')})};
-  const drawLines=()=>{g('q_lines').innerHTML=lines.map((l,i)=>`<div class="qline" data-i="${i}"><input class="inp nm" list="q_prods" placeholder="Item or service" value="${esc(l.name)}" maxlength="200" aria-label="Item"><select class="inp un" aria-label="Unit"><option value="pc" ${l.unit==='pc'?'selected':''}>pcs</option><option value="kg" ${l.unit==='kg'?'selected':''}>kg</option></select><input class="inp nn" type="number" inputmode="decimal" min="0" step="any" value="${l.n}" aria-label="Quantity"><input class="inp pr" type="number" inputmode="decimal" min="0" step="any" value="${l.list}" aria-label="List price"><input class="inp dp" type="number" inputmode="decimal" min="0" max="100" step="any" value="${l.dp||''}" placeholder="0" aria-label="Discount %"><b class="lt"></b><button class="x rm" type="button" aria-label="Remove line">×</button><input class="inp ds" placeholder="Description on the document (optional), e.g. Premium Belgian chocolates – 1205 g" value="${esc(l.desc||'')}" maxlength="300" aria-label="Description"></div>`).join('');drawSum()};
+  const drawLines=()=>{g('q_lines').innerHTML=lines.map((l,i)=>`<div class="qline" data-i="${i}"><input class="inp nm" list="q_prods" placeholder="Item or service" value="${esc(l.name)}" maxlength="200" aria-label="Item"><span class="ql u">Unit</span><span class="ql q">Qty</span><span class="ql p">List price</span><span class="ql d">Disc. %</span><select class="inp un" aria-label="Unit"><option value="pc" ${l.unit==='pc'?'selected':''}>pcs</option><option value="kg" ${l.unit==='kg'?'selected':''}>kg</option></select><input class="inp nn" type="number" inputmode="decimal" min="0" step="any" value="${l.n}" aria-label="Quantity"><input class="inp pr" type="number" inputmode="decimal" min="0" step="any" value="${l.list}" aria-label="List price"><input class="inp dp" type="number" inputmode="decimal" min="0" max="100" step="any" value="${l.dp||''}" placeholder="0" aria-label="Discount %"><b class="lt"></b><button class="x rm" type="button" aria-label="Remove line">×</button><input class="inp ds" placeholder="Description on the document (optional), e.g. Premium Belgian chocolates – 1205 g" value="${esc(l.desc||'')}" maxlength="300" aria-label="Description"></div>`).join('');drawSum()};
   g('q_lines').addEventListener('input',e=>{const r=e.target.closest('.qline');if(!r)return;const l=lines[+r.dataset.i],c=e.target.classList;
     if(c.contains('nm')){l.name=e.target.value;const p=cat.find(x=>x.name===l.name.trim());if(p){if(l.pid!==p.id){l.pid=p.id;l.unit=p.unit==='kg'?'kg':'pc';l.list=+p.price||0;r.querySelector('.un').value=l.unit;r.querySelector('.pr').value=l.list}}else l.pid=''}
     else if(c.contains('nn'))l.n=Math.max(0,+e.target.value||0);
