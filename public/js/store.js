@@ -86,6 +86,14 @@
     onlinePayments: ['cod', 'card_on_delivery', 'link'],
     // company documents (quotation / invoice / receipt). The bank details (settings.bank) are entered in Admin → Settings and
     // stay in the database: they are never part of this file or of the public copy of the settings.
+    // shop by occasion (website menu + home page). Managed in Admin → Products → Occasions; a product lists the ids it suits in p.occasions.
+    occasions: [
+      { id: 'birthday', name: 'Birthday', ar: 'عيد ميلاد', on: true }, { id: 'newborn', name: 'New Born', ar: 'مولود جديد', on: true },
+      { id: 'wedding', name: 'Wedding & Engagement', ar: 'زفاف وخطوبة', on: true }, { id: 'thankyou', name: 'Thank You', ar: 'شكراً', on: true },
+      { id: 'ramadan', name: 'Ramadan', ar: 'رمضان', on: true }, { id: 'eid', name: 'Eid', ar: 'العيد', on: true },
+      { id: 'nationalday', name: 'National Day', ar: 'اليوم الوطني', on: true }, { id: 'christmas', name: 'Christmas', ar: 'عيد الميلاد المجيد', on: true }
+    ],
+    hours: '', mapUrl: '',   // contact page: opening hours and an optional Google Maps link
     legalName: 'The Touch Planners For Chocolates and Sweets LLC–SPC',
     payTerms: '100% on advance.',
     quoteStart: 1, invoiceStart: 1
@@ -274,6 +282,11 @@
       if (!prods.length) prods = SEED.slice(); // public fallback
       TT.products = prods;
       return TT;
+    },
+    /* the occasions shown on the website: cleaned, only those switched on */
+    occasions(all) {
+      const l = Array.isArray(TT.settings.occasions) ? TT.settings.occasions : [];
+      return l.map(o => ({ id: String((o && o.id) || '').replace(/[^a-z0-9-]/g, '').slice(0, 40), name: String((o && o.name) || '').slice(0, 60), ar: String((o && o.ar) || '').slice(0, 60), img: String((o && o.img) || ''), desc: String((o && o.desc) || '').slice(0, 240), on: !o || o.on !== false })).filter(o => o.id && o.name && (all || o.on));
     },
     catName(id) { const c = CATS.find(c => c.id === id); return c ? c.name : id; },
     deliveryFee(emirate, subtotal) {

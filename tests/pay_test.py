@@ -37,7 +37,7 @@ with sync_playwright() as pw:
     check('card is offered first and selected', pg.evaluate("document.querySelector('#pay input:checked').value") == 'card_online', pg.evaluate("[...document.querySelectorAll('#pay input')].map(i=>i.value).join(',')"))
     check('button says "Continue to payment"', pg.inner_text('#place').strip().lower() == 'continue to payment', pg.inner_text('#place'))
     pg.screenshot(path=out + '/pay-checkout.png', full_page=True)
-    pg.click('#place'); pg.wait_for_url(lambda u: 'paid=1' in u, timeout=30000); pg.wait_for_timeout(2500)   # order page (pay=now) → payment page → back
+    pg.click('#place'); pg.wait_for_url(lambda u: 'paid=1' in u, timeout=30000); pg.wait_for_function("/Payment received/.test((document.querySelector('#payBox')||{}).textContent||'')", timeout=30000); pg.wait_for_timeout(800)   # order page (pay=now) → payment page → back
     check('returned to the confirmation page with a session', 'paid=1' in pg.url and 'sid=cs_' in pg.url, pg.url)
     check('page says the payment was received', 'Payment received' in pg.inner_text('#payBox') and 'paid' in pg.inner_text('#okH').lower(), pg.inner_text('#payBox'))
     pg.screenshot(path=out + '/pay-paid.png')

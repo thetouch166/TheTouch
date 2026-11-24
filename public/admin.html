@@ -276,6 +276,23 @@ table.t tr:hover td{background:var(--soft2)}
 @keyframes fi{from{opacity:0}}
 .mbox{background:var(--card);border-radius:20px;width:min(520px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden;animation:pu .2s;box-shadow:0 30px 80px rgba(20,6,9,.35)}
 .mbox.wide{width:min(860px,100%)}
+/* occasions manager */
+.ocrow{display:grid;grid-template-columns:auto 52px minmax(0,1.2fr) minmax(0,1fr) auto auto 34px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--hair)}
+.ocrow .mv{display:flex;flex-direction:column;gap:3px}.ocrow .mv .x{width:28px;height:22px;font-size:12px;border-radius:6px}
+.ocrow .x[disabled]{opacity:.3;pointer-events:none}
+.ocw{position:relative;width:52px;height:52px}
+.ocph{width:52px;height:52px;border-radius:10px;overflow:hidden;background:#f7f2ec;cursor:pointer;display:block;border:1px solid var(--line)}
+.ocph img{width:100%;height:100%;object-fit:cover}
+.ocx{position:absolute;top:-7px;inset-inline-end:-7px;width:22px;height:22px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:13px;line-height:1;display:grid;place-items:center}
+.ocrow .inp{height:42px;padding:0 10px}
+.ocon{display:flex;align-items:center;gap:6px;font-size:12.5px;white-space:nowrap}.ocon input{width:18px;height:18px;accent-color:var(--acc)}
+.ocrow .x.rm{width:34px;height:34px}
+@media(max-width:760px){.ocrow{grid-template-columns:28px 52px 1fr 34px}.ocrow .nm{grid-column:3}.ocrow .rm{grid-column:4;grid-row:1}.ocrow .ar{grid-column:2/5;grid-row:2}.ocrow .pr{grid-column:2/4;grid-row:3;justify-self:start}.ocrow .ocon{grid-column:4;grid-row:3;justify-self:end}}
+.oplist{display:grid;gap:2px;max-height:52vh;overflow:auto}
+.oprow{display:grid;grid-template-columns:22px 44px 1fr auto;gap:12px;align-items:center;padding:8px 6px;border-radius:10px;cursor:pointer}
+.oprow:hover{background:var(--soft2)}.oprow input{width:18px;height:18px;accent-color:var(--acc)}
+.oprow img{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#f7f2ec}
+.oprow b{display:block;font-weight:600;font-size:13.5px}.oprow small{color:var(--mute);font-size:11.5px}.oprow .pr{font-size:12.5px;white-space:nowrap}
 /* quotations for companies */
 .grid2 .full{grid-column:1/-1}
 .qbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
@@ -598,6 +615,8 @@ const LANG=(()=>{try{return localStorage.getItem('tt_lang')==='ar'?'ar':'en'}cat
 const LOC=LANG==='ar'?'ar-AE-u-nu-latn':'en-GB';
 function setLang(l){try{localStorage.setItem('tt_lang',l)}catch(e){}try{saveT()}catch(e){}location.reload()}
 const AR={
+ // occasions, contact page
+ 'Occasions':'المناسبات','+ Add occasion':'+ إضافة مناسبة','Save occasions':'حفظ المناسبات','Show':'إظهار','Opening hours (contact page)':'ساعات العمل (صفحة التواصل)','Google Maps link (contact page, optional)':'رابط خرائط جوجل (اختياري)','Enquiries & Messages':'الطلبات والرسائل','Message':'الرسالة',
  // quotations for companies
  'Company documents':'مستندات الشركات','Legal company name (top of the documents)':'الاسم القانوني للشركة (أعلى المستندات)','Payment terms (filled in on a new quotation)':'شروط الدفع (تُضاف لكل عرض سعر جديد)','Payment terms':'شروط الدفع','Quotation numbers continue from':'ترقيم عروض الأسعار يبدأ من','Invoice numbers continue from':'ترقيم الفواتير يبدأ من','Bank account title':'اسم الحساب البنكي','Account number':'رقم الحساب','Bank':'البنك','Branch code / branch name':'رمز الفرع / اسم الفرع','List price':'السعر الأصلي','Disc. %':'الخصم %',
  'Quotations':'عروض الأسعار','Quotes':'العروض','Companies':'الشركات','Company':'الشركة','+ Company':'+ شركة','+ New quotation':'+ عرض سعر جديد','+ New company':'+ شركة جديدة','+ Quotation':'+ عرض سعر','New quotation':'عرض سعر جديد','Edit quotation':'تعديل عرض السعر','New company':'شركة جديدة','Edit company':'تعديل الشركة','Awaiting approval':'بانتظار الموافقة','Approved · to invoice':'موافق عليها · للفوترة','Invoiced · not paid':'مفوترة · غير مدفوعة','Paid company invoices':'فواتير شركات مدفوعة','Draft':'مسودة','Sent · awaiting approval':'أُرسل · بانتظار الموافقة','Approved · make the invoice':'موافق عليه · أنشئ الفاتورة','Declined':'مرفوض','Invoiced':'تمت الفوترة','Expired':'منتهي الصلاحية','Quotation':'عرض السعر','Valid until':'صالح حتى','Company name':'اسم الشركة','TRN (tax number)':'الرقم الضريبي','Contact person':'الشخص المسؤول','Mobile / WhatsApp':'الجوال / واتساب','Notes (only you see them)':'ملاحظات (تظهر لك فقط)','Save company':'حفظ الشركة','Subject (what it is for)':'الموضوع','Item':'البند','Unit':'الوحدة','Unit price':'سعر الوحدة','+ Add a line':'+ إضافة بند','Hand-over':'التسليم','Delivery fee AED':'رسوم التوصيل (درهم)','Discount AED':'الخصم (درهم)','Delivery / event date':'تاريخ التوصيل / المناسبة','Notes for the company':'ملاحظات للشركة','Terms':'الشروط','Save draft':'حفظ كمسودة','Save & send →':'حفظ وإرسال ←','Duplicate':'نسخ','🖨 Print / PDF':'🖨 طباعة / PDF','Send to company →':'إرسال للشركة ←','Send again':'إرسال مرة أخرى','Mark approved':'تأكيد الموافقة','Create invoice →':'إنشاء الفاتورة ←','Open invoice':'فتح الفاتورة','Send invoice':'إرسال الفاتورة','🖨 Receipt A4':'🖨 إيصال A4','🖨 Invoice A4':'🖨 فاتورة A4','Link for the company':'رابط الشركة','Approved by (name)':'تمت الموافقة من (الاسم)','PO number (optional)':'رقم أمر الشراء (اختياري)','Company invoice':'فاتورة شركة','Approved by the company':'موافقة الشركة','Invoice not paid':'الفاتورة غير مدفوعة','Invoice paid':'الفاتورة مدفوعة',
@@ -903,7 +922,7 @@ function sampleOrder(){const p=PRODUCTS.find(x=>x.active!==false&&x.web!==false&
     items:[{pid:p.id,name:p.name,unit:'pc',price:+p.price||0,qty:1}],subtotal:+p.price||0,discount:0,delivery:0,total:+p.price||0,vat:U.vatPart(+p.price||0,S.vatRate),payment:{method:'cod',paid:false}})}
 
 /* =================== router =================== */
-const TITLES={home:'Good day',pos:'Point of Sale',orders:'Orders',products:'Products & Stock',reports:'Reports',customers:'Clients',events:'Event Enquiries',quotes:'Quotations',settings:'Settings'};
+const TITLES={home:'Good day',pos:'Point of Sale',orders:'Orders',products:'Products & Stock',reports:'Reports',customers:'Clients',events:'Enquiries & Messages',quotes:'Quotations',settings:'Settings'};
 $('#rail').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(b)go(b.dataset.v)});
 /* phone: secondary sections live in a "More" sheet */
 const MORE=['reports','customers','events','quotes','settings'];
@@ -1455,9 +1474,9 @@ async function setStatus(o,s){
 let pQ='',pCat='all';
 function renderProducts(){
   const view=$('#view');
-  if(!view.querySelector('#ptable')){view.innerHTML=`<div class="ptop"><input class="inp" id="pq" placeholder="Search products…" value="${esc(pQ)}"><div class="ptools"><button class="btn b-line" id="phist">History</button><button class="btn b-line" id="pcsv">⬇ Stock list</button><button class="btn b-line" id="pcount">🖨 Count sheet</button><button class="btn b-dark" id="padd">＋ Add product</button></div></div>
+  if(!view.querySelector('#ptable')){view.innerHTML=`<div class="ptop"><input class="inp" id="pq" placeholder="Search products…" value="${esc(pQ)}"><div class="ptools"><button class="btn b-line" id="phist">History</button><button class="btn b-line" id="pcsv">⬇ Stock list</button><button class="btn b-line" id="pcount">🖨 Count sheet</button><button class="btn b-line own" id="pocc">Occasions</button><button class="btn b-dark" id="padd">＋ Add product</button></div></div>
     <div class="kpis ks" id="pkpi"></div><div class="chips" id="pcats" style="margin-bottom:14px"></div><div class="card" style="overflow:auto"><table class="t ptbl" id="ptable"></table></div>`;
-    $('#pq').oninput=e=>{pQ=e.target.value;renderProducts()};$('#padd').onclick=()=>productModal();
+    $('#pq').oninput=e=>{pQ=e.target.value;renderProducts()};$('#padd').onclick=()=>productModal();$('#pocc').onclick=()=>occasionsModal();
     $('#phist').onclick=()=>stockHistory();$('#pcsv').onclick=stockCSV;$('#pcount').onclick=countSheet;
     $('#pkpi').onclick=e=>{const b=e.target.closest('[data-f]');if(b){pCat=pCat===b.dataset.f?'all':b.dataset.f;renderProducts()}}}
   const st=p=>+p.stock||0;const lowN=PRODUCTS.filter(p=>isLow(p)&&st(p)>0).length,outN=PRODUCTS.filter(p=>st(p)<=0).length;
@@ -1548,9 +1567,11 @@ function productModal(p){
       <label style="display:flex;gap:10px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;color:var(--ink)"><input type="checkbox" id="f_act" ${p.active!==false?'checked':''} style="width:18px;height:18px;accent-color:var(--acc)"> On sale</label>
       <label style="display:flex;gap:10px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;color:var(--ink)"><input type="checkbox" id="f_web" ${p.web!==false?'checked':''} style="width:18px;height:18px;accent-color:var(--acc)"> Show on the website</label></div>
     <div class="fld full"><label>Description</label><textarea id="f_desc">${esc(p.desc||'')}</textarea></div>
+    <div class="fld full"><label>Occasions <span style="text-transform:none;letter-spacing:0;font-weight:500">(website: Shop by occasion)</span></label><div class="chips" id="f_occ" style="flex-wrap:wrap;overflow:visible">${occAll().map(o=>`<button type="button" class="chip ${(p.occasions||[]).includes(o.id)?'on':''}" data-o="${o.id}">${esc(o.name)}</button>`).join('')||'<span class="small muted">No occasions yet. Add them with the Occasions button on the Products screen.</span>'}</div></div>
    </div></div>
    <div class="mf" style="justify-content:space-between">${isNew?'<span></span>':'<button class="btn b-bad" id="pdel">Delete</button>'}<div style="display:flex;gap:10px"><button class="btn b-line" data-close>Cancel</button><button class="btn b-dark" id="psave" style="min-width:120px">Save</button></div></div>`,'wide');
   const g=id=>m.querySelector('#'+id);
+  g('f_occ').onclick=e=>{const b=e.target.closest('.chip');if(b)b.classList.toggle('on')};
   g('f_unit').onchange=()=>{const kg=g('f_unit').value==='kg';g('ul').textContent=kg?'per kg':'';g('sl').textContent=kg?'(kg)':'(pcs)';g('ml').textContent=kg?'(kg)':'(pcs)'};
   g('pfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;const prev=img;g('pfl').textContent='Processing…';g('psave').disabled=true;
     try{const d=await U.compressImage(f,DB.mode==='live'?1000:700);g('pimg').src=d;if(DB.mode==='live'){g('pfl').textContent='Uploading…';img=await DB.upload(d)}else img=d;g('pfl').textContent='Change photo'}
@@ -1558,7 +1579,7 @@ function productModal(p){
     g('psave').disabled=false};
   if(g('pdel'))g('pdel').onclick=async()=>{if(await ask('Delete product?',esc(p.name)+' will be removed from the website and POS.','Delete',true)){await DB.del('products',p.id);m.close();toast('Deleted')}};
   g('psave').onclick=async()=>{const name=g('f_name').value.trim();if(!name){g('f_name').focus();toast('Please enter a product name');return}
-    const o=Object.assign({},p,{id:p.id||name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Math.random().toString(36).slice(2,5),name,ar:g('f_ar').value.trim(),cat:g('f_cat').value,unit:g('f_unit').value,price:Math.max(0,+g('f_price').value||0),stock:(!isNew&&(+g('f_stock').value||0)===(+p.stock||0)&&prod(p.id))?prod(p.id).stock:Math.max(0,+g('f_stock').value||0),sku:g('f_sku').value.trim(),min:g('f_min').value===''?(g('f_unit').value==='kg'?2:5):Math.max(0,U.r2(+g('f_min').value)),desc:g('f_desc').value.trim(),img:img||'img/monogram-flat.png',featured:g('f_feat').checked,active:g('f_act').checked,web:g('f_web').checked,updated:Date.now()});
+    const o=Object.assign({},p,{id:p.id||name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Math.random().toString(36).slice(2,5),name,ar:g('f_ar').value.trim(),cat:g('f_cat').value,unit:g('f_unit').value,price:Math.max(0,+g('f_price').value||0),stock:(!isNew&&(+g('f_stock').value||0)===(+p.stock||0)&&prod(p.id))?prod(p.id).stock:Math.max(0,+g('f_stock').value||0),sku:g('f_sku').value.trim(),min:g('f_min').value===''?(g('f_unit').value==='kg'?2:5):Math.max(0,U.r2(+g('f_min').value)),desc:g('f_desc').value.trim(),img:img||'img/monogram-flat.png',featured:g('f_feat').checked,active:g('f_act').checked,web:g('f_web').checked,occasions:[...m.querySelectorAll('#f_occ .chip.on')].map(b=>b.dataset.o),updated:Date.now()});
     if(!o.sku)o.sku=o.id.toUpperCase().replace(/-/g,'').slice(0,8);
     try{const was=isNew?0:U.r2(+((prod(p.id)||p).stock)||0);await DB.put('products',o);if(U.r2(o.stock)!==was)logStock(o,isNew?'receive':'count',o.stock,was,o.stock,isNew?'New product':'Edited in product form');m.close();toast('Saved ✓')}catch(e){toast('Could not save (image too large?)')}};
 }
@@ -1712,11 +1733,66 @@ function renderCustomers(){const all=clientStats();const cs=all.filter(c=>!cQ||(
 function renderEvents(){
   const ES=['new','contacted','quoted','won','lost'];const fmtD=d=>{if(!d)return '—';const x=new Date(d+'T12:00');return isNaN(x)?esc(d):x.toLocaleDateString(LOC,{weekday:'short',day:'numeric',month:'long',year:'numeric'})};
   const bud=v=>{const n=+String(v||'').replace(/[^\d.]/g,'');return v?(n?money(n):esc(v)):'—'};
-  $('#view').innerHTML=ENQ.length?`<div style="display:grid;gap:12px;max-width:980px">${ENQ.map(e=>`<div class="card sec"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b style="font-size:16px">${esc(e.name)}</b> · ${esc(e.type)}<div class="small muted">Received ${U.fmtTime(e.created)} · <a href="tel:${esc(e.phone)}" style="text-decoration:none">${esc(e.phone)}</a></div></div>
-    <div style="display:flex;gap:8px;align-items:center"><select class="inp evst s-${esc(e.status)}" data-id="${e.id}" aria-label="Enquiry status">${ES.map(s=>`<option value="${s}" ${e.status===s?'selected':''}>${s}</option>`).join('')}</select><a class="btn b-line b-sm" style="height:38px" target="_blank" rel="noopener" href="${waLink(e.phone,'Dear '+e.name+', thank you for your '+e.type+' enquiry with The Touch. ')}">WhatsApp</a></div></div>
-    <div class="kv" style="margin-top:12px"><dt>Event date</dt><dd><b>${fmtD(e.date)}</b></dd><dt>Guests / pieces</dt><dd>${esc(e.guests||'—')}</dd><dt>Budget</dt><dd>${bud(e.budget)}</dd>${e.msg?`<dt>Vision</dt><dd style="line-height:1.55">${esc(e.msg)}</dd>`:''}</div></div>`).join('')}</div>`:'<div class="card empty">✦<br><br>Wedding, corporate and celebration enquiries from the website appear here.</div>';
+  $('#view').innerHTML=ENQ.length?`<div style="display:grid;gap:12px;max-width:980px">${ENQ.map(e=>`<div class="card sec"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b style="font-size:16px">${esc(e.name)}</b> · ${esc(e.type)}<div class="small muted">Received ${U.fmtTime(e.created)} · <a href="tel:${esc(e.phone)}" style="text-decoration:none">${esc(e.phone)}</a>${e.email?' · <a href="mailto:'+esc(e.email)+'" style="text-decoration:none" data-en>'+esc(e.email)+'</a>':''}</div></div>
+    <div style="display:flex;gap:8px;align-items:center"><select class="inp evst s-${esc(e.status)}" data-id="${e.id}" aria-label="Enquiry status">${ES.map(s=>`<option value="${s}" ${e.status===s?'selected':''}>${s}</option>`).join('')}</select><a class="btn b-line b-sm" style="height:38px" target="_blank" rel="noopener" href="${waLink(e.phone,'Dear '+e.name+(/^Message/.test(e.type)?', thank you for your message to The Touch. ':', thank you for your '+e.type+' enquiry with The Touch. '))}">WhatsApp</a></div></div>
+    <div class="kv" style="margin-top:12px">${/^Message/.test(e.type)?`<dt>Message</dt><dd style="line-height:1.55">${esc(e.msg||'')}</dd>`:`<dt>Event date</dt><dd><b>${fmtD(e.date)}</b></dd><dt>Guests / pieces</dt><dd>${esc(e.guests||'—')}</dd><dt>Budget</dt><dd>${bud(e.budget)}</dd>${e.msg?`<dt>Vision</dt><dd style="line-height:1.55">${esc(e.msg)}</dd>`:''}`}</div></div>`).join('')}</div>`:'<div class="card empty">✦<br><br>Wedding, corporate and celebration enquiries from the website appear here.</div>';
   $('#view').onchange=async e=>{const s=e.target.closest('select[data-id]');if(s){s.className='inp evst s-'+s.value;await DB.patch('enquiries',s.dataset.id,{status:s.value});toast('Enquiry marked as '+s.value)}};
 }
+
+/* =================== OCCASIONS (website: Shop by occasion) =================== */
+/* The list lives in settings.occasions [{id,name,ar,img,desc,on}], in the order shown on the website; a product lists the
+   occasions it suits in p.occasions. Saved at once: the website menu, the home page and /occasion/<id> follow within a minute. */
+function occAll(){TT.settings=S;return TT.occasions(true)}
+function occasionsModal(){
+  let list=occAll().map(o=>Object.assign({},o));
+  const count=id=>PRODUCTS.filter(p=>Array.isArray(p.occasions)&&p.occasions.includes(id)).length;
+  const m=modal(`<div class="mh"><h3>Occasions</h3><button class="x" data-close aria-label="Close">×</button></div>
+   <div class="mb"><p class="small muted" style="line-height:1.6;margin-bottom:14px">These appear in the website menu under “Occasions” and on the home page, in this order. Choose the products for each one here, or tick the occasions on a product.</p>
+    <div id="oc_rows"></div>
+    <button class="btn b-line b-sm" id="oc_add" type="button" style="margin-top:14px">+ Add occasion</button></div>
+   <div class="mf"><button class="btn b-line" data-close>Close</button><button class="btn b-dark" id="oc_save" style="min-width:150px">Save occasions</button></div>`,'wide');
+  const g=id=>m.querySelector('#'+id);
+  const draw=()=>{g('oc_rows').innerHTML=list.map((o,i)=>`<div class="ocrow" data-i="${i}">
+     <div class="mv"><button class="x up" type="button" aria-label="Move up" ${i?'':'disabled'}>↑</button><button class="x dn" type="button" aria-label="Move down" ${i<list.length-1?'':'disabled'}>↓</button></div>
+     <div class="ocw"><label class="ocph" title="Cover photo (optional: a product photo is used when empty)"><img src="${esc(o.img||'img/monogram-flat.png')}" alt=""><input type="file" accept="image/*" hidden></label>${o.img?'<button class="ocx" type="button" aria-label="Remove the photo">×</button>':''}</div>
+     <input class="inp nm" value="${esc(o.name)}" placeholder="Name, e.g. Birthday" maxlength="60" aria-label="Name">
+     <input class="inp ar" dir="rtl" value="${esc(o.ar)}" placeholder="الاسم بالعربية" maxlength="60" aria-label="Arabic name">
+     <button class="btn b-line b-sm pr" type="button">${o.id?plural(count(o.id),'product'):'Products'}</button>
+     <label class="ocon"><input type="checkbox" class="on" ${o.on?'checked':''}> Show</label>
+     <button class="x rm" type="button" aria-label="Delete">×</button></div>`).join('')||'<div class="empty">No occasions yet. Add the first one.</div>'};
+  const rows=g('oc_rows'),at=e=>list[+e.target.closest('.ocrow').dataset.i];
+  rows.addEventListener('input',e=>{if(!e.target.closest('.ocrow'))return;const o=at(e),c=e.target.classList;if(c.contains('nm'))o.name=e.target.value;else if(c.contains('ar'))o.ar=e.target.value;else if(c.contains('on'))o.on=e.target.checked});
+  rows.addEventListener('change',async e=>{if(e.target.type!=='file')return;const f=e.target.files[0];if(!f)return;const o=at(e);
+    try{const d=await U.compressImage(f,DB.mode==='live'?1000:700);o.img=DB.mode==='live'?await DB.upload(d):d;draw()}catch(err){toast(err&&err.status?'Photo upload failed. Check the connection and try again.':'Could not read this image')}});
+  rows.addEventListener('click',e=>{const r=e.target.closest('.ocrow');if(!r)return;const i=+r.dataset.i,o=list[i],b=e.target.closest('button');if(!b)return;const c=b.classList;
+    if(c.contains('up')&&i>0){[list[i-1],list[i]]=[list[i],list[i-1]];draw()}
+    else if(c.contains('dn')&&i<list.length-1){[list[i+1],list[i]]=[list[i],list[i+1]];draw()}
+    else if(c.contains('ocx')){o.img='';draw()}
+    else if(c.contains('rm')){list.splice(i,1);draw()}
+    else if(c.contains('pr')){if(!o.id){toast('Save the occasions first, then choose the products');return}const pm=occasionProducts(o);pm.onclose=()=>setTimeout(draw,500)}});
+  g('oc_add').onclick=()=>{list.push({id:'',name:'',ar:'',img:'',desc:'',on:true});draw();const a=m.querySelectorAll('.ocrow .nm');a[a.length-1].focus()};
+  g('oc_save').onclick=async()=>{const used=new Set(),clean=[];
+    for(const o of list){const name=String(o.name||'').trim();if(!name)continue;let id=o.id||name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,30)||('occ-'+Math.random().toString(36).slice(2,6));
+      while(used.has(id))id=id+'-'+Math.random().toString(36).slice(2,4);used.add(id);clean.push({id,name:name.slice(0,60),ar:String(o.ar||'').trim().slice(0,60),img:o.img||'',desc:String(o.desc||'').trim().slice(0,240),on:o.on!==false})}
+    const b=g('oc_save');b.disabled=true;
+    try{await DB.patch('settings','main',{occasions:clean})}catch(e){b.disabled=false;toast(esc(e.message||'Could not save the occasions'),true);return}
+    S=Object.assign({},S,{occasions:clean});TT.settings=S;list=clean.map(o=>Object.assign({},o));b.disabled=false;draw();toast('Occasions saved ✓ The website follows within a minute.')};
+  draw();return m}
+function occasionProducts(o){
+  const sel=new Set(PRODUCTS.filter(p=>Array.isArray(p.occasions)&&p.occasions.includes(o.id)).map(p=>p.id)),was=new Set(sel);let q='';
+  const m=modal(`<div class="mh"><h3>${esc(o.name)} · products</h3><button class="x" data-close aria-label="Close">×</button></div>
+   <div class="mb"><input class="inp" id="op_q" placeholder="Search products…" style="margin-bottom:12px"><div id="op_list" class="oplist"></div></div>
+   <div class="mf"><span class="small muted" id="op_n" style="margin-inline-end:auto;align-self:center"></span><button class="btn b-line" data-close>Cancel</button><button class="btn b-dark" id="op_save" style="min-width:140px">Save</button></div>`,'wide');
+  const g=id=>m.querySelector('#'+id),n=()=>{g('op_n').textContent=plural(sel.size,'product')+' selected'};
+  const draw=()=>{const k=q.toLowerCase();const l=PRODUCTS.filter(p=>p.active!==false&&(!k||(p.name+' '+(p.ar||'')).toLowerCase().includes(k))).slice().sort((a,b)=>(a.web===false)-(b.web===false)||String(a.name).localeCompare(String(b.name)));
+    g('op_list').innerHTML=l.map(p=>`<label class="oprow"><input type="checkbox" data-p="${esc(p.id)}" ${sel.has(p.id)?'checked':''}><img src="${esc(p.img||'img/monogram-flat.png')}" alt="" loading="lazy"><span><b>${esc(p.name)}</b><small>${esc(TT.catName(p.cat))}${p.web===false?' · boutique only, not on the website':''}</small></span><span class="pr">${money(p.price)}${p.unit==='kg'?' / kg':''}</span></label>`).join('')||'<div class="empty">No products match.</div>';n()};
+  g('op_list').onchange=e=>{const c=e.target.closest('input[data-p]');if(!c)return;if(c.checked)sel.add(c.dataset.p);else sel.delete(c.dataset.p);n()};
+  g('op_q').oninput=()=>{q=g('op_q').value;draw()};
+  g('op_save').onclick=async()=>{const b=g('op_save');b.disabled=true;let done=0;
+    try{for(const p of PRODUCTS.slice()){const had=was.has(p.id),has=sel.has(p.id);if(had===has)continue;const cur=(Array.isArray(p.occasions)?p.occasions:[]).filter(x=>x!==o.id);if(has)cur.push(o.id);await DB.patch('products',p.id,{occasions:cur,updated:Date.now()});done++}}
+    catch(e){b.disabled=false;toast(esc(e.message||'Could not save'),true);return}
+    m.close();toast(done?plural(done,'product')+' updated ✓':'Nothing changed')};
+  draw();return m}
 
 /* =================== QUOTATIONS FOR COMPANIES =================== */
 /* Owner only (collections quotes + companies). A quotation is written here and sent to the company as a private link
@@ -1964,7 +2040,7 @@ function renderSettings(){
      <div class="fld"><label>Try it</label><button type="button" class="btn b-line" id="btest" style="width:100%">🔔 Test order alert</button></div>
     </div><p class="small muted" style="margin-top:12px;line-height:1.6">A new website order rings and opens a pop-up with its details. Keep this page open: it also works while you are on another tab. <span id="alnote"></span></p></div>
    <div class="card sec own"><h4>Boutique</h4><div class="grid2">
-     ${[['storeName','Store name'],['phone','Phone'],['whatsapp','WhatsApp number for orders (e.g. 9715…)'],['instagram','Instagram'],['email','Email'],['trn','VAT TRN (printed on receipts)'],['address','Address'],['vatRate','VAT %'],['announcement','Website announcement bar'],['receiptFooter','Receipt footer']].map(([k,l])=>`<div class="fld ${['announcement','receiptFooter','address'].includes(k)?'full':''}"><label>${l}</label><input data-k="${k}" value="${esc(S[k]==null?'':S[k])}"></div>`).join('')}
+     ${[['storeName','Store name'],['phone','Phone'],['whatsapp','WhatsApp number for orders (e.g. 9715…)'],['instagram','Instagram'],['email','Email'],['trn','VAT TRN (printed on receipts)'],['address','Address'],['hours','Opening hours (contact page)'],['mapUrl','Google Maps link (contact page, optional)'],['vatRate','VAT %'],['announcement','Website announcement bar'],['receiptFooter','Receipt footer']].map(([k,l])=>`<div class="fld ${['announcement','receiptFooter','address','mapUrl'].includes(k)?'full':''}"><label>${l}</label><input data-k="${k}" value="${esc(S[k]==null?'':S[k])}"></div>`).join('')}
    </div></div>
    <div class="card sec own"><h4>Company documents <small>quotation, invoice and receipt for companies</small></h4><div class="grid2">
      <div class="fld full"><label>Legal company name (top of the documents)</label><input data-k="legalName" value="${esc(S.legalName||'')}"></div>

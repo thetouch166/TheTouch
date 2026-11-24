@@ -21,7 +21,9 @@ const CATS = {
   gifts: ['Gifts & Arrangements', 'Luxury chocolate gift boxes, trays and arrangements, finished by hand with our signature ribbon.']
 };
 const PAGES = {
-  story: ['Our Story', 'The Touch was born from a simple idea: chocolate can say what words sometimes cannot. Meet the Abu Dhabi boutique behind the box.'],
+  about: ['About The Touch', 'The Touch is a luxury chocolate boutique in Abu Dhabi. Chocolate that says what words sometimes cannot: our story, our craft and how we work.'],
+  contact: ['Contact The Touch', 'Visit, call or message The Touch chocolate boutique in Abu Dhabi. WhatsApp, phone, email and a form for orders, corporate gifting and events.'],
+  occasions: ['Chocolate Gifts by Occasion', 'Choose a chocolate gift by occasion: birthdays, new born, weddings, Ramadan, Eid, National Day and more, delivered across the UAE.'],
   events: ['Weddings, Corporate Gifting & Events', 'Bespoke chocolate arrangements for weddings, corporate gifting, baby receptions and Eid. Tell us about your occasion and receive a proposal within 24 hours.'],
   delivery: ['Delivery & Care', 'Chocolate delivery across all seven Emirates, same day in Abu Dhabi. Delivery fees, timings and how to store your chocolates.'],
   privacy: ['Privacy Policy', 'How The Touch collects, uses and protects your personal information.'],
@@ -57,7 +59,8 @@ async function shopData(ctx, origin) {
 
 /* ---------- what each address is ---------- */
 function describe(path, data, site) {
-  const [pg, arg, extra] = path.split('/'); const { products, s } = data;
+  let [pg, arg, extra] = path.split('/'); const { products, s } = data;
+  if (pg === 'story' && !arg) pg = 'about';   // the old address of the About page
   const abs = src => !src || /^data:/.test(src) ? site + '/img/og.jpg' : /^https?:/.test(src) ? src : site + '/' + String(src).replace(/^\//, '');
   const store = {
     '@type': 'Store', '@id': site + '/#store', name: BRAND, alternateName: 'The Touch Chocolates', url: site + '/', description: HOME_DESC,
@@ -71,7 +74,7 @@ function describe(path, data, site) {
   const crumbs = list => ({ '@type': 'BreadcrumbList', itemListElement: list.map(([name, url], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site + url })) });
   const link = p => `<li><a href="/p/${esc(p.id)}">${esc(p.name)}</a> — ${esc(aed(p.price))}${p.unit === 'kg' ? ' per kg' : ''}</li>`;
   const cats = Object.keys(CATS).filter(c => products.some(p => p.cat === c));
-  const nav = `<p><a href="/shop/all">All chocolates</a>${cats.map(c => ` · <a href="/shop/${c}">${esc(CATS[c][0])}</a>`).join('')} · <a href="/events">Weddings &amp; events</a> · <a href="/story">Our story</a> · <a href="/delivery">Delivery &amp; care</a></p>`;
+  const nav = `<p><a href="/shop/all">All chocolates</a>${cats.map(c => ` · <a href="/shop/${c}">${esc(CATS[c][0])}</a>`).join('')} · <a href="/occasions">Gifts by occasion</a> · <a href="/events">Weddings &amp; events</a> · <a href="/about">About</a> · <a href="/contact">Contact</a> · <a href="/delivery">Delivery &amp; care</a></p>`;
   const page = (m) => Object.assign({ status: 200, type: 'website', image: site + '/img/og.jpg', ld: [], pre: '' }, m);
 
   if (!pg && !arg) return page({
@@ -101,6 +104,15 @@ function describe(path, data, site) {
       pre: `<p><a href="/">Home</a> / <a href="/shop/${esc(p.cat)}">${esc(cat)}</a></p><h1>${esc(p.name)}</h1>${p.ar ? `<p lang="ar" dir="rtl">${esc(p.ar)}</p>` : ''}<p>${esc(aed(p.price))}${kg ? ' per kg' : ''}, inclusive of VAT${inStock ? '' : ' — sold out'}</p><p>${esc(p.desc || '')}</p><img src="${esc(abs(p.img))}" alt="${esc(p.name)}" width="600">${nav}`
     });
   }
+  if (pg === 'occasion' && arg && !extra) {   // a page per occasion, named in Admin → Products → Occasions
+    const o = (Array.isArray(s.occasions) ? s.occasions : []).find(x => x && x.id === arg && x.on !== false && x.name); if (!o) return null;
+    const list = products.filter(p => Array.isArray(p.occasions) && p.occasions.includes(arg));
+    return page({
+      title: o.name + ' Chocolate Gifts | The Touch Chocolates Abu Dhabi', desc: clip(o.desc || 'Chocolate gifts for ' + o.name + ' by The Touch, Abu Dhabi: gift boxes, trays and arrangements finished by hand and delivered across the UAE.', 300), path: '/occasion/' + arg,
+      image: list.length ? abs(list[0].img) : site + '/img/og.jpg', noindex: !list.length, ld: [crumbs([['Home', '/'], ['Occasions', '/occasions'], [o.name, '/occasion/' + arg]])],
+      pre: `<p><a href="/">Home</a> / <a href="/occasions">Occasions</a></p><h1>${esc(o.name)} chocolate gifts</h1>` + list.map(p => `<p><a href="/p/${esc(p.id)}">${esc(p.name)}</a></p>`).join('') + nav
+    });
+  }
   if (PAGES[pg] && !arg) return page({
     title: PAGES[pg][0] + ' | The Touch Chocolates Abu Dhabi', desc: PAGES[pg][1], path: '/' + pg, ld: [crumbs([['Home', '/'], [PAGES[pg][0], '/' + pg]])],
     pre: `<h1>${esc(PAGES[pg][0])}</h1><p>${esc(PAGES[pg][1])}</p>${nav}`
@@ -118,7 +130,8 @@ function sitemap(data, site) {
   const urls = [['/', today, '1.0'], ['/shop/all', today, '0.9']]
     .concat(cats.map(c => ['/shop/' + c, today, '0.8']))
     .concat(data.products.map(p => ['/p/' + p.id, day(p.updated), '0.8']))
-    .concat(['events', 'story', 'delivery'].map(p => ['/' + p, today, '0.5']))
+    .concat((Array.isArray(data.s.occasions) ? data.s.occasions : []).filter(o => o && o.id && o.name && o.on !== false && data.products.some(p => Array.isArray(p.occasions) && p.occasions.includes(o.id))).map(o => ['/occasion/' + o.id, today, '0.7']))
+    .concat(['occasions', 'about', 'contact', 'events', 'delivery'].map(p => ['/' + p, today, '0.5']))
     .concat(['privacy', 'terms', 'refunds'].map(p => ['/' + p, today, '0.2']));
   return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     urls.map(([u, d, pr]) => `<url><loc>${esc(site + u)}</loc><lastmod>${d}</lastmod><priority>${pr}</priority></url>`).join('\n') + '\n</urlset>\n';

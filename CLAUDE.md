@@ -47,6 +47,11 @@ Design reference: bateel.com (elegant, airy, premium). Every change must keep th
   Legal name, payment terms, numbering (`quoteStart`, `invoiceStart` → `2026-005`, `INV-2026-001`, `nextDocNo`) and the bank details are edited in
   Admin → Settings → Company documents. `settings.bank` is removed from the public copy of the settings (`publicDoc`) and reaches a company only
   through its own quotation / invoice page. Never put real bank details in the code or the tests.
+- Website menu: **Home · Shop (categories) · Occasions · About · Contact** (`renderNav`; menus open on hover and keyboard focus, the phone uses the drawer).
+  **Occasions are managed in the admin** (Products → Occasions: add, rename, Arabic name, photo, order, show/hide, choose products; also chips on the
+  product form): `settings.occasions [{id,name,ar,img,desc,on}]` + `product.occasions [ids]`, read through `TT.occasions()`. Pages `/occasions`,
+  `/occasion/<id>` (an occasion without products shows a note and the most loved pieces), `/about` (old `/story` still works), `/contact` (details +
+  a message form saved in `enquiries` with `type:'Message · …'`, listed in Admin → Events, now titled Enquiries & Messages; `settings.hours`, `settings.mapUrl`).
 - New-order alert in the admin: pop-up with the order + sound (`orderAlert`, `showAlert`, `chime`, `ringStart`), settings per device in
   localStorage `tt_alert` (Settings → New-order alert). In a background tab the admin asks `GET /api/ping` every 20 s (KV key `sys:ping`,
   no database) and syncs only when it moved, so alerts keep working while the database can sleep.
@@ -95,7 +100,7 @@ tests/smoke_test.py     Playwright end-to-end smoke test (offline; --live agains
 - Prices are **AED, VAT-inclusive (5%)**: `vat = total − total/1.05` (`U.vatPart`). Use `U.r2` for money math.
 
 ### Shapes (do not rename fields — stored data and the API's checks depend on them)
-- **product**: `{id, sku, name, ar, cat, unit:'kg'|'pc', price, stock, min, img, desc, active, web, featured, updated}`
+- **product**: `{id, sku, name, ar, cat, unit:'kg'|'pc', price, stock, min, img, desc, active, web, featured, occasions:[occasion ids], updated}`
   — `web:false` = sold in the boutique (POS) only: hidden from the website, its sitemap and saved bags
   — `min` = low-stock alert level (optional; default 2 kg / 5 pcs, see `lowLevel()`)
   — `unit:'kg'` → price per kg, stock in kg, sold by grams.
@@ -132,7 +137,7 @@ never use window.confirm/alert), chime, waLink, applyStock, shift functions (ope
 ## index.html map
 Router `route()` on real paths (History API; `go(path)` to navigate from code, old `#/…` links are converted):
 `/` pageHome · `/shop/<cat>` pageShop · `/p/<id>` pageProduct · `/checkout` pageCheckout · `/order/<no>?k=<key>` pageOrder (invoiceHTML, waOrderText) · `/quote/<no>?k=<key>` pageQuote (quoteHTML) ·
-`/story` · `/events` · `/delivery` · `/privacy` `/terms` `/refunds` pageLegal · anything else pageNotFound.
+`/occasions` pageOccasions · `/occasion/<id>` pageOccasion · `/about` (+ `/story`) pageAbout · `/contact` pageContact · `/events` · `/delivery` · `/privacy` `/terms` `/refunds` pageLegal · anything else pageNotFound.
 **A new page or category must be added in three places:** `route()` + `PAGE_META` here, `PAGES`/`CATS` in
 `functions/[[path]].js` (server titles, sitemap), and `CATS` in `js/store.js`. Links are written as real paths
 (`href="/shop/all"`); `<base href="/">` keeps relative assets working on deep addresses.
@@ -155,6 +160,7 @@ checkout. Dates/cut-offs use Dubai time via `dxbNow()`.
 - Card payment, payment link, order page and new-order alert: `node tests/mock_stripe.js` + the live-mode server, then
   `python tests/pay_test.py <folder>` and `python tests/order_link_test.py <folder>`; sign-in and roles: `python tests/auth_test.py <folder>`.
   `python tests/pay_setup_test.py` covers the shop's real setup (key only): run it with `STRIPE_WEBHOOK_SECRET` commented out in `.dev.vars`.
+  `python tests/site_test.py <folder>` covers the website structure (occasions from the admin, menus, About, Contact form, checkout).
   `python tests/quote_test.py <folder>` runs the company flow (company → quotation → approval → invoice → card payment → receipt). The on-site card form
   itself can only be tried against Stripe's test mode (real `sk_test_`/`pk_test_` keys passed with `--binding`), not against the stand-in.
 - After any change: run the smoke test and check the browser console for errors on both pages.
